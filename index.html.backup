@@ -77,7 +77,7 @@
                                     </span>
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-text">₹</span>
+                                    <span class="input-group-text rupee">₹</span>
                                     <input type="number" class="form-control" id="spotPrice" 
                                            placeholder="e.g., 17450" value="17450" step="1" min="0" max="100000">
                                 </div>
@@ -127,7 +127,7 @@
                                     </span>
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-text">₹</span>
+                                    <span class="input-group-text rupee">₹</span>
                                     <input type="number" class="form-control" id="callStrike" 
                                            placeholder="e.g., 17500" value="17500" step="1" min="0" max="100000">
                                 </div>
@@ -142,7 +142,7 @@
                                     </span>
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-text">₹</span>
+                                    <span class="input-group-text rupee">₹</span>
                                     <input type="number" class="form-control" id="callPremium" 
                                            placeholder="e.g., 450" value="450" step="1" min="0" max="10000">
                                 </div>
@@ -157,7 +157,7 @@
                                     </span>
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-text">₹</span>
+                                    <span class="input-group-text rupee">₹</span>
                                     <input type="number" class="form-control" id="callTheta" 
                                            placeholder="e.g., -4.50" value="-4.50" step="0.01" min="-1000" max="0">
                                 </div>
@@ -299,7 +299,7 @@
                                     </span>
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-text">₹</span>
+                                    <span class="input-group-text rupee">₹</span>
                                     <input type="number" class="form-control" id="putStrike" 
                                            placeholder="e.g., 17500" value="17500" step="1" min="0" max="100000">
                                 </div>
@@ -314,7 +314,7 @@
                                     </span>
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-text">₹</span>
+                                    <span class="input-group-text rupee">₹</span>
                                     <input type="number" class="form-control" id="putPremium" 
                                            placeholder="e.g., 380" value="380" step="1" min="0" max="10000">
                                 </div>
@@ -329,7 +329,7 @@
                                     </span>
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-text">₹</span>
+                                    <span class="input-group-text rupee">₹</span>
                                     <input type="number" class="form-control" id="putTheta" 
                                            placeholder="e.g., -3.80" value="-3.80" step="0.01" min="-1000" max="0">
                                 </div>

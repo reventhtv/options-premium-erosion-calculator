@@ -282,7 +282,7 @@ function calculateTotalErosionLinear(initialPremium, dailyTheta, daysToExpiry, t
  */
 function calculateCallPremiumErosion() {
     try {
-        // Get input values
+        // Get input values - INDIAN MARKET DEFAULTS
         const strike = parseFloat(document.getElementById('callStrike').value) || 17500;
         const premium = parseFloat(document.getElementById('callPremium').value) || 450;
         const theta = parseFloat(document.getElementById('callTheta').value) || -4.50;
@@ -342,7 +342,7 @@ function calculateCallPremiumErosion() {
             premiumInWeek = Math.max(0.01, premium + weeklyErosion);
         }
         
-        // Update UI
+        // Update UI with ₹ formatting
         document.getElementById('callDailyErosion').textContent = formatCurrency(dailyErosion);
         document.getElementById('callWeeklyErosion').textContent = formatCurrency(weeklyErosion);
         document.getElementById('callPremiumWeek').textContent = formatCurrency(premiumInWeek);
@@ -401,7 +401,7 @@ function calculateCallPremiumErosion() {
  */
 function calculatePutPremiumErosion() {
     try {
-        // Get input values
+        // Get input values - INDIAN MARKET DEFAULTS
         const strike = parseFloat(document.getElementById('putStrike').value) || 17500;
         const premium = parseFloat(document.getElementById('putPremium').value) || 380;
         const theta = parseFloat(document.getElementById('putTheta').value) || -3.80;
@@ -461,7 +461,7 @@ function calculatePutPremiumErosion() {
             premiumInWeek = Math.max(0.01, premium + weeklyErosion);
         }
         
-        // Update UI
+        // Update UI with ₹ formatting
         document.getElementById('putDailyErosion').textContent = formatCurrency(dailyErosion);
         document.getElementById('putWeeklyErosion').textContent = formatCurrency(weeklyErosion);
         document.getElementById('putPremiumWeek').textContent = formatCurrency(premiumInWeek);
@@ -660,8 +660,6 @@ function updateSummaryDisplay() {
     try {
         const callTheta = parseFloat(document.getElementById('callTheta').value) || -4.50;
         const putTheta = parseFloat(document.getElementById('putTheta').value) || -3.80;
-        const callWeekly = (callTheta * 7).toFixed(2);
-        const putWeekly = (putTheta * 7).toFixed(2);
         
         // Get total erosions from results if available
         let callTotal = document.getElementById('callTotalErosion').textContent;
@@ -710,11 +708,11 @@ function updateSummaryDisplay() {
             }
         }
         
-        // Update summary table
+        // Update summary table with ₹ formatting
         document.getElementById('summaryCallTheta').textContent = formatCurrency(callTheta);
         document.getElementById('summaryPutTheta').textContent = formatCurrency(putTheta);
-        document.getElementById('summaryCallWeekly').textContent = `-₹${Math.abs(parseFloat(callWeekly)).toFixed(2)}`;
-        document.getElementById('summaryPutWeekly').textContent = `-₹${Math.abs(parseFloat(putWeekly)).toFixed(2)}`;
+        document.getElementById('summaryCallWeekly').textContent = formatCurrency(callTheta * 7);
+        document.getElementById('summaryPutWeekly').textContent = formatCurrency(putTheta * 7);
         document.getElementById('summaryCallTotal').textContent = callTotal;
         document.getElementById('summaryPutTotal').textContent = putTotal;
         
@@ -724,11 +722,11 @@ function updateSummaryDisplay() {
 }
 
 // ==========================================================================
-// Utility Functions
+// Utility Functions - RUPEES FORMATTING
 // ==========================================================================
 
 /**
- * Format currency value in Indian Rupees
+ * Format currency value in Indian Rupees with Lakhs/Crores formatting
  */
 function formatCurrency(value, forChart = false) {
     if (isNaN(value)) return forChart ? '₹0' : '₹0.00';
@@ -738,9 +736,9 @@ function formatCurrency(value, forChart = false) {
     
     if (forChart) {
         // Simplified format for chart axis
-        if (absValue >= 10000000) { // Crores
+        if (absValue >= 10000000) { // 1 Crore = 10,000,000
             return '₹' + (value / 10000000).toFixed(1) + 'Cr';
-        } else if (absValue >= 100000) { // Lakhs
+        } else if (absValue >= 100000) { // 1 Lakh = 100,000
             return '₹' + (value / 100000).toFixed(1) + 'L';
         } else if (absValue >= 1000) { // Thousands
             return '₹' + (value / 1000).toFixed(1) + 'K';
@@ -752,7 +750,7 @@ function formatCurrency(value, forChart = false) {
         if (absValue >= 10000000) { // Crores
             formatted = (value / 10000000).toFixed(2) + ' Cr';
         } else if (absValue >= 100000) { // Lakhs
-            formatted = (value / 100000).toFixed(2) + ' L';
+            formatted = (value / 100000).toFixed(2) + ' Lakh';
         } else if (absValue >= 1000) { // Thousands
             formatted = (value / 1000).toFixed(2) + ' K';
         } else if (absValue < 0.01 && absValue > 0) { // Very small values
@@ -767,6 +765,21 @@ function formatCurrency(value, forChart = false) {
         }
         return '₹' + formatted;
     }
+}
+
+/**
+ * Test rupee formatting function
+ */
+function testRupeeFormatting() {
+    console.log('Testing Rupee Formatting:');
+    console.log('₹450.00 ->', formatCurrency(450));
+    console.log('₹4,500.00 ->', formatCurrency(4500));
+    console.log('₹45,000.00 ->', formatCurrency(45000));
+    console.log('₹4,50,000.00 (4.5 Lakh) ->', formatCurrency(450000));
+    console.log('₹45,00,000.00 (45 Lakh) ->', formatCurrency(4500000));
+    console.log('₹1,00,00,000.00 (1 Crore) ->', formatCurrency(10000000));
+    console.log('-₹450.00 ->', formatCurrency(-450));
+    console.log('-₹4,50,000.00 (-4.5 Lakh) ->', formatCurrency(-450000));
 }
 
 /**
@@ -1014,7 +1027,7 @@ function exportToCSV() {
 }
 
 /**
- * Reset all inputs to defaults
+ * Reset all inputs to Indian market defaults
  */
 function resetAll() {
     if (!confirm('Are you sure you want to reset all inputs to default values?')) {
@@ -1022,27 +1035,27 @@ function resetAll() {
     }
     
     try {
-        // Reset underlying info
+        // Reset underlying info - NIFTY typical values
         document.getElementById('underlyingName').value = 'NIFTY';
         document.getElementById('spotPrice').value = '17450';
         
-        // Reset call inputs
+        // Reset call inputs - ATM NIFTY option typical values
         document.getElementById('callStrike').value = '17500';
-        document.getElementById('callPremium').value = '450';
-        document.getElementById('callTheta').value = '-4.50';
+        document.getElementById('callPremium').value = '450';  // ~₹450 premium
+        document.getElementById('callTheta').value = '-4.50';  // ~₹4.50 daily decay
         document.getElementById('callGamma').value = '0.0002';
         document.getElementById('callDelta').value = '0.55';
-        document.getElementById('callVega').value = '12.50';
-        document.getElementById('callDaysToExpiry').value = '30';
+        document.getElementById('callVega').value = '12.50';   // ~₹12.50 vega
+        document.getElementById('callDaysToExpiry').value = '30'; // Monthly expiry
         
-        // Reset put inputs
+        // Reset put inputs - ATM NIFTY option typical values
         document.getElementById('putStrike').value = '17500';
-        document.getElementById('putPremium').value = '380';
-        document.getElementById('putTheta').value = '-3.80';
+        document.getElementById('putPremium').value = '380';   // ~₹380 premium
+        document.getElementById('putTheta').value = '-3.80';   // ~₹3.80 daily decay
         document.getElementById('putGamma').value = '0.00018';
         document.getElementById('putDelta').value = '-0.45';
-        document.getElementById('putVega').value = '10.50';
-        document.getElementById('putDaysToExpiry').value = '30';
+        document.getElementById('putVega').value = '10.50';    // ~₹10.50 vega
+        document.getElementById('putDaysToExpiry').value = '30'; // Monthly expiry
         
         // Reset advanced settings
         document.getElementById('thetaAcceleration').value = '1.2';
@@ -1072,7 +1085,7 @@ function resetAll() {
         // Save reset state
         saveInputs();
         
-        console.log('All inputs reset to defaults');
+        console.log('All inputs reset to Indian market defaults');
         trackEvent('reset_all', { currency: 'INR' });
         
     } catch (error) {
@@ -1184,6 +1197,7 @@ window.OptionCalculator = {
     resetAll: resetAll,
     exportToCSV: exportToCSV,
     getHistory: () => calculationHistory,
+    testRupeeFormatting: testRupeeFormatting,
     version: '2.0.0',
     currency: 'INR'
 };
