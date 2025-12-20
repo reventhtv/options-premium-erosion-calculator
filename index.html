@@ -1,716 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Options Premium Erosion Calculator | Calculate Theta Decay in ₹</title>
-    <meta name="description" content="Professional Indian options calculator for theta decay (premium erosion) of call and put options. Free NSE & BSE options trading calculator with visualization.">
-    <meta name="keywords" content="options calculator india, premium erosion, theta decay, nse options, bse options, indian options trading, call options, put options, options Greeks">
-    <meta name="author" content="Options Premium Erosion Calculator">
-    
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
-    
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/styles.css">
-    
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
-    
-    <!-- Open Graph / Social Media Meta Tags -->
-    <meta property="og:title" content="Indian Options Premium Erosion Calculator">
-    <meta property="og:description" content="Calculate theta decay for Indian call and put options with interactive visualization in Rupees">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://reventhtv.github.io/options-premium-erosion-calculator/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Indian Options Premium Erosion Calculator</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js" defer></script>
+
+<link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
-    <div class="container-fluid py-4">
-        <!-- Header -->
-        <header class="text-center mb-5">
-            <h1 class="display-4 fw-bold mb-3">📊 Indian Options Premium Erosion Calculator</h1>
-            <p class="lead text-muted">Professional tool for calculating theta decay (premium erosion) of Indian call and put options in ₹</p>
-            <div class="d-flex justify-content-center gap-3 mt-4">
-                <button class="btn btn-primary" onclick="calculateBoth()">
-                    <i class="bi bi-calculator me-2"></i>Calculate Both Options
-                </button>
-                <button class="btn btn-success" onclick="exportToCSV()">
-                    <i class="bi bi-download me-2"></i>Export to CSV
-                </button>
-                <button class="btn btn-outline-secondary" onclick="resetAll()">
-                    <i class="bi bi-arrow-clockwise me-2"></i>Reset All
-                </button>
-            </div>
-        </header>
+<div class="container-fluid py-4">
 
-        <!-- Underlying Asset Information -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-secondary text-white">
-                        <h4 class="h6 mb-0">
-                            <i class="bi bi-currency-rupee me-2"></i>Underlying Asset Information
-                        </h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="underlyingName" class="form-label">
-                                    Underlying Asset
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Name of the underlying (e.g., NIFTY, BANKNIFTY, RELIANCE, TCS)">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="text" class="form-control" id="underlyingName" 
-                                       placeholder="e.g., NIFTY" value="NIFTY">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="spotPrice" class="form-label">
-                                    Spot Price (Underlying)
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Current market price of the underlying asset">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text rupee">₹</span>
-                                    <input type="number" class="form-control" id="spotPrice" 
-                                           placeholder="e.g., 17450" value="17450" step="1" min="0" max="100000">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- HEADER -->
+<header class="text-center mb-5">
+    <h1 class="fw-bold">📊 Indian Options Premium Erosion Calculator</h1>
+    <p class="text-muted">Theta decay & premium erosion for option buyers (₹)</p>
+
+    <div class="d-flex justify-content-center gap-3 mt-3">
+        <button id="calculateBothBtn" class="btn btn-primary">Calculate Both</button>
+        <button id="exportCsvBtn" class="btn btn-success">Export CSV</button>
+        <button id="resetBtn" class="btn btn-outline-secondary">Reset</button>
+    </div>
+</header>
+
+<!-- UNDERLYING -->
+<div class="card mb-4">
+    <div class="card-header bg-secondary text-white">
+        Underlying Asset
+    </div>
+    <div class="card-body row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Underlying</label>
+            <input id="underlyingName" class="form-control" value="NIFTY">
         </div>
-
-        <!-- Main Calculator Section -->
-        <div class="row g-4">
-            <!-- Call Option Card -->
-            <div class="col-lg-6">
-                <div class="card call-option h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h2 class="h4 mb-0">
-                            <i class="bi bi-graph-up-arrow me-2"></i>Call Option Calculator
-                        </h2>
-                        <span class="option-type-badge badge-call">CALL OPTION</span>
-                    </div>
-                    <div class="card-body">
-                        <!-- Moneyness Indicator -->
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <div class="d-flex align-items-center">
-                                    <span class="me-2 fw-bold">Status:</span>
-                                    <span class="moneyness-badge badge-atm" id="callMoneyness">ATM (At The Money)</span>
-                                    <div class="ms-auto">
-                                        <small class="text-muted">Theta Acceleration:</small>
-                                        <div class="theta-acceleration-bar">
-                                            <div class="theta-acceleration-fill" id="callThetaAcceleration" style="width: 30%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Input Grid -->
-                        <div class="row g-3">
-                            <!-- Strike Price -->
-                            <div class="col-md-6">
-                                <label for="callStrike" class="form-label">
-                                    Strike Price 
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="The price at which the option can be exercised">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text rupee">₹</span>
-                                    <input type="number" class="form-control" id="callStrike" 
-                                           placeholder="e.g., 17500" value="17500" step="1" min="0" max="100000">
-                                </div>
-                            </div>
-                            
-                            <!-- Current Premium -->
-                            <div class="col-md-6">
-                                <label for="callPremium" class="form-label">
-                                    Current Premium
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Current market price of the option">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text rupee">₹</span>
-                                    <input type="number" class="form-control" id="callPremium" 
-                                           placeholder="e.g., 450" value="450" step="1" min="0" max="10000">
-                                </div>
-                            </div>
-                            
-                            <!-- Theta -->
-                            <div class="col-md-6">
-                                <label for="callTheta" class="form-label">
-                                    Theta (θ) - Daily Decay
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Daily time decay - premium lost per day (negative value)">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text rupee">₹</span>
-                                    <input type="number" class="form-control" id="callTheta" 
-                                           placeholder="e.g., -4.50" value="-4.50" step="0.01" min="-1000" max="0">
-                                </div>
-                            </div>
-                            
-                            <!-- Gamma -->
-                            <div class="col-md-6">
-                                <label for="callGamma" class="form-label">
-                                    Gamma (Γ)
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Rate of change of delta with respect to underlying price">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="callGamma" 
-                                       placeholder="e.g., 0.0002" value="0.0002" step="0.0001" min="0" max="1">
-                            </div>
-                            
-                            <!-- Delta -->
-                            <div class="col-md-6">
-                                <label for="callDelta" class="form-label">
-                                    Delta (Δ)
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Rate of change of option price with respect to underlying price (0 to 1 for calls)">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="callDelta" 
-                                       placeholder="e.g., 0.55" value="0.55" step="0.01" min="0" max="1">
-                            </div>
-                            
-                            <!-- Vega -->
-                            <div class="col-md-6">
-                                <label for="callVega" class="form-label">
-                                    Vega (ν)
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Sensitivity to implied volatility changes">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="callVega" 
-                                       placeholder="e.g., 12.50" value="12.50" step="0.01" min="0" max="100">
-                            </div>
-                            
-                            <!-- Days to Expiry -->
-                            <div class="col-12">
-                                <label for="callDaysToExpiry" class="form-label">
-                                    Days to Expiry
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Number of calendar days until option expiration">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="callDaysToExpiry" 
-                                       placeholder="e.g., 30" value="30" min="1" max="365">
-                            </div>
-                            
-                            <!-- Calculate Button -->
-                            <div class="col-12">
-                                <button class="btn btn-call w-100 py-3" onclick="calculateCallPremiumErosion()">
-                                    <i class="bi bi-lightning-charge me-2"></i>
-                                    Calculate Call Premium Erosion
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Results Section -->
-                        <div id="callResults" class="mt-4" style="display: none;">
-                            <h5 class="border-bottom pb-2 mb-3">
-                                <i class="bi bi-bar-chart-line me-2"></i>Call Option Results
-                            </h5>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="result-box">
-                                        <small class="text-muted">Daily Erosion (Theta)</small>
-                                        <div class="greek-value text-danger" id="callDailyErosion">-₹4.50</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="result-box">
-                                        <small class="text-muted">Weekly Erosion</small>
-                                        <div class="greek-value text-warning" id="callWeeklyErosion">-₹31.50</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="result-box">
-                                        <small class="text-muted">Remaining Premium in 7 Days</small>
-                                        <div class="highlight" id="callPremiumWeek">₹418.50</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="result-box">
-                                        <small class="text-muted">Remaining Premium at Expiry</small>
-                                        <div class="highlight" id="callPremiumExpiry">₹320.25</div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="result-box">
-                                        <small class="text-muted">Total Erosion to Expiry</small>
-                                        <div class="highlight text-danger" id="callTotalErosion">-₹129.75</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Put Option Card -->
-            <div class="col-lg-6">
-                <div class="card put-option h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h2 class="h4 mb-0">
-                            <i class="bi bi-graph-down-arrow me-2"></i>Put Option Calculator
-                        </h2>
-                        <span class="option-type-badge badge-put">PUT OPTION</span>
-                    </div>
-                    <div class="card-body">
-                        <!-- Moneyness Indicator -->
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <div class="d-flex align-items-center">
-                                    <span class="me-2 fw-bold">Status:</span>
-                                    <span class="moneyness-badge badge-otm" id="putMoneyness">OTM (Out of Money)</span>
-                                    <div class="ms-auto">
-                                        <small class="text-muted">Theta Acceleration:</small>
-                                        <div class="theta-acceleration-bar">
-                                            <div class="theta-acceleration-fill" id="putThetaAcceleration" style="width: 30%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Input Grid -->
-                        <div class="row g-3">
-                            <!-- Strike Price -->
-                            <div class="col-md-6">
-                                <label for="putStrike" class="form-label">
-                                    Strike Price
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="The price at which the option can be exercised">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text rupee">₹</span>
-                                    <input type="number" class="form-control" id="putStrike" 
-                                           placeholder="e.g., 17500" value="17500" step="1" min="0" max="100000">
-                                </div>
-                            </div>
-                            
-                            <!-- Current Premium -->
-                            <div class="col-md-6">
-                                <label for="putPremium" class="form-label">
-                                    Current Premium
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Current market price of the option">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text rupee">₹</span>
-                                    <input type="number" class="form-control" id="putPremium" 
-                                           placeholder="e.g., 380" value="380" step="1" min="0" max="10000">
-                                </div>
-                            </div>
-                            
-                            <!-- Theta -->
-                            <div class="col-md-6">
-                                <label for="putTheta" class="form-label">
-                                    Theta (θ) - Daily Decay
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Daily time decay - premium lost per day (negative value)">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text rupee">₹</span>
-                                    <input type="number" class="form-control" id="putTheta" 
-                                           placeholder="e.g., -3.80" value="-3.80" step="0.01" min="-1000" max="0">
-                                </div>
-                            </div>
-                            
-                            <!-- Gamma -->
-                            <div class="col-md-6">
-                                <label for="putGamma" class="form-label">
-                                    Gamma (Γ)
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Rate of change of delta with respect to underlying price">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="putGamma" 
-                                       placeholder="e.g., 0.00018" value="0.00018" step="0.0001" min="0" max="1">
-                            </div>
-                            
-                            <!-- Delta -->
-                            <div class="col-md-6">
-                                <label for="putDelta" class="form-label">
-                                    Delta (Δ)
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Rate of change of option price with respect to underlying price (-1 to 0 for puts)">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="putDelta" 
-                                       placeholder="e.g., -0.45" value="-0.45" step="0.01" min="-1" max="0">
-                            </div>
-                            
-                            <!-- Vega -->
-                            <div class="col-md-6">
-                                <label for="putVega" class="form-label">
-                                    Vega (ν)
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Sensitivity to implied volatility changes">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="putVega" 
-                                       placeholder="e.g., 10.50" value="10.50" step="0.01" min="0" max="100">
-                            </div>
-                            
-                            <!-- Days to Expiry -->
-                            <div class="col-12">
-                                <label for="putDaysToExpiry" class="form-label">
-                                    Days to Expiry
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Number of calendar days until option expiration">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="putDaysToExpiry" 
-                                       placeholder="e.g., 30" value="30" min="1" max="365">
-                            </div>
-                            
-                            <!-- Calculate Button -->
-                            <div class="col-12">
-                                <button class="btn btn-put w-100 py-3" onclick="calculatePutPremiumErosion()">
-                                    <i class="bi bi-lightning-charge me-2"></i>
-                                    Calculate Put Premium Erosion
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Results Section -->
-                        <div id="putResults" class="mt-4" style="display: none;">
-                            <h5 class="border-bottom pb-2 mb-3">
-                                <i class="bi bi-bar-chart-line me-2"></i>Put Option Results
-                            </h5>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="result-box">
-                                        <small class="text-muted">Daily Erosion (Theta)</small>
-                                        <div class="greek-value text-danger" id="putDailyErosion">-₹3.80</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="result-box">
-                                        <small class="text-muted">Weekly Erosion</small>
-                                        <div class="greek-value text-warning" id="putWeeklyErosion">-₹26.60</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="result-box">
-                                        <small class="text-muted">Remaining Premium in 7 Days</small>
-                                        <div class="highlight" id="putPremiumWeek">₹353.40</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="result-box">
-                                        <small class="text-muted">Remaining Premium at Expiry</small>
-                                        <div class="highlight" id="putPremiumExpiry">₹270.50</div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="result-box">
-                                        <small class="text-muted">Total Erosion to Expiry</small>
-                                        <div class="highlight text-danger" id="putTotalErosion">-₹109.50</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="col-md-6">
+            <label class="form-label">Spot Price</label>
+            <input id="spotPrice" class="form-control" type="number" value="17450">
         </div>
+    </div>
+</div>
 
-        <!-- Visualization & Comparison Section -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-dark text-white">
-                        <h3 class="h5 mb-0">
-                            <i class="bi bi-graph-up me-2"></i>Premium Erosion Comparison & Visualization
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <div class="card bg-light h-100">
-                                    <div class="card-body">
-                                        <h5 class="card-title">
-                                            <i class="bi bi-clipboard-data me-2"></i>Comparison Summary
-                                        </h5>
-                                        <div class="table-responsive">
-                                            <table class="table table-sm">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Metric</th>
-                                                        <th>Call</th>
-                                                        <th>Put</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td>Daily Theta</td>
-                                                        <td id="summaryCallTheta">-₹4.50</td>
-                                                        <td id="summaryPutTheta">-₹3.80</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Weekly Erosion</td>
-                                                        <td id="summaryCallWeekly">-₹31.50</td>
-                                                        <td id="summaryPutWeekly">-₹26.60</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Total Erosion</td>
-                                                        <td id="summaryCallTotal">-₹129.75</td>
-                                                        <td id="summaryPutTotal">-₹109.50</td>
-                                                    </tr>
-                                                    <tr class="table-info">
-                                                        <td>Erosion Ratio</td>
-                                                        <td colspan="2" id="erosionRatio">Call:Put = 1.18:1</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div class="mt-3">
-                                            <button class="btn btn-primary w-100" onclick="calculateBoth()">
-                                                <i class="bi bi-arrow-repeat me-2"></i>Recalculate Both
-                                            </button>
-                                        </div>
-                                        <div class="mt-2">
-                                            <button class="btn btn-outline-success w-100" onclick="exportToCSV()">
-                                                <i class="bi bi-file-earmark-spreadsheet me-2"></i>Export Results
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-8">
-                                <div class="chart-container">
-                                    <canvas id="erosionChart"></canvas>
-                                </div>
-                                <div class="text-center mt-3">
-                                    <small class="text-muted">
-                                        <i class="bi bi-info-circle me-1"></i>
-                                        Hover over the chart to see detailed values. Click and drag to zoom.
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="row g-4">
 
-        <!-- Advanced Settings Section -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="h5 mb-0">
-                            <i class="bi bi-gear me-2"></i>Advanced Settings
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label for="thetaAcceleration" class="form-label">
-                                    Theta Acceleration Factor
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Adjusts theta decay as expiration approaches (typically increases)">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="thetaAcceleration" 
-                                       placeholder="e.g., 1.2" value="1.2" step="0.1" min="0.5" max="3">
-                                <small class="text-muted">Higher = faster decay near expiry</small>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="volatilityChange" class="form-label">
-                                    Volatility Impact
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Annual volatility change assumption (%)">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control" id="volatilityChange" 
-                                           placeholder="e.g., -5" value="0" step="1" min="-50" max="50">
-                                    <span class="input-group-text">%</span>
-                                </div>
-                                <small class="text-muted">Positive = IV increase, Negative = IV decrease</small>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="projectionDays" class="form-label">
-                                    Days for Projection
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Number of days to project erosion in chart">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="projectionDays" 
-                                       placeholder="e.g., 30" value="30" min="1" max="365">
-                                <small class="text-muted">Affects chart projection range</small>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="includeWeekends">
-                                    <label class="form-check-label" for="includeWeekends">
-                                        Include weekend decay (3 days of decay over weekends)
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="nonLinearTheta" checked>
-                                    <label class="form-check-label" for="nonLinearTheta">
-                                        Use Non-Linear Theta Model (more accurate - accelerates near expiry)
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- CALL OPTION -->
+<div class="col-lg-6">
+<div class="card call-option">
+<div class="card-header">
+    Call Option
+</div>
+<div class="card-body">
 
-        <!-- Information & Education Section -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-info text-white">
-                        <h3 class="h5 mb-0">
-                            <i class="bi bi-book me-2"></i>Understanding Premium Erosion (Theta Decay)
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-key me-2"></i>Key Concepts:</h6>
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item">
-                                        <strong>Theta (θ)</strong>: Measures daily time decay of option premium
-                                    </li>
-                                    <li class="list-group-item">
-                                        <strong>Premium Erosion</strong>: Loss of option value over time due to theta
-                                    </li>
-                                    <li class="list-group-item">
-                                        <strong>Non-Linear Decay</strong>: Theta accelerates as expiration approaches (√time model)
-                                    </li>
-                                    <li class="list-group-item">
-                                        <strong>Moneyness Effect</strong>: ATM options decay fastest, OTM/ITM slower
-                                    </li>
-                                    <li class="list-group-item">
-                                        <strong>Weekend Effect</strong>: Options decay over weekends (3 days in 2)
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-calculator me-2"></i>Calculation Notes:</h6>
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item">
-                                        <strong>Non-linear model</strong>: Decay ∝ 1/√(time to expiry)
-                                    </li>
-                                    <li class="list-group-item">
-                                        Weekly erosion = Theta × 7 trading days
-                                    </li>
-                                    <li class="list-group-item">
-                                        Negative theta = premium decreases daily
-                                    </li>
-                                    <li class="list-group-item">
-                                        Gamma affects theta acceleration rate
-                                    </li>
-                                    <li class="list-group-item">
-                                        Vega accounts for volatility changes
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="alert alert-warning mt-4">
-                            <h6 class="alert-heading">
-                                <i class="bi bi-exclamation-triangle me-2"></i>Important Disclaimer
-                            </h6>
-                            <p class="mb-0">
-                                This calculator provides theoretical estimates based on the Black-Scholes model assumptions. 
-                                Actual premium erosion can vary significantly based on volatility changes, interest rates, 
-                                dividends, and market conditions. Options are complex financial instruments with risk of loss; 
-                                consider consulting a financial advisor before trading.
-                            </p>
-                        </div>
-                        <div class="alert alert-info mt-3">
-                            <h6 class="alert-heading">
-                                <i class="bi bi-lightbulb me-2"></i>Pro Tips for Indian Markets
-                            </h6>
-                            <ul class="mb-0">
-                                <li>NIFTY options typically have 30-45 days to expiry</li>
-                                <li>Premium values usually range from ₹50 to ₹500 for ATM options</li>
-                                <li>Use the non-linear model for weekly and monthly expiries</li>
-                                <li>Monitor VIX (India Volatility Index) for volatility changes</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<span id="callMoneyness" class="moneyness-badge badge-atm">ATM</span>
 
-        <!-- Footer -->
-        <footer class="mt-5 pt-4 border-top">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6>Indian Options Premium Erosion Calculator</h6>
-                    <p class="text-muted">
-                        A professional tool for Indian options traders to calculate theta decay and premium erosion in ₹.
-                        Free to use, open source. Optimized for NSE & BSE.
-                    </p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <h6>Quick Links</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="#" onclick="resetAll()" class="text-decoration-none">Reset Calculator</a></li>
-                        <li><a href="#" onclick="exportToCSV()" class="text-decoration-none">Export Results</a></li>
-                        <li><a href="https://github.com/reventhtv/options-premium-erosion-calculator" 
-                               target="_blank" class="text-decoration-none">GitHub Repository</a></li>
-                        <li><a href="#" onclick="window.print()" class="text-decoration-none">Print Results</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="row mt-3">
-                <div class="col-12 text-center">
-                    <p class="text-muted small">
-                        <i class="bi bi-code-slash"></i> Built with HTML5, CSS3, JavaScript, Bootstrap 5, and Chart.js |
-                        <i class="bi bi-currency-rupee"></i> Indian Rupee (₹) Format |
-                        <i class="bi bi-shield-check"></i> No data stored on servers
-                    </p>
-                    <p class="text-muted small">
-                        Version 2.0.0 | Last Updated: <span id="currentDate"></span>
-                    </p>
-                </div>
-            </div>
-        </footer>
+<input id="callStrike" class="form-control mb-2" placeholder="Strike" value="17500">
+<input id="callPremium" class="form-control mb-2" placeholder="Premium" value="450">
+<input id="callTheta" class="form-control mb-2" placeholder="Theta" value="-4.5">
+<input id="callGamma" class="form-control mb-2" placeholder="Gamma" value="0.0002">
+<input id="callDelta" class="form-control mb-2" placeholder="Delta" value="0.55">
+<input id="callVega" class="form-control mb-2" placeholder="Vega" value="12.5">
+<input id="callDaysToExpiry" class="form-control mb-2" placeholder="Days to Expiry" value="30">
+
+<button id="calculateCallBtn" class="btn btn-call w-100 mt-2">
+    Calculate Call
+</button>
+
+<div id="callResults" class="mt-3 d-none">
+
+    <div class="result-box">
+        <small>Daily Theta</small>
+        <div id="callDailyErosion"></div>
     </div>
 
-    <!-- Bootstrap 5 JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Custom JavaScript -->
-    <script src="js/script.js"></script>
-    
-    <!-- Set current date in footer -->
-    <script>
-        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-IN', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    </script>
+    <div class="result-box">
+        <small>Weekly Erosion</small>
+        <div id="callWeeklyErosion"></div>
+    </div>
+
+    <div class="result-box">
+        <small>Premium at Expiry</small>
+        <div id="callPremiumExpiry"></div>
+    </div>
+
+    <div class="result-box">
+        <small>Total Erosion</small>
+        <div id="callTotalErosion"></div>
+    </div>
+
+    <div class="result-box">
+        <small>Erosion Confidence</small>
+        <div id="callConfidence" class="confidence-medium">Medium Erosion Risk</div>
+    </div>
+
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- PUT OPTION -->
+<div class="col-lg-6">
+<div class="card put-option">
+<div class="card-header">
+    Put Option
+</div>
+<div class="card-body">
+
+<span id="putMoneyness" class="moneyness-badge badge-otm">OTM</span>
+
+<input id="putStrike" class="form-control mb-2" placeholder="Strike" value="17500">
+<input id="putPremium" class="form-control mb-2" placeholder="Premium" value="380">
+<input id="putTheta" class="form-control mb-2" placeholder="Theta" value="-3.8">
+<input id="putGamma" class="form-control mb-2" placeholder="Gamma" value="0.00018">
+<input id="putDelta" class="form-control mb-2" placeholder="Delta" value="-0.45">
+<input id="putVega" class="form-control mb-2" placeholder="Vega" value="10.5">
+<input id="putDaysToExpiry" class="form-control mb-2" placeholder="Days to Expiry" value="30">
+
+<button id="calculatePutBtn" class="btn btn-put w-100 mt-2">
+    Calculate Put
+</button>
+
+<div id="putResults" class="mt-3 d-none">
+
+    <div class="result-box">
+        <small>Daily Theta</small>
+        <div id="putDailyErosion"></div>
+    </div>
+
+    <div class="result-box">
+        <small>Weekly Erosion</small>
+        <div id="putWeeklyErosion"></div>
+    </div>
+
+    <div class="result-box">
+        <small>Premium at Expiry</small>
+        <div id="putPremiumExpiry"></div>
+    </div>
+
+    <div class="result-box">
+        <small>Total Erosion</small>
+        <div id="putTotalErosion"></div>
+    </div>
+
+    <div class="result-box">
+        <small>Erosion Confidence</small>
+        <div id="putConfidence" class="confidence-medium">Medium Erosion Risk</div>
+    </div>
+
+</div>
+
+</div>
+</div>
+</div>
+
+</div>
+
+<footer class="text-center mt-5">
+    <small class="text-muted">v2.1 · Confidence Bands Enabled · No data stored</small>
+</footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="js/script.js"></script>
 </body>
 </html>

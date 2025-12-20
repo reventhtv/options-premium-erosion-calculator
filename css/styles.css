@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CSS Reset & Base Styles
+   CSS RESET & VARIABLES
    ========================================================================== */
 
 * {
@@ -12,195 +12,131 @@
     --call-color: #28a745;
     --put-color: #dc3545;
     --primary-color: #0d6efd;
-    --secondary-color: #5a6268;
+    --secondary-color: #6c757d;
     --success-color: #198754;
     --danger-color: #dc3545;
-    --warning-color: #e0a800;
+    --warning-color: #ffc107;
     --info-color: #17a2b8;
-    --light-color: #f8f9fa;
-    --dark-color: #343a40;
+
+    --bg-main: #f0f2f5;
+    --card-bg: #ffffff;
+    --input-bg: #ffffff;
+
     --text-primary: #212529;
     --text-secondary: #495057;
-    --text-light: #6c757d;
+    --text-muted: #6c757d;
+
     --border-radius: 10px;
-    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --transition: all 0.3s ease;
-    --input-bg: #ffffff;
-    --card-bg: #ffffff;
-    --header-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --shadow-sm: 0 4px 6px rgba(0,0,0,.1);
+    --shadow-md: 0 6px 15px rgba(0,0,0,.15);
+
+    --transition: all .3s ease;
+    --header-gradient: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
 }
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
 
 body {
-    background-color: #f0f2f5;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-main);
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    color: var(--text-primary);
     line-height: 1.6;
-    color: var(--text-primary);
-    padding-top: 20px;
-    padding-bottom: 40px;
+    padding: 20px 0 40px;
 }
-
-/* ==========================================================================
-   Typography
-   ========================================================================== */
-
-h1, h2, h3, h4, h5, h6 {
-    font-weight: 700;
-    margin-bottom: 1rem;
-    color: var(--dark-color);
-}
-
-h1 {
-    font-size: 2rem;
-    color: #2c3e50;
-}
-
-h2 {
-    font-size: 1.75rem;
-    color: #34495e;
-}
-
-h3 {
-    font-size: 1.5rem;
-    color: #2c3e50;
-}
-
-h4 {
-    font-size: 1.25rem;
-    color: #34495e;
-}
-
-h5 {
-    font-size: 1.1rem;
-    color: #2c3e50;
-}
-
-h6 {
-    font-size: 1rem;
-    color: #34495e;
-}
-
-p {
-    margin-bottom: 1rem;
-    color: var(--text-secondary);
-}
-
-/* Rupee symbol styling */
-.rupee-symbol {
-    font-family: Arial, sans-serif;
-    font-weight: bold;
-}
-
-.input-group-text.rupee {
-    font-weight: bold;
-    padding-left: 12px;
-    padding-right: 12px;
-    background-color: #e9ecef;
-    color: var(--text-primary);
-    border-color: #ced4da;
-}
-
-/* ==========================================================================
-   Layout Components
-   ========================================================================== */
 
 .container-fluid {
     max-width: 1400px;
-    margin: 0 auto;
 }
 
+/* ==========================================================================
+   TYPOGRAPHY
+   ========================================================================== */
+
+h1,h2,h3,h4,h5,h6 {
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+p {
+    color: var(--text-secondary);
+}
+
+small {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* ==========================================================================
+   CARDS
+   ========================================================================== */
+
 .card {
+    background-color: var(--card-bg);
     border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
     border: none;
     transition: var(--transition);
-    overflow: hidden;
-    background-color: var(--card-bg);
 }
 
 .card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-md);
 }
 
 .card-header {
+    padding: 18px 22px;
+    color: #fff;
     background: var(--header-gradient);
-    color: white;
-    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
-    padding: 20px;
-    border-bottom: none;
 }
 
 .card-header.bg-dark {
-    background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%) !important;
+    background: linear-gradient(135deg,#2c3e50,#4a6491)!important;
 }
 
 .card-header.bg-secondary {
-    background: linear-gradient(135deg, #6c757d 0%, #868e96 100%) !important;
+    background: linear-gradient(135deg,#6c757d,#868e96)!important;
 }
 
 .card-header.bg-info {
-    background: linear-gradient(135deg, #17a2b8 0%, #2ab7ca 100%) !important;
+    background: linear-gradient(135deg,#17a2b8,#2ab7ca)!important;
 }
 
 .card-body {
-    padding: 25px;
+    padding: 24px;
 }
 
-.call-option {
-    border-left: 4px solid var(--call-color);
-}
-
-.put-option {
-    border-left: 4px solid var(--put-color);
-}
+.call-option { border-left: 4px solid var(--call-color); }
+.put-option  { border-left: 4px solid var(--put-color); }
 
 /* ==========================================================================
-   Form Elements - IMPROVED CONTRAST
+   FORMS
    ========================================================================== */
 
 .form-label {
     font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: var(--dark-color);
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+    color: #2c3e50;
+    font-size: .95rem;
 }
 
 .form-control {
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    padding: 10px 15px;
-    font-size: 1rem;
-    transition: var(--transition);
     background-color: var(--input-bg);
-    color: var(--text-primary);
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 10px 14px;
+    transition: var(--transition);
 }
 
 .form-control:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-    background-color: #ffffff;
-}
-
-.form-control::placeholder {
-    color: #6c757d;
-    opacity: 0.8;
-}
-
-.input-group {
-    border-radius: 6px;
-    overflow: hidden;
+    box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
+    background-color: #fff;
 }
 
 .input-group-text {
     background-color: #e9ecef;
-    border: 1px solid #ced4da;
     font-weight: 600;
-    color: var(--text-primary);
-    font-size: 0.95rem;
 }
 
 .form-check-input:checked {
@@ -208,828 +144,214 @@ p {
     border-color: var(--primary-color);
 }
 
-.form-check-label {
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
 /* ==========================================================================
-   Buttons
+   BUTTONS
    ========================================================================== */
 
 .btn {
-    padding: 10px 20px;
-    border-radius: 6px;
     font-weight: 600;
+    border-radius: 6px;
     transition: var(--transition);
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
 }
 
 .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 10px rgba(0,0,0,.2);
 }
 
 .btn-call {
-    background: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
-    color: white;
-}
-
-.btn-call:hover {
-    background: linear-gradient(135deg, #218838 0%, #2db44a 100%);
-    color: white;
+    background: linear-gradient(135deg,#28a745,#34ce57);
+    color: #fff;
 }
 
 .btn-put {
-    background: linear-gradient(135deg, #dc3545 0%, #e4606d 100%);
-    color: white;
-}
-
-.btn-put:hover {
-    background: linear-gradient(135deg, #c82333 0%, #d9534f 100%);
-    color: white;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #0d6efd 0%, #3d8bfd 100%);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, #0b5ed7 0%, #2d7ffd 100%);
-    color: white;
-}
-
-.btn-success {
-    background: linear-gradient(135deg, #198754 0%, #20c997 100%);
-    color: white;
-}
-
-.btn-outline-secondary {
-    border: 1px solid var(--secondary-color);
-    color: var(--secondary-color);
-    background: transparent;
-}
-
-.btn-outline-secondary:hover {
-    background-color: var(--secondary-color);
-    color: white;
-    border-color: var(--secondary-color);
+    background: linear-gradient(135deg,#dc3545,#e4606d);
+    color: #fff;
 }
 
 /* ==========================================================================
-   Results & Data Display
+   RESULTS
    ========================================================================== */
 
 .result-box {
-    background-color: #f8f9fa;
+    background: linear-gradient(135deg,#f8f9fa,#e9ecef);
     border-radius: 8px;
-    padding: 15px;
+    padding: 14px;
     border: 1px solid #dee2e6;
-    margin-top: 10px;
-    transition: var(--transition);
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-}
-
-.result-box:hover {
-    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
-    transform: translateY(-2px);
 }
 
 .highlight {
-    font-size: 1.25em;
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--primary-color);
 }
 
 .greek-value {
-    font-size: 1.15em;
     font-weight: 700;
+    font-size: 1.15rem;
 }
 
-.text-danger {
-    color: #dc3545 !important;
-    font-weight: 600;
-}
+/* ==========================================================================
+   MONEyness
+   ========================================================================== */
 
-.text-warning {
-    color: #e0a800 !important;
-    font-weight: 600;
-}
-
-.text-success {
-    color: #198754 !important;
-    font-weight: 600;
-}
-
-/* Moneyness Indicator */
 .moneyness-badge {
-    padding: 5px 15px;
+    padding: 5px 14px;
     border-radius: 20px;
+    font-size: .8rem;
     font-weight: 700;
-    font-size: 0.85rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: inline-block;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .badge-atm {
-    background: linear-gradient(135deg, rgba(13, 110, 253, 0.2) 0%, rgba(13, 110, 253, 0.3) 100%);
+    background: rgba(13,110,253,.2);
     color: #0d6efd;
-    border: 2px solid rgba(13, 110, 253, 0.4);
 }
 
 .badge-itm {
-    background: linear-gradient(135deg, rgba(25, 135, 84, 0.2) 0%, rgba(25, 135, 84, 0.3) 100%);
+    background: rgba(25,135,84,.2);
     color: #198754;
-    border: 2px solid rgba(25, 135, 84, 0.4);
 }
 
 .badge-otm {
-    background: linear-gradient(135deg, rgba(108, 117, 125, 0.2) 0%, rgba(108, 117, 125, 0.3) 100%);
+    background: rgba(108,117,125,.2);
     color: #5a6268;
-    border: 2px solid rgba(108, 117, 125, 0.4);
 }
 
-/* Theta acceleration indicator */
+/* ==========================================================================
+   THETA BAR
+   ========================================================================== */
+
 .theta-acceleration-bar {
     height: 8px;
-    width: 150px;
-    background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+    width: 140px;
+    background: linear-gradient(90deg,#28a745,#ffc107,#dc3545);
     border-radius: 4px;
-    margin-top: 5px;
     overflow: hidden;
-    position: relative;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .theta-acceleration-fill {
     height: 100%;
-    background: linear-gradient(90deg, #0d6efd, #3d8bfd);
-    border-radius: 4px;
-    transition: width 0.5s ease;
-    position: absolute;
-    left: 0;
-    top: 0;
-    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
-}
-
-.theta-acceleration-bar::after {
-    content: '';
-    position: absolute;
-    top: -3px;
-    bottom: -3px;
-    width: 2px;
-    background-color: rgba(0, 0, 0, 0.3);
-    left: 33.33%;
-}
-
-.theta-acceleration-bar::before {
-    content: '';
-    position: absolute;
-    top: -3px;
-    bottom: -3px;
-    width: 2px;
-    background-color: rgba(0, 0, 0, 0.3);
-    left: 66.66%;
+    background: linear-gradient(90deg,#0d6efd,#3d8bfd);
+    transition: width .4s ease;
 }
 
 /* ==========================================================================
-   Charts
+   CHART
    ========================================================================== */
 
 .chart-container {
     height: 300px;
-    margin-top: 20px;
-    position: relative;
-    background: white;
+    background-color: #fff;
     border-radius: 8px;
     padding: 15px;
     border: 1px solid #dee2e6;
 }
 
 /* ==========================================================================
-   Badges & Labels
-   ========================================================================== */
-
-.option-type-badge {
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-weight: 700;
-    display: inline-block;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.badge-call {
-    background: linear-gradient(135deg, rgba(40, 167, 69, 0.2) 0%, rgba(40, 167, 69, 0.3) 100%);
-    color: var(--call-color);
-    border: 2px solid rgba(40, 167, 69, 0.4);
-}
-
-.badge-put {
-    background: linear-gradient(135deg, rgba(220, 53, 69, 0.2) 0%, rgba(220, 53, 69, 0.3) 100%);
-    color: var(--put-color);
-    border: 2px solid rgba(220, 53, 69, 0.4);
-}
-
-/* ==========================================================================
-   Tooltips & Info
-   ========================================================================== */
-
-.info-icon {
-    color: #17a2b8;
-    cursor: help;
-    font-size: 0.9em;
-    margin-left: 5px;
-    transition: color 0.2s;
-}
-
-.info-icon:hover {
-    color: #0d6efd;
-}
-
-.tooltip-inner {
-    max-width: 300px;
-    padding: 10px 15px;
-    border-radius: 6px;
-    background-color: #343a40;
-    color: white;
-    font-size: 0.9rem;
-}
-
-/* ==========================================================================
-   Tables
+   TABLES
    ========================================================================== */
 
 .table {
-    background-color: white;
+    background-color: #fff;
     border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     border: 1px solid #dee2e6;
 }
 
 .table th {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-bottom: 2px solid #dee2e6;
+    background: linear-gradient(135deg,#f8f9fa,#e9ecef);
     font-weight: 700;
-    color: var(--dark-color);
-    padding: 12px 15px;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
-}
-
-.table td, .table th {
-    padding: 12px 15px;
-    vertical-align: middle;
-    color: var(--text-primary);
-    border-color: #dee2e6;
-}
-
-.table-sm td, .table-sm th {
-    padding: 8px 10px;
-}
-
-.table-info {
-    background-color: rgba(23, 162, 184, 0.1);
-    font-weight: 600;
 }
 
 /* ==========================================================================
-   Alerts
+   FUTURE READY (PHASE 2/3)
    ========================================================================== */
 
-.alert {
-    border-radius: 8px;
-    border: none;
-    padding: 15px 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.confidence-high { color: var(--success-color); font-weight: 700; }
+.confidence-medium { color: var(--warning-color); font-weight: 700; }
+.confidence-low { color: var(--danger-color); font-weight: 700; }
+
+.live-data-badge {
+    background: #198754;
+    color: #fff;
+    font-size: .75rem;
+    padding: 3px 8px;
+    border-radius: 12px;
 }
 
-.alert-warning {
-    background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.1) 100%);
-    border-left: 4px solid #ffc107;
-    color: #856404;
+.locked-feature {
+    opacity: .5;
+    pointer-events: none;
 }
 
-.alert-info {
-    background: linear-gradient(135deg, rgba(23, 162, 184, 0.15) 0%, rgba(23, 162, 184, 0.1) 100%);
-    border-left: 4px solid #17a2b8;
-    color: #055160;
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+
+footer {
+    background-color: #f8f9fa;
+    border-top: 2px solid #dee2e6;
+    padding-top: 20px;
 }
 
-.alert-heading {
+footer h6 {
     font-weight: 700;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
-/* ==========================================================================
-   Grid & Spacing
-   ========================================================================== */
-
-.row {
-    margin-bottom: 20px;
-}
-
-.g-2 {
-    gap: 0.5rem !important;
-}
-
-.g-3 {
-    gap: 1rem !important;
-}
-
-.mt-3 {
-    margin-top: 1rem !important;
-}
-
-.mt-4 {
-    margin-top: 1.5rem !important;
-}
-
-.mb-0 {
-    margin-bottom: 0 !important;
-}
-
-.mb-2 {
-    margin-bottom: 0.5rem !important;
-}
-
-.mb-3 {
-    margin-bottom: 1rem !important;
-}
-
-.pb-2 {
-    padding-bottom: 0.5rem !important;
-}
-
-.border-bottom {
-    border-bottom: 2px solid #dee2e6 !important;
-}
-
-/* ==========================================================================
-   Utility Classes
-   ========================================================================== */
-
-.opacity-75 {
-    opacity: 0.75;
-}
-
-.text-center {
-    text-align: center !important;
-}
-
-.text-muted {
-    color: var(--text-light) !important;
-    font-weight: 500;
-}
-
-.text-muted small {
-    color: #6c757d !important;
-}
-
-.d-none {
-    display: none !important;
-}
-
-.d-flex {
-    display: flex !important;
-}
-
-.justify-content-between {
-    justify-content: space-between !important;
-}
-
-.align-items-center {
-    align-items: center !important;
-}
-
-.w-100 {
-    width: 100% !important;
-}
-
-/* Small text for labels and descriptions */
-small {
-    color: var(--text-light);
+footer a {
+    color: var(--primary-color);
     font-weight: 500;
 }
 
 /* ==========================================================================
-   Print Styles
-   ========================================================================== */
-
-@media print {
-    .no-print {
-        display: none !important;
-    }
-    
-    .card {
-        border: 1px solid #000 !important;
-        box-shadow: none !important;
-        break-inside: avoid;
-    }
-    
-    .btn {
-        display: none !important;
-    }
-    
-    .result-box {
-        border: 1px solid #000 !important;
-    }
-}
-
-/* ==========================================================================
-   Mobile Responsive Styles
-   ========================================================================== */
-
-@media (max-width: 768px) {
-    .container-fluid {
-        padding: 0 15px;
-    }
-    
-    .card-body {
-        padding: 15px;
-    }
-    
-    .card-header {
-        padding: 15px;
-    }
-    
-    .form-control {
-        padding: 8px 12px;
-        font-size: 0.95rem;
-    }
-    
-    .input-group-text {
-        font-size: 0.9rem;
-        padding: 8px 12px;
-    }
-    
-    .greek-value {
-        font-size: 1rem;
-    }
-    
-    .highlight {
-        font-size: 1.1em;
-    }
-    
-    .chart-container {
-        height: 250px;
-        padding: 10px;
-    }
-    
-    .btn {
-        padding: 8px 16px;
-        font-size: 0.9rem;
-    }
-    
-    .table-responsive {
-        overflow-x: auto;
-    }
-    
-    h1 {
-        font-size: 1.75rem;
-    }
-    
-    h2 {
-        font-size: 1.5rem;
-    }
-    
-    h3 {
-        font-size: 1.25rem;
-    }
-    
-    h5 {
-        font-size: 1rem;
-    }
-    
-    .moneyness-badge {
-        padding: 3px 10px;
-        font-size: 0.75rem;
-    }
-    
-    .theta-acceleration-bar {
-        width: 100px;
-        height: 6px;
-    }
-    
-    .form-label {
-        font-size: 0.9rem;
-    }
-}
-
-@media (max-width: 576px) {
-    .chart-container {
-        height: 200px;
-    }
-    
-    .card-header {
-        padding: 12px 15px;
-    }
-    
-    .result-box {
-        padding: 10px;
-    }
-    
-    .option-type-badge {
-        padding: 3px 10px;
-        font-size: 0.85rem;
-    }
-    
-    .theta-acceleration-bar {
-        width: 80px;
-    }
-    
-    .btn {
-        padding: 6px 12px;
-        font-size: 0.85rem;
-    }
-}
-
-/* ==========================================================================
-   Dark Mode Support
+   DARK MODE
    ========================================================================== */
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --text-primary: #e0e0e0;
-        --text-secondary: #b0b0b0;
-        --text-light: #8a8a8a;
-        --dark-color: #f8f9fa;
-        --input-bg: #2d2d2d;
-        --card-bg: #2d2d2d;
+        --bg-main:#1a1a1a;
+        --card-bg:#2d2d2d;
+        --input-bg:#2d2d2d;
+        --text-primary:#e0e0e0;
+        --text-secondary:#b0b0b0;
+        --text-muted:#8a8a8a;
     }
-    
-    body {
-        background-color: #1a1a1a;
-        color: var(--text-primary);
-    }
-    
-    .card {
+
+    body { background-color: var(--bg-main); }
+
+    .card,.table,.chart-container {
         background-color: var(--card-bg);
-        color: var(--text-primary);
+        border-color: #444;
     }
-    
-    .result-box {
-        background: linear-gradient(135deg, #3d3d3d 0%, #4d4d4d 100%);
-        border-color: #4d4d4d;
-        color: var(--text-primary);
-    }
-    
-    .form-control {
+
+    .form-control,.input-group-text {
         background-color: var(--input-bg);
-        border-color: #4d4d4d;
+        border-color: #444;
         color: var(--text-primary);
     }
-    
-    .input-group-text {
-        background-color: #4d4d4d;
-        border-color: #5d5d5d;
-        color: var(--text-primary);
-    }
-    
-    .table {
-        background-color: #2d2d2d;
-        color: var(--text-primary);
-        border-color: #4d4d4d;
-    }
-    
-    .table th {
-        background: linear-gradient(135deg, #3d3d3d 0%, #4d4d4d 100%);
-        border-color: #4d4d4d;
-        color: var(--text-primary);
-    }
-    
-    .table td {
-        border-color: #4d4d4d;
-        color: var(--text-primary);
-    }
-    
-    .moneyness-badge {
-        opacity: 0.9;
-    }
-    
-    .text-muted {
-        color: var(--text-light) !important;
-    }
-    
-    .chart-container {
-        background-color: #2d2d2d;
-        border-color: #4d4d4d;
-    }
+
+    footer { background-color:#222; }
 }
 
 /* ==========================================================================
-   Animations
+   ANIMATIONS
    ========================================================================== */
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 .fade-in {
-    animation: fadeIn 0.5s ease forwards;
+    animation: fadeIn .4s ease forwards;
 }
 
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4);
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
-    }
+@keyframes fadeIn {
+    from { opacity:0; transform:translateY(10px); }
+    to { opacity:1; transform:none; }
 }
 
 .pulse {
     animation: pulse 2s infinite;
 }
 
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.slide-in {
-    animation: slideIn 0.3s ease forwards;
-}
-
-@keyframes glow {
-    0%, 100% {
-        box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
-    }
-    50% {
-        box-shadow: 0 0 20px rgba(13, 110, 253, 0.8);
-    }
-}
-
-.glow {
-    animation: glow 2s infinite;
-}
-
-/* ==========================================================================
-   Custom Scrollbar
-   ========================================================================== */
-
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
-/* ==========================================================================
-   Form Section Styling
-   ========================================================================== */
-
-/* Underlying Asset Section */
-.card-header.bg-secondary + .card-body .form-label {
-    color: #f8f9fa;
-    font-weight: 600;
-}
-
-/* Advanced Settings Section */
-.card-header:not(.bg-secondary):not(.bg-info):not(.bg-dark) + .card-body .form-label {
-    color: #2c3e50;
-    font-weight: 600;
-}
-
-/* Info Section */
-.card-header.bg-info + .card-body .form-label {
-    color: #055160;
-}
-
-/* List group items in info section */
-.list-group-item {
-    background-color: transparent;
-    border-color: rgba(0, 0, 0, 0.1);
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-.list-group-item strong {
-    color: var(--dark-color);
-}
-
-/* Footer styling */
-footer {
-    background-color: #f8f9fa;
-    border-top: 2px solid #dee2e6 !important;
-}
-
-footer h6 {
-    color: #2c3e50;
-    font-weight: 700;
-}
-
-footer .text-muted {
-    color: #6c757d !important;
-    font-weight: 500;
-}
-
-footer a {
-    color: #0d6efd;
-    font-weight: 500;
-}
-
-footer a:hover {
-    color: #0b5ed7;
-    text-decoration: underline;
-}
-
-/* Header improvements */
-header .lead {
-    color: #5a6268;
-    font-weight: 500;
-}
-
-/* Input focus states for better UX */
-.form-control:focus {
-    background-color: #ffffff;
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-}
-
-/* Improve the look of disabled inputs */
-.form-control:disabled {
-    background-color: #e9ecef;
-    color: #6c757d;
-}
-
-/* Better contrast for helper text */
-small.text-muted {
-    color: #6c757d !important;
-    font-weight: 500;
-}
-
-/* Improve radio and checkbox labels */
-.form-check-label {
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-/* Section headers within cards */
-.card-body h5, .card-body h6 {
-    color: #2c3e50;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
-
-/* Improve the look of the summary table */
-.table-sm th {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    color: #2c3e50;
-    font-weight: 700;
-}
-
-.table-sm td {
-    color: #495057;
-    font-weight: 600;
-}
-
-/* Make numbers stand out more in results */
-.result-box .highlight,
-.result-box .greek-value {
-    font-weight: 700;
-}
-
-/* Improve the contrast for the chart labels */
-.chart-container canvas {
-    background-color: white;
-    border-radius: 6px;
-    padding: 10px;
+@keyframes pulse {
+    0% { box-shadow:0 0 0 0 rgba(13,110,253,.4); }
+    70% { box-shadow:0 0 0 10px rgba(13,110,253,0); }
+    100% { box-shadow:0 0 0 0 rgba(13,110,253,0); }
 }
