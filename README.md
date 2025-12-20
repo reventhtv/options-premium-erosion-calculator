@@ -13,7 +13,7 @@ A professional web tool for calculating theta decay (premium erosion) of call an
 
 ## Live Demo
 
-[https://your-username.github.io/options-premium-erosion-calculator/](https://your-username.github.io/options-premium-erosion-calculator/)
+[https://reventhtv.github.io/options-premium-erosion-calculator/](https://reventhtv.github.io/options-premium-erosion-calculator/)
 
 ## How to Use
 
