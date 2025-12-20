@@ -1,9 +1,13 @@
-// app.js — Safe DOM wiring + CTA enabled
+// app.js — VERIFIED SAFE VERSION
+
+console.log("app.js loaded"); // 🔍 execution proof
 
 // --------------------
 // Helpers
 // --------------------
-const formatINR = v => "₹" + Number(v).toFixed(2);
+function formatINR(v) {
+  return "Rs " + Number(v).toFixed(2);
+}
 
 // --------------------
 // DOM Elements
@@ -52,6 +56,8 @@ function showCTA() {
 // Calculations
 // --------------------
 function calcCall() {
+  console.log("calcCall fired");
+
   const theta = Number(callTheta.value);
   const days = Number(callDaysToExpiry.value);
   const premium = Number(callPremium.value);
@@ -66,6 +72,8 @@ function calcCall() {
 }
 
 function calcPut() {
+  console.log("calcPut fired");
+
   const theta = Number(putTheta.value);
   const days = Number(putDaysToExpiry.value);
   const premium = Number(putPremium.value);
@@ -80,6 +88,7 @@ function calcPut() {
 }
 
 function calcBoth() {
+  console.log("calcBoth fired");
   calcCall();
   calcPut();
 }
