@@ -20,9 +20,7 @@
   <!-- HEADER -->
   <header class="text-center mb-4">
     <h1 class="fw-bold">📊 Indian Options Premium Erosion Calculator</h1>
-    <p class="text-muted">
-      Theta decay & premium erosion for option buyers (₹)
-    </p>
+    <p class="text-muted">Theta decay & premium erosion for option buyers (₹)</p>
 
     <div class="d-flex justify-content-center gap-2 mt-3">
       <button id="btnCalcBoth" class="btn btn-primary">Calculate Both</button>
@@ -36,11 +34,11 @@
     <div class="card-header bg-secondary text-white">Underlying Asset</div>
     <div class="card-body row g-3">
       <div class="col-md-6">
-        <label>Underlying</label>
+        <label class="form-label">Underlying</label>
         <input id="underlyingName" class="form-control" value="NIFTY">
       </div>
       <div class="col-md-6">
-        <label>Spot Price</label>
+        <label class="form-label">Spot Price</label>
         <input id="spotPrice" type="number" class="form-control" value="17450">
       </div>
     </div>
@@ -48,18 +46,32 @@
 
   <!-- OPTIONS -->
   <div class="row g-4">
+
     <!-- CALL -->
     <div class="col-md-6">
       <div class="card call-option h-100">
         <div class="card-header">Call Option</div>
         <div class="card-body">
 
+          <label class="form-label">Strike</label>
           <input id="callStrike" class="form-control mb-2" value="17500">
+
+          <label class="form-label">Premium</label>
           <input id="callPremium" class="form-control mb-2" value="450">
+
+          <label class="form-label">Theta</label>
           <input id="callTheta" class="form-control mb-2" value="-4.5">
+
+          <label class="form-label">Gamma</label>
           <input id="callGamma" class="form-control mb-2" value="0.0002">
+
+          <label class="form-label">Delta</label>
           <input id="callDelta" class="form-control mb-2" value="0.55">
+
+          <label class="form-label">Vega</label>
           <input id="callVega" class="form-control mb-2" value="12.5">
+
+          <label class="form-label">Days to Expiry</label>
           <input id="callDaysToExpiry" class="form-control mb-3" value="30">
 
           <button id="btnCalcCall" class="btn btn-call w-100">Calculate Call</button>
@@ -85,12 +97,25 @@
         <div class="card-header">Put Option</div>
         <div class="card-body">
 
+          <label class="form-label">Strike</label>
           <input id="putStrike" class="form-control mb-2" value="17500">
+
+          <label class="form-label">Premium</label>
           <input id="putPremium" class="form-control mb-2" value="380">
+
+          <label class="form-label">Theta</label>
           <input id="putTheta" class="form-control mb-2" value="-3.8">
+
+          <label class="form-label">Gamma</label>
           <input id="putGamma" class="form-control mb-2" value="0.00018">
+
+          <label class="form-label">Delta</label>
           <input id="putDelta" class="form-control mb-2" value="-0.45">
+
+          <label class="form-label">Vega</label>
           <input id="putVega" class="form-control mb-2" value="10.5">
+
+          <label class="form-label">Days to Expiry</label>
           <input id="putDaysToExpiry" class="form-control mb-3" value="30">
 
           <button id="btnCalcPut" class="btn btn-put w-100">Calculate Put</button>
@@ -109,9 +134,10 @@
         </div>
       </div>
     </div>
+
   </div>
 
-  <!-- 🔥 CTA TO ANALYSIS -->
+  <!-- CTA -->
   <section id="analysisCTA" class="card mt-4 d-none">
     <div class="card-body text-center">
       <h5>📊 Want deeper insights?</h5>
@@ -124,7 +150,6 @@
     </div>
   </section>
 
-  <!-- FOOTER -->
   <footer class="text-center mt-5 text-muted">
     v2.1 · Confidence Bands Enabled · No data stored
   </footer>
