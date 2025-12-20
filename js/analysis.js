@@ -1,4 +1,4 @@
-// analysis.js — Snapshot + Confidence Bands + Risk Labels (FULL FILE)
+// analysis.js — Snapshot + Confidence Bands + Risk Labels
 
 console.log("analysis.js loaded");
 
@@ -7,87 +7,76 @@ console.log("analysis.js loaded");
 // --------------------
 const formatINR = v => "₹" + Number(v).toFixed(2);
 
-// Risk classification
-function erosionRisk(totalErosion, premiumExpiry) {
-  const erosion = Math.abs(totalErosion);
-  const base = erosion + Math.max(premiumExpiry, 0);
-  const ratio = base === 0 ? 0 : erosion / base;
+function getRiskLabel(totalErosion) {
+  const abs = Math.abs(totalErosion);
 
-  if (ratio < 0.3) return { label: "🟢 Low Erosion Risk", cls: "text-success" };
-  if (ratio < 0.6) return { label: "🟡 Medium Erosion Risk", cls: "text-warning" };
-  return { label: "🔴 High Erosion Risk", cls: "text-danger" };
+  if (abs < 80) {
+    return { text: "Low Erosion Risk", cls: "text-success" };
+  }
+  if (abs < 150) {
+    return { text: "Medium Erosion Risk", cls: "text-warning" };
+  }
+  return { text: "High Erosion Risk", cls: "text-danger" };
+}
+
+// --------------------
+// Load Snapshot
+// --------------------
+const snapshot = JSON.parse(sessionStorage.getItem("erosionSnapshot"));
+
+if (!snapshot) {
+  console.warn("No erosion snapshot found");
+  return;
 }
 
 // --------------------
 // DOM Elements
 // --------------------
-const elCallErosion = document.getElementById("summaryCallErosion");
-const elPutErosion = document.getElementById("summaryPutErosion");
-const elCallExpiry = document.getElementById("summaryCallPremiumExpiry");
-const elPutExpiry = document.getElementById("summaryPutPremiumExpiry");
-const elDays = document.getElementById("summaryDays");
+const snapCall = document.getElementById("snapCall");
+const snapPut = document.getElementById("snapPut");
+const snapDays = document.getElementById("snapDays");
 
-const elCallRisk = document.getElementById("callRiskLabel");
-const elPutRisk = document.getElementById("putRiskLabel");
+const callRiskLabel = document.getElementById("callRiskLabel");
+const putRiskLabel = document.getElementById("putRiskLabel");
 
 // --------------------
-// Load snapshot
+// Populate Snapshot
 // --------------------
-const raw = sessionStorage.getItem("erosionSnapshot");
+const callErosion = snapshot.call.totalErosion;
+const putErosion = snapshot.put.totalErosion;
+const days = snapshot.daysToExpiry;
 
-if (!raw) {
-  alert("No calculation data found. Please calculate from home page first.");
-} else {
-  const snapshot = JSON.parse(raw);
-  console.log("Snapshot received", snapshot);
-
-  // Populate numbers
-  elCallErosion.textContent = formatINR(snapshot.call.totalErosion);
-  elPutErosion.textContent = formatINR(snapshot.put.totalErosion);
-  elCallExpiry.textContent = formatINR(snapshot.call.premiumExpiry);
-  elPutExpiry.textContent = formatINR(snapshot.put.premiumExpiry);
-  elDays.textContent = snapshot.daysToExpiry + " days";
-
-  // Risk labels
-  const callRisk = erosionRisk(
-    snapshot.call.totalErosion,
-    snapshot.call.premiumExpiry
-  );
-  const putRisk = erosionRisk(
-    snapshot.put.totalErosion,
-    snapshot.put.premiumExpiry
-  );
-
-  elCallRisk.textContent = callRisk.label;
-  elCallRisk.className = callRisk.cls;
-
-  elPutRisk.textContent = putRisk.label;
-  elPutRisk.className = putRisk.cls;
-
-  // Chart
-  renderConfidenceChart(
-    snapshot.daysToExpiry,
-    snapshot.call.totalErosion,
-    snapshot.put.totalErosion
-  );
-}
+snapCall.textContent = formatINR(callErosion);
+snapPut.textContent = formatINR(putErosion);
+snapDays.textContent = `${days} days`;
 
 // --------------------
-// Chart logic
+// Inject Risk Labels (🔥 FIX)
+// --------------------
+const callRisk = getRiskLabel(callErosion);
+callRiskLabel.textContent = callRisk.text;
+callRiskLabel.className = `fw-bold ${callRisk.cls}`;
+
+const putRisk = getRiskLabel(putErosion);
+putRiskLabel.textContent = putRisk.text;
+putRiskLabel.className = `fw-bold ${putRisk.cls}`;
+
+// --------------------
+// Confidence Bands Chart
 // --------------------
 function renderConfidenceChart(days, callTotal, putTotal) {
   const labels = Array.from({ length: days + 1 }, (_, i) => i);
 
-  const band = (total, factor) =>
+  const makeBand = (total, factor) =>
     labels.map(d => total * (1 - (d / days) * factor));
 
-  const callLow  = band(callTotal, 0.7);
-  const callMid  = band(callTotal, 1.0);
-  const callHigh = band(callTotal, 1.3);
+  const callMid = makeBand(callTotal, 1.0);
+  const callHigh = makeBand(callTotal, 1.25);
+  const callLow = makeBand(callTotal, 0.75);
 
-  const putLow  = band(putTotal, 0.7);
-  const putMid  = band(putTotal, 1.0);
-  const putHigh = band(putTotal, 1.3);
+  const putMid = makeBand(putTotal, 1.0);
+  const putHigh = makeBand(putTotal, 1.25);
+  const putLow = makeBand(putTotal, 0.75);
 
   new Chart(document.getElementById("confidenceChart"), {
     type: "line",
@@ -116,26 +105,12 @@ function renderConfidenceChart(days, callTotal, putTotal) {
           fill: "-1"
         },
         {
-          label: "Put – High Erosion",
-          data: putHigh,
-          backgroundColor: "rgba(255,193,7,0.25)",
-          borderColor: "rgba(255,193,7,0)",
-          fill: true
-        },
-        {
           label: "Put – Expected",
           data: putMid,
           borderColor: "#ffc107",
+          borderDash: [5, 5],
           borderWidth: 2,
-          borderDash: [6, 4],
           fill: false
-        },
-        {
-          label: "Put – Low Erosion",
-          data: putLow,
-          backgroundColor: "rgba(13,202,240,0.25)",
-          borderColor: "rgba(13,202,240,0)",
-          fill: "-1"
         }
       ]
     },
@@ -157,3 +132,6 @@ function renderConfidenceChart(days, callTotal, putTotal) {
     }
   });
 }
+
+// Render chart
+renderConfidenceChart(days, callErosion, putErosion);
