@@ -1,34 +1,8 @@
-// analysis.js — Snapshot + Confidence Bands + Risk Labels
+// analysis.js — Confidence Bands with PUT Asymmetry
 
 console.log("analysis.js loaded");
 
-// --------------------
-// Helpers
-// --------------------
 const formatINR = v => "₹" + Number(v).toFixed(2);
-
-function getRiskLabel(totalErosion) {
-  const abs = Math.abs(totalErosion);
-
-  if (abs < 80) {
-    return {
-      text: "🟢 Low Erosion Risk",
-      cls: "text-success"
-    };
-  }
-
-  if (abs < 150) {
-    return {
-      text: "🟡 Medium Erosion Risk",
-      cls: "text-warning"
-    };
-  }
-
-  return {
-    text: "🔴 High Erosion Risk",
-    cls: "text-danger"
-  };
-}
 
 // --------------------
 // Load Snapshot
@@ -36,13 +10,12 @@ function getRiskLabel(totalErosion) {
 const snapshot = JSON.parse(sessionStorage.getItem("erosionSnapshot"));
 
 if (!snapshot) {
-  console.warn("No erosion snapshot found");
-  alert("No data found. Please calculate from the main page.");
+  alert("No snapshot found. Please calculate from main page.");
   window.location.href = "index.html";
 }
 
 // --------------------
-// DOM Elements (SAFE)
+// DOM
 // --------------------
 const snapCall = document.getElementById("snapCall");
 const snapPut = document.getElementById("snapPut");
@@ -62,36 +35,43 @@ snapPut.textContent = formatINR(putErosion);
 snapDays.textContent = `${days} days`;
 
 // --------------------
-// Risk Labels
+// Risk Labels (text only, visual later)
 // --------------------
-const callRisk = getRiskLabel(callErosion);
-callRiskLabel.textContent = callRisk.text;
-callRiskLabel.className = `fw-bold ${callRisk.cls}`;
+function riskText(v) {
+  const a = Math.abs(v);
+  if (a < 80) return "Low Erosion Risk";
+  if (a < 150) return "Medium Erosion Risk";
+  return "High Erosion Risk";
+}
 
-const putRisk = getRiskLabel(putErosion);
-putRiskLabel.textContent = putRisk.text;
-putRiskLabel.className = `fw-bold ${putRisk.cls}`;
+callRiskLabel.textContent = riskText(callErosion);
+putRiskLabel.textContent = riskText(putErosion);
 
 // --------------------
-// Confidence Bands Chart
+// Confidence Bands
 // --------------------
 function renderConfidenceChart(days, callTotal, putTotal) {
   const labels = Array.from({ length: days + 1 }, (_, i) => i);
 
-  const makeBand = (total, factor) =>
+  const band = (total, factor) =>
     labels.map(d => total * (1 - (d / days) * factor));
 
-  const callMid = makeBand(callTotal, 1.0);
-  const callHigh = makeBand(callTotal, 1.25);
-  const callLow = makeBand(callTotal, 0.75);
+  // CALL — symmetric
+  const callExpected = band(callTotal, 1.0);
+  const callHigh = band(callTotal, 1.25);
+  const callLow = band(callTotal, 0.75);
 
-  const putMid = makeBand(putTotal, 1.0);
+  // PUT — asymmetric (bearish skew realism)
+  const putExpected = band(putTotal, 1.0);
+  const putHigh = band(putTotal, 1.35); // faster decay risk
+  const putLow = band(putTotal, 0.55);  // IV support zone
 
   new Chart(document.getElementById("confidenceChart"), {
     type: "line",
     data: {
       labels,
       datasets: [
+        // CALL
         {
           label: "Call – High Erosion",
           data: callHigh,
@@ -101,7 +81,7 @@ function renderConfidenceChart(days, callTotal, putTotal) {
         },
         {
           label: "Call – Expected",
-          data: callMid,
+          data: callExpected,
           borderColor: "#0d6efd",
           borderWidth: 2,
           fill: false
@@ -113,13 +93,29 @@ function renderConfidenceChart(days, callTotal, putTotal) {
           borderColor: "rgba(25,135,84,0)",
           fill: "-1"
         },
+
+        // PUT
+        {
+          label: "Put – High Erosion",
+          data: putHigh,
+          backgroundColor: "rgba(255,193,7,0.25)",
+          borderColor: "rgba(255,193,7,0)",
+          fill: true
+        },
         {
           label: "Put – Expected",
-          data: putMid,
+          data: putExpected,
           borderColor: "#ffc107",
-          borderDash: [5, 5],
+          borderDash: [6, 4],
           borderWidth: 2,
           fill: false
+        },
+        {
+          label: "Put – Low Erosion (IV Support)",
+          data: putLow,
+          backgroundColor: "rgba(32,201,151,0.25)",
+          borderColor: "rgba(32,201,151,0)",
+          fill: "-1"
         }
       ]
     },
