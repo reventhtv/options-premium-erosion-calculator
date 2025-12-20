@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Premium Erosion Confidence Analysis</title>
+  <title>Premium Erosion Analysis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Styles -->
   <link rel="stylesheet" href="css/styles.css">
@@ -19,11 +21,8 @@
 
   <!-- HEADER -->
   <header class="text-center mb-4">
-    <h1 class="fw-bold">
-      📊 Premium Erosion Analysis
-    </h1>
-
-    <a href="index.html" class="btn btn-outline-secondary mt-3">
+    <h2 class="fw-bold">📊 Premium Erosion Analysis</h2>
+    <a href="index.html" class="btn btn-outline-secondary mt-2">
       ← Back to Calculator
     </a>
   </header>
@@ -36,28 +35,21 @@
 
     <div class="card-body row text-center">
 
-      <!-- CALL -->
-      <div class="col-md-4 mb-3">
+      <div class="col-md-4">
         <h6 class="text-info">Call Total Erosion</h6>
-        <div id="snapCall" class="fw-bold fs-4 text-primary">—</div>
-
-        <!-- ✅ RISK LABEL -->
-        <div id="callRiskLabel" class="mt-2 fw-semibold"></div>
+        <div id="snapCall" class="fw-bold fs-5"></div>
+        <div id="callRiskLabel" class="mt-1"></div>
       </div>
 
-      <!-- PUT -->
-      <div class="col-md-4 mb-3">
+      <div class="col-md-4">
         <h6 class="text-info">Put Total Erosion</h6>
-        <div id="snapPut" class="fw-bold fs-4 text-primary">—</div>
-
-        <!-- ✅ RISK LABEL -->
-        <div id="putRiskLabel" class="mt-2 fw-semibold"></div>
+        <div id="snapPut" class="fw-bold fs-5"></div>
+        <div id="putRiskLabel" class="mt-1"></div>
       </div>
 
-      <!-- DAYS -->
-      <div class="col-md-4 mb-3">
+      <div class="col-md-4">
         <h6 class="text-info">Days to Expiry</h6>
-        <div id="snapDays" class="fw-bold fs-4 text-primary">—</div>
+        <div id="snapDays" class="fw-bold fs-5"></div>
       </div>
 
     </div>
@@ -68,50 +60,33 @@
     <div class="card-header bg-info text-dark">
       Premium Erosion Over Time (Confidence Bands)
     </div>
-
     <div class="card-body">
       <canvas id="confidenceChart" height="120"></canvas>
-
-      <p class="text-muted mt-3 small">
-        Shaded zones represent probabilistic erosion ranges — not price predictions.
+      <p class="text-muted mt-2">
+        Shaded zones represent probabilistic erosion ranges, not price predictions.
       </p>
     </div>
   </section>
 
-  <!-- HOW TO READ -->
+  <!-- EXPLANATION -->
   <section class="card">
     <div class="card-header bg-primary text-white">
       How to Read Confidence Bands
     </div>
-
     <div class="card-body">
-      <ul class="mb-0">
-        <li>
-          <span class="text-danger fw-bold">Red zone</span> → faster-than-expected erosion
-        </li>
-        <li>
-          <span class="text-info fw-bold">Blue line</span> → most probable decay path
-        </li>
-        <li>
-          <span class="text-success fw-bold">Green zone</span> → slower erosion scenario
-        </li>
-        <li class="mt-2">
-          Markets are probabilistic — bands show **risk ranges**, not certainty
+      <ul>
+        <li><span class="text-danger fw-bold">Red zone</span> – faster-than-expected erosion</li>
+        <li><span class="text-primary fw-bold">Blue line</span> – most probable decay path</li>
+        <li><span class="text-success fw-bold">Green zone</span> – slower erosion scenario</li>
+        <li class="text-muted mt-2">
+          Markets are probabilistic — these bands show <strong>risk ranges</strong>, not certainty.
         </li>
       </ul>
     </div>
   </section>
 
-  <footer class="text-center mt-5 text-muted">
-    v2.1 · Confidence Bands Enabled · No data stored
-  </footer>
-
 </div>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- Analysis Logic -->
 <script src="js/analysis.js"></script>
 </body>
 </html>

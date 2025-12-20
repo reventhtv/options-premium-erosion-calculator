@@ -26,16 +26,16 @@ const snapshot = JSON.parse(sessionStorage.getItem("erosionSnapshot"));
 
 if (!snapshot) {
   console.warn("No erosion snapshot found");
-  return;
+  alert("No data found. Please calculate from the main page.");
+  window.location.href = "index.html";
 }
 
 // --------------------
-// DOM Elements
+// DOM Elements (SAFE)
 // --------------------
 const snapCall = document.getElementById("snapCall");
 const snapPut = document.getElementById("snapPut");
 const snapDays = document.getElementById("snapDays");
-
 const callRiskLabel = document.getElementById("callRiskLabel");
 const putRiskLabel = document.getElementById("putRiskLabel");
 
@@ -51,7 +51,7 @@ snapPut.textContent = formatINR(putErosion);
 snapDays.textContent = `${days} days`;
 
 // --------------------
-// Inject Risk Labels (🔥 FIX)
+// Risk Labels
 // --------------------
 const callRisk = getRiskLabel(callErosion);
 callRiskLabel.textContent = callRisk.text;
@@ -75,8 +75,6 @@ function renderConfidenceChart(days, callTotal, putTotal) {
   const callLow = makeBand(callTotal, 0.75);
 
   const putMid = makeBand(putTotal, 1.0);
-  const putHigh = makeBand(putTotal, 1.25);
-  const putLow = makeBand(putTotal, 0.75);
 
   new Chart(document.getElementById("confidenceChart"), {
     type: "line",
@@ -133,5 +131,4 @@ function renderConfidenceChart(days, callTotal, putTotal) {
   });
 }
 
-// Render chart
 renderConfidenceChart(days, callErosion, putErosion);
