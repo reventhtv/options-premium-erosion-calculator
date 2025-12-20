@@ -1,75 +1,46 @@
-import { calculateErosion } from './core/erosionEngine.js';
-import { getMoneyness } from './core/moneyness.js';
-import { formatCurrency } from './utils/currency.js';
-import { getConfidenceBand } from './core/confidenceEngine.js';
+// app.js — CTA + Navigation enabled
 
-function read(type) {
-    return {
-        strike: +document.getElementById(`${type}Strike`).value,
-        premium: +document.getElementById(`${type}Premium`).value,
-        theta: +document.getElementById(`${type}Theta`).value,
-        gamma: +document.getElementById(`${type}Gamma`).value,
-        delta: +document.getElementById(`${type}Delta`).value,
-        vega: +document.getElementById(`${type}Vega`).value,
-        daysToExpiry: +document.getElementById(`${type}DaysToExpiry`).value,
-        spot: +spotPrice.value,
-        useNonLinear: true,
-        thetaAcceleration: 1.2,
-        volatilityChange: 0
-    };
+const ₹ = v => "₹" + Number(v).toFixed(2);
+
+function showCTA() {
+  document.getElementById("analysisCTA").classList.remove("d-none");
 }
 
-function render(type, result, m) {
-    const input = read(type);
+function calcCall() {
+  const theta = Number(callTheta.value);
+  const days = Number(callDaysToExpiry.value);
+  const premium = Number(callPremium.value);
 
-    document.getElementById(`${type}DailyErosion`).textContent =
-        formatCurrency(input.theta);
+  callDailyTheta.textContent = ₹(theta);
+  callWeeklyErosion.textContent = ₹(theta * 7);
+  callPremiumExpiry.textContent = ₹(premium + theta * days);
+  callTotalErosion.textContent = ₹(theta * days);
 
-    document.getElementById(`${type}WeeklyErosion`).textContent =
-        formatCurrency(input.theta * 7);
-
-    document.getElementById(`${type}PremiumExpiry`).textContent =
-        formatCurrency(result.premiumAtExpiry);
-
-    document.getElementById(`${type}TotalErosion`).textContent =
-        formatCurrency(result.totalErosion);
-
-    const badge = document.getElementById(`${type}Moneyness`);
-    badge.textContent = m.moneyness;
-    badge.className = `moneyness-badge badge-${m.moneyness.toLowerCase()}`;
-
-    // 🔥 CONFIDENCE BAND
-    const confidence = getConfidenceBand(input.premium, input.theta);
-    const confidenceEl = document.getElementById(`${type}Confidence`);
-    confidenceEl.textContent = confidence.label;
-    confidenceEl.className = confidence.className;
-
-    document.getElementById(`${type}Results`).classList.remove('d-none');
+  callResults.classList.remove("d-none");
+  showCTA();
 }
 
-export function calculateCall() {
-    const input = read('call');
-    const m = getMoneyness(input.strike, input.spot, true);
-    const result = calculateErosion({ ...input, isATM: m.moneyness === 'ATM' });
-    render('call', result, m);
+function calcPut() {
+  const theta = Number(putTheta.value);
+  const days = Number(putDaysToExpiry.value);
+  const premium = Number(putPremium.value);
+
+  putDailyTheta.textContent = ₹(theta);
+  putWeeklyErosion.textContent = ₹(theta * 7);
+  putPremiumExpiry.textContent = ₹(premium + theta * days);
+  putTotalErosion.textContent = ₹(theta * days);
+
+  putResults.classList.remove("d-none");
+  showCTA();
 }
 
-export function calculatePut() {
-    const input = read('put');
-    const m = getMoneyness(input.strike, input.spot, false);
-    const result = calculateErosion({ ...input, isATM: m.moneyness === 'ATM' });
-    render('put', result, m);
+function calcBoth() {
+  calcCall();
+  calcPut();
 }
 
-export function calculateBoth() {
-    calculateCall();
-    calculatePut();
-}
+btnCalcCall.onclick = calcCall;
+btnCalcPut.onclick = calcPut;
+btnCalcBoth.onclick = calcBoth;
 
-export function resetAll() {
-    location.reload();
-}
-
-export function exportCSV() {
-    alert('CSV export will be enabled in next phase');
-}
+btnReset.onclick = () => location.reload();

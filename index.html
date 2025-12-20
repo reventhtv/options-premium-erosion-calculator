@@ -1,171 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Indian Options Premium Erosion Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>Indian Options Premium Erosion Calculator</title>
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js" defer></script>
-
-<link rel="stylesheet" href="css/styles.css">
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 
-<body>
-<div class="container-fluid py-4">
+<body class="bg-dark text-light">
 
-<!-- HEADER -->
-<header class="text-center mb-5">
+<div class="container py-4">
+
+  <!-- HEADER -->
+  <header class="text-center mb-4">
     <h1 class="fw-bold">📊 Indian Options Premium Erosion Calculator</h1>
-    <p class="text-muted">Theta decay & premium erosion for option buyers (₹)</p>
+    <p class="text-muted">
+      Theta decay & premium erosion for option buyers (₹)
+    </p>
 
-    <div class="d-flex justify-content-center gap-3 mt-3">
-        <button id="calculateBothBtn" class="btn btn-primary">Calculate Both</button>
-        <button id="exportCsvBtn" class="btn btn-success">Export CSV</button>
-        <button id="resetBtn" class="btn btn-outline-secondary">Reset</button>
+    <div class="d-flex justify-content-center gap-2 mt-3">
+      <button id="btnCalcBoth" class="btn btn-primary">Calculate Both</button>
+      <button id="btnExport" class="btn btn-success">Export CSV</button>
+      <button id="btnReset" class="btn btn-outline-secondary">Reset</button>
     </div>
-</header>
+  </header>
 
-<!-- UNDERLYING -->
-<div class="card mb-4">
-    <div class="card-header bg-secondary text-white">
-        Underlying Asset
-    </div>
+  <!-- UNDERLYING -->
+  <section class="card mb-4">
+    <div class="card-header bg-secondary text-white">Underlying Asset</div>
     <div class="card-body row g-3">
-        <div class="col-md-6">
-            <label class="form-label">Underlying</label>
-            <input id="underlyingName" class="form-control" value="NIFTY">
+      <div class="col-md-6">
+        <label>Underlying</label>
+        <input id="underlyingName" class="form-control" value="NIFTY">
+      </div>
+      <div class="col-md-6">
+        <label>Spot Price</label>
+        <input id="spotPrice" type="number" class="form-control" value="17450">
+      </div>
+    </div>
+  </section>
+
+  <!-- OPTIONS -->
+  <div class="row g-4">
+    <!-- CALL -->
+    <div class="col-md-6">
+      <div class="card call-option h-100">
+        <div class="card-header">Call Option</div>
+        <div class="card-body">
+
+          <input id="callStrike" class="form-control mb-2" value="17500">
+          <input id="callPremium" class="form-control mb-2" value="450">
+          <input id="callTheta" class="form-control mb-2" value="-4.5">
+          <input id="callGamma" class="form-control mb-2" value="0.0002">
+          <input id="callDelta" class="form-control mb-2" value="0.55">
+          <input id="callVega" class="form-control mb-2" value="12.5">
+          <input id="callDaysToExpiry" class="form-control mb-3" value="30">
+
+          <button id="btnCalcCall" class="btn btn-call w-100">Calculate Call</button>
+
+          <div id="callResults" class="mt-3 d-none">
+            <div class="result-box">Daily Theta <span id="callDailyTheta"></span></div>
+            <div class="result-box">Weekly Erosion <span id="callWeeklyErosion"></span></div>
+            <div class="result-box">Premium at Expiry <span id="callPremiumExpiry"></span></div>
+            <div class="result-box">Total Erosion <span id="callTotalErosion"></span></div>
+            <div class="result-box">
+              Erosion Confidence
+              <span id="callConfidence" class="confidence-medium">Medium Erosion Risk</span>
+            </div>
+          </div>
+
         </div>
-        <div class="col-md-6">
-            <label class="form-label">Spot Price</label>
-            <input id="spotPrice" class="form-control" type="number" value="17450">
+      </div>
+    </div>
+
+    <!-- PUT -->
+    <div class="col-md-6">
+      <div class="card put-option h-100">
+        <div class="card-header">Put Option</div>
+        <div class="card-body">
+
+          <input id="putStrike" class="form-control mb-2" value="17500">
+          <input id="putPremium" class="form-control mb-2" value="380">
+          <input id="putTheta" class="form-control mb-2" value="-3.8">
+          <input id="putGamma" class="form-control mb-2" value="0.00018">
+          <input id="putDelta" class="form-control mb-2" value="-0.45">
+          <input id="putVega" class="form-control mb-2" value="10.5">
+          <input id="putDaysToExpiry" class="form-control mb-3" value="30">
+
+          <button id="btnCalcPut" class="btn btn-put w-100">Calculate Put</button>
+
+          <div id="putResults" class="mt-3 d-none">
+            <div class="result-box">Daily Theta <span id="putDailyTheta"></span></div>
+            <div class="result-box">Weekly Erosion <span id="putWeeklyErosion"></span></div>
+            <div class="result-box">Premium at Expiry <span id="putPremiumExpiry"></span></div>
+            <div class="result-box">Total Erosion <span id="putTotalErosion"></span></div>
+            <div class="result-box">
+              Erosion Confidence
+              <span id="putConfidence" class="confidence-medium">Medium Erosion Risk</span>
+            </div>
+          </div>
+
         </div>
+      </div>
     </div>
-</div>
+  </div>
 
-<div class="row g-4">
-
-<!-- CALL OPTION -->
-<div class="col-lg-6">
-<div class="card call-option">
-<div class="card-header">
-    Call Option
-</div>
-<div class="card-body">
-
-<span id="callMoneyness" class="moneyness-badge badge-atm">ATM</span>
-
-<input id="callStrike" class="form-control mb-2" placeholder="Strike" value="17500">
-<input id="callPremium" class="form-control mb-2" placeholder="Premium" value="450">
-<input id="callTheta" class="form-control mb-2" placeholder="Theta" value="-4.5">
-<input id="callGamma" class="form-control mb-2" placeholder="Gamma" value="0.0002">
-<input id="callDelta" class="form-control mb-2" placeholder="Delta" value="0.55">
-<input id="callVega" class="form-control mb-2" placeholder="Vega" value="12.5">
-<input id="callDaysToExpiry" class="form-control mb-2" placeholder="Days to Expiry" value="30">
-
-<button id="calculateCallBtn" class="btn btn-call w-100 mt-2">
-    Calculate Call
-</button>
-
-<div id="callResults" class="mt-3 d-none">
-
-    <div class="result-box">
-        <small>Daily Theta</small>
-        <div id="callDailyErosion"></div>
+  <!-- 🔥 CTA TO ANALYSIS -->
+  <section id="analysisCTA" class="card mt-4 d-none">
+    <div class="card-body text-center">
+      <h5>📊 Want deeper insights?</h5>
+      <p class="text-muted">
+        Compare Call vs Put erosion, visualize decay over time, and explore confidence zones.
+      </p>
+      <a href="analysis.html" class="btn btn-outline-info">
+        View Detailed Analysis →
+      </a>
     </div>
+  </section>
 
-    <div class="result-box">
-        <small>Weekly Erosion</small>
-        <div id="callWeeklyErosion"></div>
-    </div>
-
-    <div class="result-box">
-        <small>Premium at Expiry</small>
-        <div id="callPremiumExpiry"></div>
-    </div>
-
-    <div class="result-box">
-        <small>Total Erosion</small>
-        <div id="callTotalErosion"></div>
-    </div>
-
-    <div class="result-box">
-        <small>Erosion Confidence</small>
-        <div id="callConfidence" class="confidence-medium">Medium Erosion Risk</div>
-    </div>
+  <!-- FOOTER -->
+  <footer class="text-center mt-5 text-muted">
+    v2.1 · Confidence Bands Enabled · No data stored
+  </footer>
 
 </div>
 
-</div>
-</div>
-</div>
-
-<!-- PUT OPTION -->
-<div class="col-lg-6">
-<div class="card put-option">
-<div class="card-header">
-    Put Option
-</div>
-<div class="card-body">
-
-<span id="putMoneyness" class="moneyness-badge badge-otm">OTM</span>
-
-<input id="putStrike" class="form-control mb-2" placeholder="Strike" value="17500">
-<input id="putPremium" class="form-control mb-2" placeholder="Premium" value="380">
-<input id="putTheta" class="form-control mb-2" placeholder="Theta" value="-3.8">
-<input id="putGamma" class="form-control mb-2" placeholder="Gamma" value="0.00018">
-<input id="putDelta" class="form-control mb-2" placeholder="Delta" value="-0.45">
-<input id="putVega" class="form-control mb-2" placeholder="Vega" value="10.5">
-<input id="putDaysToExpiry" class="form-control mb-2" placeholder="Days to Expiry" value="30">
-
-<button id="calculatePutBtn" class="btn btn-put w-100 mt-2">
-    Calculate Put
-</button>
-
-<div id="putResults" class="mt-3 d-none">
-
-    <div class="result-box">
-        <small>Daily Theta</small>
-        <div id="putDailyErosion"></div>
-    </div>
-
-    <div class="result-box">
-        <small>Weekly Erosion</small>
-        <div id="putWeeklyErosion"></div>
-    </div>
-
-    <div class="result-box">
-        <small>Premium at Expiry</small>
-        <div id="putPremiumExpiry"></div>
-    </div>
-
-    <div class="result-box">
-        <small>Total Erosion</small>
-        <div id="putTotalErosion"></div>
-    </div>
-
-    <div class="result-box">
-        <small>Erosion Confidence</small>
-        <div id="putConfidence" class="confidence-medium">Medium Erosion Risk</div>
-    </div>
-
-</div>
-
-</div>
-</div>
-</div>
-
-</div>
-
-<footer class="text-center mt-5">
-    <small class="text-muted">v2.1 · Confidence Bands Enabled · No data stored</small>
-</footer>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<script type="module" src="js/script.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
