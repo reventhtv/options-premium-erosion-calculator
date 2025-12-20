@@ -2,24 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Options Premium Erosion – Analysis</title>
+  <title>Premium Erosion Confidence Analysis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Bootstrap -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
-    rel="stylesheet"
-  />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-  <!-- Custom Styles -->
-  <link rel="stylesheet" href="css/styles.css" />
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body class="bg-dark text-light">
@@ -28,12 +19,11 @@
 
   <!-- HEADER -->
   <header class="text-center mb-4">
-    <h1 class="fw-bold">📊 Premium Erosion Analysis</h1>
-    <p class="text-muted">
-      Call vs Put erosion comparison with confidence bands & risk levels
-    </p>
+    <h1 class="fw-bold">
+      📊 Premium Erosion Analysis
+    </h1>
 
-    <a href="index.html" class="btn btn-outline-secondary mt-2">
+    <a href="index.html" class="btn btn-outline-secondary mt-3">
       ← Back to Calculator
     </a>
   </header>
@@ -47,59 +37,81 @@
     <div class="card-body row text-center">
 
       <!-- CALL -->
-      <div class="col-md-4">
-        <h6>Call Total Erosion</h6>
-        <div class="highlight" id="summaryCallErosion">—</div>
-        <div id="callRiskLabel" class="mt-1 fw-bold"></div>
+      <div class="col-md-4 mb-3">
+        <h6 class="text-info">Call Total Erosion</h6>
+        <div id="snapCall" class="fw-bold fs-4 text-primary">—</div>
+
+        <!-- ✅ RISK LABEL -->
+        <div id="callRiskLabel" class="mt-2 fw-semibold"></div>
       </div>
 
       <!-- PUT -->
-      <div class="col-md-4">
-        <h6>Put Total Erosion</h6>
-        <div class="highlight" id="summaryPutErosion">—</div>
-        <div id="putRiskLabel" class="mt-1 fw-bold"></div>
+      <div class="col-md-4 mb-3">
+        <h6 class="text-info">Put Total Erosion</h6>
+        <div id="snapPut" class="fw-bold fs-4 text-primary">—</div>
+
+        <!-- ✅ RISK LABEL -->
+        <div id="putRiskLabel" class="mt-2 fw-semibold"></div>
       </div>
 
       <!-- DAYS -->
-      <div class="col-md-4">
-        <h6>Days to Expiry</h6>
-        <div class="highlight" id="summaryDays">—</div>
-      </div>
-
-      <!-- PREMIUM AT EXPIRY -->
-      <div class="col-md-6 mt-3">
-        <h6>Call Premium @ Expiry</h6>
-        <div id="summaryCallPremiumExpiry">—</div>
-      </div>
-
-      <div class="col-md-6 mt-3">
-        <h6>Put Premium @ Expiry</h6>
-        <div id="summaryPutPremiumExpiry">—</div>
+      <div class="col-md-4 mb-3">
+        <h6 class="text-info">Days to Expiry</h6>
+        <div id="snapDays" class="fw-bold fs-4 text-primary">—</div>
       </div>
 
     </div>
   </section>
 
-  <!-- CONFIDENCE BANDS CHART -->
-  <section class="card">
-    <div class="card-header bg-info text-white">
+  <!-- CONFIDENCE BANDS -->
+  <section class="card mb-4">
+    <div class="card-header bg-info text-dark">
       Premium Erosion Over Time (Confidence Bands)
     </div>
 
     <div class="card-body">
       <canvas id="confidenceChart" height="120"></canvas>
+
+      <p class="text-muted mt-3 small">
+        Shaded zones represent probabilistic erosion ranges — not price predictions.
+      </p>
     </div>
   </section>
 
-  <!-- FOOTER -->
-  <footer class="text-center mt-4 text-muted">
-    v2.2 · Snapshot-based analysis · Confidence bands · No data stored
+  <!-- HOW TO READ -->
+  <section class="card">
+    <div class="card-header bg-primary text-white">
+      How to Read Confidence Bands
+    </div>
+
+    <div class="card-body">
+      <ul class="mb-0">
+        <li>
+          <span class="text-danger fw-bold">Red zone</span> → faster-than-expected erosion
+        </li>
+        <li>
+          <span class="text-info fw-bold">Blue line</span> → most probable decay path
+        </li>
+        <li>
+          <span class="text-success fw-bold">Green zone</span> → slower erosion scenario
+        </li>
+        <li class="mt-2">
+          Markets are probabilistic — bands show **risk ranges**, not certainty
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <footer class="text-center mt-5 text-muted">
+    v2.1 · Confidence Bands Enabled · No data stored
   </footer>
 
 </div>
 
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <!-- Analysis Logic -->
 <script src="js/analysis.js"></script>
-
 </body>
 </html>
