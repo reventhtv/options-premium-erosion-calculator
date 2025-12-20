@@ -1,4 +1,4 @@
-// analysis.js — Call + Put Confidence Bands (FULL FILE)
+// analysis.js — Snapshot + Confidence Bands + Risk Labels (FULL FILE)
 
 console.log("analysis.js loaded");
 
@@ -6,6 +6,17 @@ console.log("analysis.js loaded");
 // Helpers
 // --------------------
 const formatINR = v => "₹" + Number(v).toFixed(2);
+
+// Risk classification
+function erosionRisk(totalErosion, premiumExpiry) {
+  const erosion = Math.abs(totalErosion);
+  const base = erosion + Math.max(premiumExpiry, 0);
+  const ratio = base === 0 ? 0 : erosion / base;
+
+  if (ratio < 0.3) return { label: "🟢 Low Erosion Risk", cls: "text-success" };
+  if (ratio < 0.6) return { label: "🟡 Medium Erosion Risk", cls: "text-warning" };
+  return { label: "🔴 High Erosion Risk", cls: "text-danger" };
+}
 
 // --------------------
 // DOM Elements
@@ -15,6 +26,9 @@ const elPutErosion = document.getElementById("summaryPutErosion");
 const elCallExpiry = document.getElementById("summaryCallPremiumExpiry");
 const elPutExpiry = document.getElementById("summaryPutPremiumExpiry");
 const elDays = document.getElementById("summaryDays");
+
+const elCallRisk = document.getElementById("callRiskLabel");
+const elPutRisk = document.getElementById("putRiskLabel");
 
 // --------------------
 // Load snapshot
@@ -27,12 +41,30 @@ if (!raw) {
   const snapshot = JSON.parse(raw);
   console.log("Snapshot received", snapshot);
 
+  // Populate numbers
   elCallErosion.textContent = formatINR(snapshot.call.totalErosion);
   elPutErosion.textContent = formatINR(snapshot.put.totalErosion);
   elCallExpiry.textContent = formatINR(snapshot.call.premiumExpiry);
   elPutExpiry.textContent = formatINR(snapshot.put.premiumExpiry);
   elDays.textContent = snapshot.daysToExpiry + " days";
 
+  // Risk labels
+  const callRisk = erosionRisk(
+    snapshot.call.totalErosion,
+    snapshot.call.premiumExpiry
+  );
+  const putRisk = erosionRisk(
+    snapshot.put.totalErosion,
+    snapshot.put.premiumExpiry
+  );
+
+  elCallRisk.textContent = callRisk.label;
+  elCallRisk.className = callRisk.cls;
+
+  elPutRisk.textContent = putRisk.label;
+  elPutRisk.className = putRisk.cls;
+
+  // Chart
   renderConfidenceChart(
     snapshot.daysToExpiry,
     snapshot.call.totalErosion,
@@ -49,12 +81,10 @@ function renderConfidenceChart(days, callTotal, putTotal) {
   const band = (total, factor) =>
     labels.map(d => total * (1 - (d / days) * factor));
 
-  // ===== CALL BANDS =====
   const callLow  = band(callTotal, 0.7);
   const callMid  = band(callTotal, 1.0);
   const callHigh = band(callTotal, 1.3);
 
-  // ===== PUT BANDS =====
   const putLow  = band(putTotal, 0.7);
   const putMid  = band(putTotal, 1.0);
   const putHigh = band(putTotal, 1.3);
@@ -64,7 +94,6 @@ function renderConfidenceChart(days, callTotal, putTotal) {
     data: {
       labels,
       datasets: [
-        // ----- CALL -----
         {
           label: "Call – High Erosion",
           data: callHigh,
@@ -86,8 +115,6 @@ function renderConfidenceChart(days, callTotal, putTotal) {
           borderColor: "rgba(25,135,84,0)",
           fill: "-1"
         },
-
-        // ----- PUT -----
         {
           label: "Put – High Erosion",
           data: putHigh,
