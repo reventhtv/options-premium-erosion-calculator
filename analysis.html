@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Option Premium Erosion – Detailed Analysis</title>
+  <title>Option Premium Erosion – Confidence Analysis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Bootstrap -->
@@ -22,16 +22,16 @@
 
   <!-- HEADER -->
   <header class="mb-4">
-    <h2 class="fw-bold">📊 Detailed Premium Erosion Analysis</h2>
+    <h2 class="fw-bold">📊 Premium Erosion Confidence Analysis</h2>
     <p class="text-muted">
-      Deep dive into call vs put decay, time-based erosion, and advanced assumptions.
+      Visual probability zones showing how option premium may erode over time.
     </p>
     <a href="index.html" class="btn btn-outline-light btn-sm">
       ← Back to Calculator
     </a>
   </header>
 
-  <!-- SNAPSHOT SUMMARY -->
+  <!-- SNAPSHOT -->
   <section class="card mb-4">
     <div class="card-header bg-secondary text-white">
       Snapshot Summary
@@ -52,63 +52,26 @@
     </div>
   </section>
 
-  <!-- COMPARISON TABLE -->
-  <section class="card mb-4">
-    <div class="card-header bg-dark text-white">
-      Call vs Put Comparison
-    </div>
-    <div class="card-body table-responsive">
-      <table class="table table-dark table-bordered">
-        <thead>
-          <tr>
-            <th>Metric</th>
-            <th>Call</th>
-            <th>Put</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>Daily Theta</td><td id="cmpCallTheta">–</td><td id="cmpPutTheta">–</td></tr>
-          <tr><td>Weekly Erosion</td><td id="cmpCallWeekly">–</td><td id="cmpPutWeekly">–</td></tr>
-          <tr><td>Total Erosion</td><td id="cmpCallTotal">–</td><td id="cmpPutTotal">–</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- CHART -->
+  <!-- CONFIDENCE CHART -->
   <section class="card mb-4">
     <div class="card-header bg-info text-white">
-      Premium Erosion Over Time
+      Premium Erosion Over Time (Confidence Bands)
     </div>
     <div class="card-body">
-      <canvas id="erosionChart" height="120"></canvas>
+      <canvas id="confidenceChart" height="140"></canvas>
+      <small class="text-muted d-block mt-2">
+        Shaded zones represent probabilistic erosion ranges, not price predictions.
+      </small>
     </div>
   </section>
 
-  <!-- ADVANCED SETTINGS -->
+  <!-- LEGEND -->
   <section class="card mb-4">
-    <div class="card-header">
-      Advanced Settings
-    </div>
-    <div class="card-body row g-3">
-      <div class="col-md-4">
-        <label>Projection Days</label>
-        <input id="projectionDays" type="number" class="form-control" value="30">
-      </div>
-      <div class="col-md-4">
-        <label>Volatility Change (%)</label>
-        <input id="volatilityChange" type="number" class="form-control" value="0">
-      </div>
-      <div class="col-md-4 d-flex align-items-center">
-        <div class="form-check mt-4">
-          <input class="form-check-input" type="checkbox" id="nonLinearTheta" checked>
-          <label class="form-check-label">Use Non-Linear Theta</label>
-        </div>
-      </div>
-      <div class="col-12">
-        <button id="recalcAnalysis" class="btn btn-primary w-100">
-          Recalculate Analysis
-        </button>
+    <div class="card-body">
+      <div class="row text-center">
+        <div class="col-md-4 text-danger">🔴 High erosion (faster decay)</div>
+        <div class="col-md-4 text-primary">🔵 Expected decay path</div>
+        <div class="col-md-4 text-success">🟢 Low erosion (slower decay)</div>
       </div>
     </div>
   </section>
@@ -116,15 +79,14 @@
   <!-- EDUCATION -->
   <section class="card mb-5">
     <div class="card-header bg-warning">
-      Understanding Premium Erosion (Theta)
+      How to Read Confidence Bands
     </div>
     <div class="card-body">
       <ul>
-        <li><b>Theta</b> represents daily time decay.</li>
-        <li>Decay accelerates near expiry (non-linear).</li>
-        <li>ATM options decay fastest.</li>
-        <li>Volatility can temporarily offset theta.</li>
-        <li>Option buyers fight time, not direction.</li>
+        <li>Blue line = most probable premium decay.</li>
+        <li>Red zone = worst-case erosion if decay accelerates.</li>
+        <li>Green zone = favorable scenario with slower decay.</li>
+        <li>Markets move unpredictably — these are probability ranges.</li>
       </ul>
     </div>
   </section>
