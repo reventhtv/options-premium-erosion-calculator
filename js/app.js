@@ -1,13 +1,9 @@
-// app.js — VERIFIED SAFE VERSION
-
-console.log("app.js loaded"); // 🔍 execution proof
+// app.js — verified button wiring + debug logs
 
 // --------------------
 // Helpers
 // --------------------
-function formatINR(v) {
-  return "Rs " + Number(v).toFixed(2);
-}
+const formatINR = v => "₹" + Number(v).toFixed(2);
 
 // --------------------
 // DOM Elements
@@ -16,7 +12,6 @@ const btnCalcCall = document.getElementById("btnCalcCall");
 const btnCalcPut = document.getElementById("btnCalcPut");
 const btnCalcBoth = document.getElementById("btnCalcBoth");
 const btnReset = document.getElementById("btnReset");
-
 const analysisCTA = document.getElementById("analysisCTA");
 
 // Call inputs
@@ -47,9 +42,8 @@ const putTotalErosion = document.getElementById("putTotalErosion");
 // UI helpers
 // --------------------
 function showCTA() {
-  if (analysisCTA) {
-    analysisCTA.classList.remove("d-none");
-  }
+  console.log("CTA shown");
+  analysisCTA.classList.remove("d-none");
 }
 
 // --------------------
@@ -96,12 +90,11 @@ function calcBoth() {
 // --------------------
 // Event bindings
 // --------------------
-if (btnCalcCall) btnCalcCall.addEventListener("click", calcCall);
-if (btnCalcPut) btnCalcPut.addEventListener("click", calcPut);
-if (btnCalcBoth) btnCalcBoth.addEventListener("click", calcBoth);
+btnCalcCall.addEventListener("click", calcCall);
+btnCalcPut.addEventListener("click", calcPut);
+btnCalcBoth.addEventListener("click", calcBoth);
 
-if (btnReset) {
-  btnReset.addEventListener("click", () => {
-    location.reload();
-  });
-}
+btnReset.addEventListener("click", () => {
+  console.log("Reset clicked");
+  location.reload();
+});
