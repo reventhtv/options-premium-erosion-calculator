@@ -1,4 +1,6 @@
-// app.js — verified button wiring + debug logs
+// app.js — stable calculator + sessionStorage snapshot
+
+console.log("app.js loaded");
 
 // --------------------
 // Helpers
@@ -42,7 +44,6 @@ const putTotalErosion = document.getElementById("putTotalErosion");
 // UI helpers
 // --------------------
 function showCTA() {
-  console.log("CTA shown");
   analysisCTA.classList.remove("d-none");
 }
 
@@ -62,7 +63,6 @@ function calcCall() {
   callTotalErosion.textContent = formatINR(theta * days);
 
   callResults.classList.remove("d-none");
-  showCTA();
 }
 
 function calcPut() {
@@ -78,13 +78,34 @@ function calcPut() {
   putTotalErosion.textContent = formatINR(theta * days);
 
   putResults.classList.remove("d-none");
-  showCTA();
 }
 
 function calcBoth() {
   console.log("calcBoth fired");
+
   calcCall();
   calcPut();
+
+  // 🔑 STORE SNAPSHOT FOR ANALYSIS PAGE
+  const snapshot = {
+    call: {
+      totalErosion: Number(callTheta.value) * Number(callDaysToExpiry.value),
+      premiumExpiry: Number(callPremium.value) +
+        Number(callTheta.value) * Number(callDaysToExpiry.value)
+    },
+    put: {
+      totalErosion: Number(putTheta.value) * Number(putDaysToExpiry.value),
+      premiumExpiry: Number(putPremium.value) +
+        Number(putTheta.value) * Number(putDaysToExpiry.value)
+    },
+    daysToExpiry: Number(callDaysToExpiry.value),
+    timestamp: Date.now()
+  };
+
+  sessionStorage.setItem("erosionSnapshot", JSON.stringify(snapshot));
+  console.log("Snapshot stored", snapshot);
+
+  showCTA();
 }
 
 // --------------------
@@ -95,6 +116,6 @@ btnCalcPut.addEventListener("click", calcPut);
 btnCalcBoth.addEventListener("click", calcBoth);
 
 btnReset.addEventListener("click", () => {
-  console.log("Reset clicked");
+  sessionStorage.clear();
   location.reload();
 });
