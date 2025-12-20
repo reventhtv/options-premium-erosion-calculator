@@ -11,12 +11,23 @@ function getRiskLabel(totalErosion) {
   const abs = Math.abs(totalErosion);
 
   if (abs < 80) {
-    return { text: "Low Erosion Risk", cls: "text-success" };
+    return {
+      text: "🟢 Low Erosion Risk",
+      cls: "text-success"
+    };
   }
+
   if (abs < 150) {
-    return { text: "Medium Erosion Risk", cls: "text-warning" };
+    return {
+      text: "🟡 Medium Erosion Risk",
+      cls: "text-warning"
+    };
   }
-  return { text: "High Erosion Risk", cls: "text-danger" };
+
+  return {
+    text: "🔴 High Erosion Risk",
+    cls: "text-danger"
+  };
 }
 
 // --------------------
