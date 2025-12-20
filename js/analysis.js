@@ -1,4 +1,4 @@
-// analysis.js — Snapshot + Confidence Bands (FULL FILE)
+// analysis.js — Call + Put Confidence Bands (FULL FILE)
 
 console.log("analysis.js loaded");
 
@@ -22,13 +22,11 @@ const elDays = document.getElementById("summaryDays");
 const raw = sessionStorage.getItem("erosionSnapshot");
 
 if (!raw) {
-  console.warn("No erosionSnapshot found");
   alert("No calculation data found. Please calculate from home page first.");
 } else {
   const snapshot = JSON.parse(raw);
   console.log("Snapshot received", snapshot);
 
-  // Populate snapshot summary
   elCallErosion.textContent = formatINR(snapshot.call.totalErosion);
   elPutErosion.textContent = formatINR(snapshot.put.totalErosion);
   elCallExpiry.textContent = formatINR(snapshot.call.premiumExpiry);
@@ -51,19 +49,22 @@ function renderConfidenceChart(days, callTotal, putTotal) {
   const band = (total, factor) =>
     labels.map(d => total * (1 - (d / days) * factor));
 
-  // Call bands
+  // ===== CALL BANDS =====
   const callLow  = band(callTotal, 0.7);
   const callMid  = band(callTotal, 1.0);
   const callHigh = band(callTotal, 1.3);
 
-  // Put mid (simple for now)
-  const putMid = band(putTotal, 1.0);
+  // ===== PUT BANDS =====
+  const putLow  = band(putTotal, 0.7);
+  const putMid  = band(putTotal, 1.0);
+  const putHigh = band(putTotal, 1.3);
 
   new Chart(document.getElementById("confidenceChart"), {
     type: "line",
     data: {
       labels,
       datasets: [
+        // ----- CALL -----
         {
           label: "Call – High Erosion",
           data: callHigh,
@@ -85,13 +86,29 @@ function renderConfidenceChart(days, callTotal, putTotal) {
           borderColor: "rgba(25,135,84,0)",
           fill: "-1"
         },
+
+        // ----- PUT -----
+        {
+          label: "Put – High Erosion",
+          data: putHigh,
+          backgroundColor: "rgba(255,193,7,0.25)",
+          borderColor: "rgba(255,193,7,0)",
+          fill: true
+        },
         {
           label: "Put – Expected",
           data: putMid,
           borderColor: "#ffc107",
-          borderDash: [6, 4],
           borderWidth: 2,
+          borderDash: [6, 4],
           fill: false
+        },
+        {
+          label: "Put – Low Erosion",
+          data: putLow,
+          backgroundColor: "rgba(13,202,240,0.25)",
+          borderColor: "rgba(13,202,240,0)",
+          fill: "-1"
         }
       ]
     },
