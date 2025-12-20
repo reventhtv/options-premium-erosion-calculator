@@ -1,42 +1,63 @@
-// analysis.js — Confidence Bands Chart
+// analysis.js — Snapshot + Confidence Bands (FULL FILE)
 
-const data = JSON.parse(localStorage.getItem("optionCalculatorInputs")) || {};
+console.log("analysis.js loaded");
 
-const ₹ = v => "₹" + Number(v).toFixed(2);
+// --------------------
+// Helpers
+// --------------------
+const formatINR = v => "₹" + Number(v).toFixed(2);
 
-function init() {
-  if (!data.callTheta || !data.callPremium) return;
+// --------------------
+// DOM Elements
+// --------------------
+const elCallErosion = document.getElementById("summaryCallErosion");
+const elPutErosion = document.getElementById("summaryPutErosion");
+const elCallExpiry = document.getElementById("summaryCallPremiumExpiry");
+const elPutExpiry = document.getElementById("summaryPutPremiumExpiry");
+const elDays = document.getElementById("summaryDays");
 
-  const days = Number(data.callDaysToExpiry || 30);
+// --------------------
+// Load snapshot
+// --------------------
+const raw = sessionStorage.getItem("erosionSnapshot");
 
-  const callBase = data.callTheta * days;
-  const putBase  = data.putTheta  * days;
+if (!raw) {
+  console.warn("No erosionSnapshot found");
+  alert("No calculation data found. Please calculate from home page first.");
+} else {
+  const snapshot = JSON.parse(raw);
+  console.log("Snapshot received", snapshot);
 
-  document.getElementById("snapCall").textContent = ₹(callBase);
-  document.getElementById("snapPut").textContent  = ₹(putBase);
-  document.getElementById("snapRatio").textContent =
-    Math.abs(callBase / putBase).toFixed(2) + ":1";
+  // Populate snapshot summary
+  elCallErosion.textContent = formatINR(snapshot.call.totalErosion);
+  elPutErosion.textContent = formatINR(snapshot.put.totalErosion);
+  elCallExpiry.textContent = formatINR(snapshot.call.premiumExpiry);
+  elPutExpiry.textContent = formatINR(snapshot.put.premiumExpiry);
+  elDays.textContent = snapshot.daysToExpiry + " days";
 
-  renderConfidenceChart(days, callBase, putBase);
+  renderConfidenceChart(
+    snapshot.daysToExpiry,
+    snapshot.call.totalErosion,
+    snapshot.put.totalErosion
+  );
 }
 
+// --------------------
+// Chart logic
+// --------------------
 function renderConfidenceChart(days, callTotal, putTotal) {
   const labels = Array.from({ length: days + 1 }, (_, i) => i);
 
-  const makeBand = (total, factor) =>
-    labels.map(d => Math.max(0, total * (1 - (d / days) * factor)));
+  const band = (total, factor) =>
+    labels.map(d => total * (1 - (d / days) * factor));
 
-  // Expected
-  const callMid = makeBand(callTotal, 1.0);
-  const putMid  = makeBand(putTotal, 1.0);
+  // Call bands
+  const callLow  = band(callTotal, 0.7);
+  const callMid  = band(callTotal, 1.0);
+  const callHigh = band(callTotal, 1.3);
 
-  // High erosion (faster decay)
-  const callHigh = makeBand(callTotal, 1.25);
-  const putHigh  = makeBand(putTotal, 1.25);
-
-  // Low erosion (slower decay)
-  const callLow = makeBand(callTotal, 0.75);
-  const putLow  = makeBand(putTotal, 0.75);
+  // Put mid (simple for now)
+  const putMid = band(putTotal, 1.0);
 
   new Chart(document.getElementById("confidenceChart"), {
     type: "line",
@@ -46,32 +67,31 @@ function renderConfidenceChart(days, callTotal, putTotal) {
         {
           label: "Call – High Erosion",
           data: callHigh,
-          borderColor: "rgba(220,53,69,0)",
           backgroundColor: "rgba(220,53,69,0.25)",
+          borderColor: "rgba(220,53,69,0)",
           fill: true
         },
         {
           label: "Call – Expected",
           data: callMid,
           borderColor: "#0d6efd",
-          backgroundColor: "rgba(13,110,253,0.15)",
-          fill: false,
-          borderWidth: 2
+          borderWidth: 2,
+          fill: false
         },
         {
           label: "Call – Low Erosion",
           data: callLow,
-          borderColor: "rgba(25,135,84,0)",
           backgroundColor: "rgba(25,135,84,0.25)",
+          borderColor: "rgba(25,135,84,0)",
           fill: "-1"
         },
         {
           label: "Put – Expected",
           data: putMid,
           borderColor: "#ffc107",
-          borderDash: [5, 5],
-          fill: false,
-          borderWidth: 2
+          borderDash: [6, 4],
+          borderWidth: 2,
+          fill: false
         }
       ]
     },
@@ -82,16 +102,14 @@ function renderConfidenceChart(days, callTotal, putTotal) {
         legend: { position: "bottom" },
         tooltip: {
           callbacks: {
-            label: ctx => `${ctx.dataset.label}: ${₹(ctx.raw)}`
+            label: ctx => `${ctx.dataset.label}: ${formatINR(ctx.raw)}`
           }
         }
       },
       scales: {
         x: { title: { display: true, text: "Days Passed" } },
-        y: { title: { display: true, text: "Premium Value (₹)" } }
+        y: { title: { display: true, text: "Premium Erosion (₹)" } }
       }
     }
   });
 }
-
-init();
