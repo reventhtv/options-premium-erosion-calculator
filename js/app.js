@@ -1,5 +1,7 @@
 // app.js — stable calculator + sessionStorage snapshot
 
+console.log("🔥 app.js v2.1 with snapshot loaded");
+
 console.log("app.js loaded");
 
 // --------------------
