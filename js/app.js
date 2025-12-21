@@ -1,123 +1,46 @@
-// app.js — stable calculator + sessionStorage snapshot
-
-console.log("🔥 app.js v2.1 with snapshot loaded");
-
 console.log("app.js loaded");
 
-// --------------------
-// Helpers
-// --------------------
-const formatINR = v => "₹" + Number(v).toFixed(2);
+const ₹ = v => "₹" + Number(v).toFixed(2);
 
-// --------------------
-// DOM Elements
-// --------------------
-const btnCalcCall = document.getElementById("btnCalcCall");
-const btnCalcPut = document.getElementById("btnCalcPut");
-const btnCalcBoth = document.getElementById("btnCalcBoth");
-const btnReset = document.getElementById("btnReset");
-const analysisCTA = document.getElementById("analysisCTA");
-
-// Call inputs
-const callTheta = document.getElementById("callTheta");
-const callDaysToExpiry = document.getElementById("callDaysToExpiry");
 const callPremium = document.getElementById("callPremium");
+const callTheta = document.getElementById("callTheta");
+const callDays = document.getElementById("callDays");
 
-// Call outputs
-const callResults = document.getElementById("callResults");
-const callDailyTheta = document.getElementById("callDailyTheta");
-const callWeeklyErosion = document.getElementById("callWeeklyErosion");
-const callPremiumExpiry = document.getElementById("callPremiumExpiry");
-const callTotalErosion = document.getElementById("callTotalErosion");
-
-// Put inputs
-const putTheta = document.getElementById("putTheta");
-const putDaysToExpiry = document.getElementById("putDaysToExpiry");
 const putPremium = document.getElementById("putPremium");
+const putTheta = document.getElementById("putTheta");
+const putDays = document.getElementById("putDays");
 
-// Put outputs
-const putResults = document.getElementById("putResults");
-const putDailyTheta = document.getElementById("putDailyTheta");
-const putWeeklyErosion = document.getElementById("putWeeklyErosion");
-const putPremiumExpiry = document.getElementById("putPremiumExpiry");
-const putTotalErosion = document.getElementById("putTotalErosion");
+const callResult = document.getElementById("callResult");
+const putResult = document.getElementById("putResult");
 
-// --------------------
-// UI helpers
-// --------------------
-function showCTA() {
-  analysisCTA.classList.remove("d-none");
-}
-
-// --------------------
-// Calculations
-// --------------------
 function calcCall() {
-  console.log("calcCall fired");
-
-  const theta = Number(callTheta.value);
-  const days = Number(callDaysToExpiry.value);
-  const premium = Number(callPremium.value);
-
-  callDailyTheta.textContent = formatINR(theta);
-  callWeeklyErosion.textContent = formatINR(theta * 7);
-  callPremiumExpiry.textContent = formatINR(premium + theta * days);
-  callTotalErosion.textContent = formatINR(theta * days);
-
-  callResults.classList.remove("d-none");
+  const total = Number(callTheta.value) * Number(callDays.value);
+  callResult.textContent = `Total erosion: ${₹(total)}`;
+  return total;
 }
 
 function calcPut() {
-  console.log("calcPut fired");
-
-  const theta = Number(putTheta.value);
-  const days = Number(putDaysToExpiry.value);
-  const premium = Number(putPremium.value);
-
-  putDailyTheta.textContent = formatINR(theta);
-  putWeeklyErosion.textContent = formatINR(theta * 7);
-  putPremiumExpiry.textContent = formatINR(premium + theta * days);
-  putTotalErosion.textContent = formatINR(theta * days);
-
-  putResults.classList.remove("d-none");
+  const total = Number(putTheta.value) * Number(putDays.value);
+  putResult.textContent = `Total erosion: ${₹(total)}`;
+  return total;
 }
 
-function calcBoth() {
-  console.log("calcBoth fired");
+document.getElementById("btnCalcCall").onclick = calcCall;
+document.getElementById("btnCalcPut").onclick = calcPut;
 
-  calcCall();
-  calcPut();
+document.getElementById("btnCalcBoth").onclick = () => {
+  const callTotal = calcCall();
+  const putTotal = calcPut();
 
-  // 🔑 STORE SNAPSHOT FOR ANALYSIS PAGE
   const snapshot = {
-    call: {
-      totalErosion: Number(callTheta.value) * Number(callDaysToExpiry.value),
-      premiumExpiry: Number(callPremium.value) +
-        Number(callTheta.value) * Number(callDaysToExpiry.value)
-    },
-    put: {
-      totalErosion: Number(putTheta.value) * Number(putDaysToExpiry.value),
-      premiumExpiry: Number(putPremium.value) +
-        Number(putTheta.value) * Number(putDaysToExpiry.value)
-    },
-    daysToExpiry: Number(callDaysToExpiry.value),
-    timestamp: Date.now()
+    call: { totalErosion: callTotal },
+    put: { totalErosion: putTotal },
+    days: Number(callDays.value),
+    ts: Date.now()
   };
 
   sessionStorage.setItem("erosionSnapshot", JSON.stringify(snapshot));
   console.log("Snapshot stored", snapshot);
 
-  showCTA();
-}
-
-// --------------------
-// Event bindings
-// --------------------
-btnCalcCall.addEventListener("click", calcCall);
-btnCalcPut.addEventListener("click", calcPut);
-btnCalcBoth.addEventListener("click", calcBoth);
-
-btnReset.addEventListener("click", () => {
-  sessionStorage.clear();
-  location.reload();
-});
+  window.location.href = "analysis.html";
+};
