@@ -1,4 +1,4 @@
-// analysis.js — Confidence Bands with PUT Asymmetry
+// analysis.js — Confidence Bands with PUT Asymmetry (DEBUG STEP)
 
 console.log("analysis.js loaded");
 
@@ -34,18 +34,8 @@ snapCall.textContent = formatINR(callErosion);
 snapPut.textContent = formatINR(putErosion);
 snapDays.textContent = `${days} days`;
 
-// --------------------
-// Risk Labels (text only, visual later)
-// --------------------
-function riskText(v) {
-  const a = Math.abs(v);
-  if (a < 80) return "Low Erosion Risk";
-  if (a < 150) return "Medium Erosion Risk";
-  return "High Erosion Risk";
-}
-
-callRiskLabel.textContent = riskText(callErosion);
-putRiskLabel.textContent = riskText(putErosion);
+callRiskLabel.textContent = "Medium Erosion Risk";
+putRiskLabel.textContent = "Medium Erosion Risk";
 
 // --------------------
 // Confidence Bands
@@ -63,8 +53,19 @@ function renderConfidenceChart(days, callTotal, putTotal) {
 
   // PUT — asymmetric (bearish skew realism)
   const putExpected = band(putTotal, 1.0);
-  const putHigh = band(putTotal, 1.35); // faster decay risk
-  const putLow = band(putTotal, 0.55);  // IV support zone
+  const putHigh = band(putTotal, 1.35);
+  const putLow = band(putTotal, 0.55);
+
+  // 🔍 TEMPORARY VALIDATION (REMOVE LATER)
+  console.table({
+    "PUT High (Day 0)": putHigh[0],
+    "PUT Expected (Day 0)": putExpected[0],
+    "PUT Low (Day 0)": putLow[0],
+
+    "PUT High (Mid)": putHigh[Math.floor(days / 2)],
+    "PUT Expected (Mid)": putExpected[Math.floor(days / 2)],
+    "PUT Low (Mid)": putLow[Math.floor(days / 2)]
+  });
 
   new Chart(document.getElementById("confidenceChart"), {
     type: "line",
