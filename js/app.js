@@ -2,6 +2,7 @@ console.log("app.js loaded");
 
 const ₹ = v => "₹" + Number(v).toFixed(2);
 
+// Inputs
 const callPremium = document.getElementById("callPremium");
 const callTheta = document.getElementById("callTheta");
 const callDays = document.getElementById("callDays");
@@ -10,18 +11,19 @@ const putPremium = document.getElementById("putPremium");
 const putTheta = document.getElementById("putTheta");
 const putDays = document.getElementById("putDays");
 
+// Outputs
 const callResult = document.getElementById("callResult");
 const putResult = document.getElementById("putResult");
 
 function calcCall() {
   const total = Number(callTheta.value) * Number(callDays.value);
-  callResult.textContent = `Total erosion: ${₹(total)}`;
+  callResult.textContent = `Total Erosion: ${₹(total)}`;
   return total;
 }
 
 function calcPut() {
   const total = Number(putTheta.value) * Number(putDays.value);
-  putResult.textContent = `Total erosion: ${₹(total)}`;
+  putResult.textContent = `Total Erosion: ${₹(total)}`;
   return total;
 }
 
@@ -36,7 +38,7 @@ document.getElementById("btnCalcBoth").onclick = () => {
     call: { totalErosion: callTotal },
     put: { totalErosion: putTotal },
     days: Number(callDays.value),
-    ts: Date.now()
+    timestamp: Date.now()
   };
 
   sessionStorage.setItem("erosionSnapshot", JSON.stringify(snapshot));

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Analysis</title>
+  <title>Premium Erosion Analysis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,18 +13,21 @@
 
 <div class="container py-4">
 
-  <h1 class="text-center mb-4">📈 Erosion Analysis</h1>
+  <h1 class="text-center mb-4">📈 Premium Erosion Analysis</h1>
 
-  <div class="card p-3 mb-4">
+  <!-- SNAPSHOT -->
+  <div class="card p-3 mb-4 bg-secondary">
     <h5>Snapshot Summary</h5>
-    <div>Call Total: <span id="snapCall"></span></div>
-    <div>Put Total: <span id="snapPut"></span></div>
-    <div>Ratio: <span id="snapRatio"></span></div>
+    <div>Call Total Erosion: <strong id="snapCall"></strong></div>
+    <div>Put Total Erosion: <strong id="snapPut"></strong></div>
+    <div>Days to Expiry: <strong id="snapDays"></strong></div>
+    <div>Call : Put Ratio: <strong id="snapRatio"></strong></div>
   </div>
 
-  <div class="card p-3">
-    <h5>Confidence Bands</h5>
-    <canvas id="chart" height="120"></canvas>
+  <!-- CHART -->
+  <div class="card p-3 bg-secondary">
+    <h5>Premium Erosion Confidence Bands</h5>
+    <canvas id="confidenceChart" height="120"></canvas>
   </div>
 
 </div>
