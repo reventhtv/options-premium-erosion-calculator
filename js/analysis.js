@@ -1,15 +1,13 @@
-// analysis.js — Snapshot + Confidence Bands + Insight (FIXED)
+// analysis.js — Snapshot + Confidence Bands + Insight (STABLE)
 
 console.log("analysis.js loaded");
 
-document.addEventListener("DOMContentLoaded", () => {
-  const snapshot = JSON.parse(sessionStorage.getItem("erosionSnapshot"));
-  const ₹ = v => "₹" + Number(v).toFixed(2);
+const snapshot = JSON.parse(sessionStorage.getItem("erosionSnapshot"));
+const ₹ = v => "₹" + Number(v).toFixed(2);
 
-  if (!snapshot) {
-    console.warn("No snapshot found in sessionStorage");
-    return;
-  }
+if (!snapshot) {
+  console.warn("No snapshot found in sessionStorage");
+} else {
 
   // --------------------
   // Populate snapshot
@@ -24,13 +22,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!snapCall || !snapPut || !snapRatio) {
     console.error("Snapshot DOM elements missing");
-    return;
+  } else {
+    snapCall.textContent = ₹(callErosion);
+    snapPut.textContent  = ₹(putErosion);
+    snapRatio.textContent =
+      Math.abs(callErosion / putErosion).toFixed(2) + " : 1";
   }
-
-  snapCall.textContent = ₹(callErosion);
-  snapPut.textContent  = ₹(putErosion);
-  snapRatio.textContent =
-    Math.abs(callErosion / putErosion).toFixed(2) + " : 1";
 
   // --------------------
   // Insight logic
@@ -58,20 +55,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // CALL (symmetric)
     const callExpected = linear(callTotal, 1.0);
     const callHigh = linear(callTotal, 1.2);
-    const callLow = linear(callTotal, 0.8);
 
-    // PUT (asymmetric – bearish skew realism)
+    // PUT (asymmetric)
     const putExpected = linear(putTotal, 1.0);
-    const putHigh = linear(putTotal, 0.65);
     const putLow = linear(putTotal, 1.45);
 
-    // 🔍 DEBUG BLOCK — KEEP COMMENTED FOR FUTURE VALIDATION
+    // 🔍 DEBUG BLOCK (KEEP COMMENTED)
     /*
     console.table({
-      "PUT High (Day 0)": putHigh[0],
-      "PUT Expected (Day 0)": putExpected[0],
-      "PUT Low (Day 0)": putLow[0],
-      "PUT High (Mid)": putHigh[Math.floor(days / 2)],
       "PUT Expected (Mid)": putExpected[Math.floor(days / 2)],
       "PUT Low (Mid)": putLow[Math.floor(days / 2)]
     });
@@ -95,13 +86,6 @@ document.addEventListener("DOMContentLoaded", () => {
             borderWidth: 2
           },
           {
-            label: "Call – Range",
-            data: callHigh,
-            backgroundColor: "rgba(13,110,253,0.15)",
-            fill: "-1",
-            borderWidth: 0
-          },
-          {
             label: "Put – Expected",
             data: putExpected,
             borderColor: "#ffc107",
@@ -109,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
             borderWidth: 2
           },
           {
-            label: "Put – Range",
+            label: "Put – Protected Zone",
             data: putLow,
             backgroundColor: "rgba(255,193,7,0.25)",
             fill: "-1",
@@ -121,12 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
         responsive: true,
         interaction: { mode: "index", intersect: false },
         plugins: {
-          legend: { position: "bottom" },
-          tooltip: {
-            callbacks: {
-              label: ctx => `${ctx.dataset.label}: ${₹(ctx.raw)}`
-            }
-          }
+          legend: { position: "bottom" }
         },
         scales: {
           x: { title: { display: true, text: "Days Passed" } },
@@ -137,4 +116,4 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   renderConfidenceChart(days, callErosion, putErosion);
-});
+}
