@@ -1,122 +1,101 @@
-// analysis.js — Confidence Bands with PUT Asymmetry (DEBUG STEP)
+// analysis.js — Snapshot + Confidence Bands + Insight
 
 console.log("analysis.js loaded");
 
-const formatINR = v => "₹" + Number(v).toFixed(2);
-
-// --------------------
-// Load Snapshot
-// --------------------
 const snapshot = JSON.parse(sessionStorage.getItem("erosionSnapshot"));
+const ₹ = v => "₹" + Number(v).toFixed(2);
 
 if (!snapshot) {
-  alert("No snapshot found. Please calculate from main page.");
-  window.location.href = "index.html";
+  console.warn("No snapshot found");
+  return;
 }
 
 // --------------------
-// DOM
-// --------------------
-const snapCall = document.getElementById("snapCall");
-const snapPut = document.getElementById("snapPut");
-const snapDays = document.getElementById("snapDays");
-const callRiskLabel = document.getElementById("callRiskLabel");
-const putRiskLabel = document.getElementById("putRiskLabel");
-
-// --------------------
-// Populate Snapshot
+// Populate snapshot
 // --------------------
 const callErosion = snapshot.call.totalErosion;
-const putErosion = snapshot.put.totalErosion;
+const putErosion  = snapshot.put.totalErosion;
 const days = snapshot.daysToExpiry;
 
-snapCall.textContent = formatINR(callErosion);
-snapPut.textContent = formatINR(putErosion);
-snapDays.textContent = `${days} days`;
-
-callRiskLabel.textContent = "Medium Erosion Risk";
-putRiskLabel.textContent = "Medium Erosion Risk";
+document.getElementById("snapCall").textContent = ₹(callErosion);
+document.getElementById("snapPut").textContent  = ₹(putErosion);
+document.getElementById("snapRatio").textContent =
+  Math.abs(callErosion / putErosion).toFixed(2) + " : 1";
 
 // --------------------
-// Confidence Bands
+// Insight logic
+// --------------------
+const insightBox = document.getElementById("erosionInsight");
+const insightText = document.getElementById("insightText");
+
+if (Math.abs(putErosion) < Math.abs(callErosion)) {
+  insightText.textContent =
+    "PUT downside risk is more protected than CALL upside";
+  insightBox.classList.remove("d-none");
+}
+
+// --------------------
+// Confidence bands
 // --------------------
 function renderConfidenceChart(days, callTotal, putTotal) {
   const labels = Array.from({ length: days + 1 }, (_, i) => i);
 
-  const band = (total, factor) =>
+  const linear = (total, factor) =>
     labels.map(d => total * (1 - (d / days) * factor));
 
-  // CALL — symmetric
-  const callExpected = band(callTotal, 1.0);
-  const callHigh = band(callTotal, 1.25);
-  const callLow = band(callTotal, 0.75);
+  // CALL (symmetric)
+  const callMid = linear(callTotal, 1.0);
+  const callHigh = linear(callTotal, 1.2);
+  const callLow = linear(callTotal, 0.8);
 
-  // PUT — asymmetric (bearish skew realism)
-  const putExpected = band(putTotal, 1.0);
-  const putHigh = band(putTotal, 1.35);
-  const putLow = band(putTotal, 0.55);
+  // PUT (asymmetric)
+  const putExpected = linear(putTotal, 1.0);
+  const putHigh = linear(putTotal, 0.65);
+  const putLow = linear(putTotal, 1.45);
 
-  // 🔍 TEMPORARY VALIDATION (REMOVE LATER)
+  // 🔍 DEBUG — COMMENTED, NOT DELETED
+  /*
   console.table({
     "PUT High (Day 0)": putHigh[0],
     "PUT Expected (Day 0)": putExpected[0],
     "PUT Low (Day 0)": putLow[0],
-
     "PUT High (Mid)": putHigh[Math.floor(days / 2)],
     "PUT Expected (Mid)": putExpected[Math.floor(days / 2)],
     "PUT Low (Mid)": putLow[Math.floor(days / 2)]
   });
+  */
 
   new Chart(document.getElementById("confidenceChart"), {
     type: "line",
     data: {
       labels,
       datasets: [
-        // CALL
-        {
-          label: "Call – High Erosion",
-          data: callHigh,
-          backgroundColor: "rgba(220,53,69,0.25)",
-          borderColor: "rgba(220,53,69,0)",
-          fill: true
-        },
         {
           label: "Call – Expected",
-          data: callExpected,
+          data: callMid,
           borderColor: "#0d6efd",
-          borderWidth: 2,
-          fill: false
+          borderWidth: 2
         },
         {
-          label: "Call – Low Erosion",
-          data: callLow,
-          backgroundColor: "rgba(25,135,84,0.25)",
-          borderColor: "rgba(25,135,84,0)",
-          fill: "-1"
-        },
-
-        // PUT
-        {
-          label: "Put – High Erosion",
-          data: putHigh,
-          backgroundColor: "rgba(255,193,7,0.25)",
-          borderColor: "rgba(255,193,7,0)",
-          fill: true
+          label: "Call – Range",
+          data: callHigh,
+          backgroundColor: "rgba(13,110,253,0.15)",
+          fill: "-1",
+          borderWidth: 0
         },
         {
           label: "Put – Expected",
           data: putExpected,
           borderColor: "#ffc107",
-          borderDash: [6, 4],
-          borderWidth: 2,
-          fill: false
+          borderDash: [5, 5],
+          borderWidth: 2
         },
         {
-          label: "Put – Low Erosion (IV Support)",
+          label: "Put – Range",
           data: putLow,
-          backgroundColor: "rgba(32,201,151,0.25)",
-          borderColor: "rgba(32,201,151,0)",
-          fill: "-1"
+          backgroundColor: "rgba(255,193,7,0.25)",
+          fill: "-1",
+          borderWidth: 0
         }
       ]
     },
@@ -127,13 +106,13 @@ function renderConfidenceChart(days, callTotal, putTotal) {
         legend: { position: "bottom" },
         tooltip: {
           callbacks: {
-            label: ctx => `${ctx.dataset.label}: ${formatINR(ctx.raw)}`
+            label: ctx => `${ctx.dataset.label}: ${₹(ctx.raw)}`
           }
         }
       },
       scales: {
         x: { title: { display: true, text: "Days Passed" } },
-        y: { title: { display: true, text: "Premium Erosion (₹)" } }
+        y: { title: { display: true, text: "Premium (₹)" } }
       }
     }
   });

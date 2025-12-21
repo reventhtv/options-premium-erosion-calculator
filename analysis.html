@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Premium Erosion Analysis</title>
+  <title>Option Erosion Analysis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -21,10 +22,8 @@
 
   <!-- HEADER -->
   <header class="text-center mb-4">
-    <h2 class="fw-bold">📊 Premium Erosion Analysis</h2>
-    <a href="index.html" class="btn btn-outline-secondary mt-2">
-      ← Back to Calculator
-    </a>
+    <h1 class="fw-bold">📈 Option Premium Erosion Analysis</h1>
+    <p class="text-muted">Confidence bands & erosion asymmetry</p>
   </header>
 
   <!-- SNAPSHOT SUMMARY -->
@@ -32,58 +31,40 @@
     <div class="card-header bg-secondary text-white">
       Snapshot Summary
     </div>
-
     <div class="card-body row text-center">
-
       <div class="col-md-4">
-        <h6 class="text-info">Call Total Erosion</h6>
-        <div id="snapCall" class="fw-bold fs-5"></div>
-        <div id="callRiskLabel" class="mt-1"></div>
+        <h6>Call Total Erosion</h6>
+        <div id="snapCall" class="fs-5 fw-bold"></div>
       </div>
-
       <div class="col-md-4">
-        <h6 class="text-info">Put Total Erosion</h6>
-        <div id="snapPut" class="fw-bold fs-5"></div>
-        <div id="putRiskLabel" class="mt-1"></div>
+        <h6>Put Total Erosion</h6>
+        <div id="snapPut" class="fs-5 fw-bold"></div>
       </div>
-
       <div class="col-md-4">
-        <h6 class="text-info">Days to Expiry</h6>
-        <div id="snapDays" class="fw-bold fs-5"></div>
+        <h6>Call : Put Ratio</h6>
+        <div id="snapRatio" class="fs-5 fw-bold"></div>
       </div>
-
     </div>
   </section>
 
-  <!-- CONFIDENCE BANDS -->
-  <section class="card mb-4">
-    <div class="card-header bg-info text-dark">
-      Premium Erosion Over Time (Confidence Bands)
+  <!-- 🔍 INSIGHT LINE -->
+  <section id="erosionInsight" class="alert alert-info text-center d-none">
+    <strong id="insightText"></strong>
+  </section>
+
+  <!-- CHART -->
+  <section class="card">
+    <div class="card-header bg-dark text-white">
+      Premium Erosion Confidence Bands
     </div>
     <div class="card-body">
       <canvas id="confidenceChart" height="120"></canvas>
-      <p class="text-muted mt-2">
-        Shaded zones represent probabilistic erosion ranges, not price predictions.
-      </p>
     </div>
   </section>
 
-  <!-- EXPLANATION -->
-  <section class="card">
-    <div class="card-header bg-primary text-white">
-      How to Read Confidence Bands
-    </div>
-    <div class="card-body">
-      <ul>
-        <li><span class="text-danger fw-bold">Red zone</span> – faster-than-expected erosion</li>
-        <li><span class="text-primary fw-bold">Blue line</span> – most probable decay path</li>
-        <li><span class="text-success fw-bold">Green zone</span> – slower erosion scenario</li>
-        <li class="text-muted mt-2">
-          Markets are probabilistic — these bands show <strong>risk ranges</strong>, not certainty.
-        </li>
-      </ul>
-    </div>
-  </section>
+  <footer class="text-center mt-4 text-muted">
+    Analysis View · Confidence Bands · No live market data
+  </footer>
 
 </div>
 
