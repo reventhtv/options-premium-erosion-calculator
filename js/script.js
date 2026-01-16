@@ -703,10 +703,8 @@ function calculateBoth() {
             // Update charts
             updateChart(callResult, putResult);
             
-            // Trigger P&L calculation if both options have valid data
-            if (callResult && putResult) {
-                setTimeout(() => calculatePL(), 500); // Small delay to ensure UI updates
-            }
+            // Trigger P&L calculation - FIXED: No delay needed
+            calculatePL();
             
             // Track combined calculation
             trackEvent('calculate_both', {
@@ -715,10 +713,13 @@ function calculateBoth() {
                 ratio: Math.abs(callResult.totalErosion / putResult.totalErosion).toFixed(2),
                 currency: 'INR'
             });
+            
+            return { callResult, putResult };
         }
     } catch (error) {
         console.error('Error in combined calculation:', error);
         displayError('Error calculating both options');
+        return null;
     }
 }
 
@@ -836,6 +837,11 @@ function calculatePL() {
         const priceSteps = parseInt(document.getElementById('plPriceSteps').value) || 50;
         const includePremium = document.getElementById('plIncludePremium').checked;
         
+        console.log('P&L Calculation Started:', {
+            spotPrice, callStrike, callPremium, putStrike, putPremium,
+            priceRangePercent, priceSteps, includePremium
+        });
+        
         // Validate inputs
         if (isNaN(callPremium) || isNaN(putPremium) || callPremium < 0 || putPremium < 0) {
             throw new Error('Please enter valid option premiums');
@@ -856,7 +862,6 @@ function calculatePL() {
         const callPLData = [];
         const putPLData = [];
         const combinedPLData = [];
-        const breakevenPoints = [];
         
         let maxProfit = -Infinity;
         let maxLoss = Infinity;
@@ -865,11 +870,13 @@ function calculatePL() {
         
         pricePoints.forEach((price, index) => {
             // Call option P&L at expiry
-            const callPL = Math.max(0, price - callStrike) - (includePremium ? callPremium : 0);
+            const callIntrinsic = Math.max(0, price - callStrike);
+            const callPL = callIntrinsic - (includePremium ? callPremium : 0);
             callPLData.push(callPL);
             
             // Put option P&L at expiry
-            const putPL = Math.max(0, putStrike - price) - (includePremium ? putPremium : 0);
+            const putIntrinsic = Math.max(0, putStrike - price);
+            const putPL = putIntrinsic - (includePremium ? putPremium : 0);
             putPLData.push(putPL);
             
             // Combined P&L (both positions)
@@ -880,18 +887,20 @@ function calculatePL() {
             maxProfit = Math.max(maxProfit, combinedPL, callPL, putPL);
             maxLoss = Math.min(maxLoss, combinedPL, callPL, putPL);
             
-            // Find breakeven points for calls (where PL = 0)
-            if (index > 0) {
-                const prevCallPL = callPLData[index - 1];
-                if (prevCallPL * callPL <= 0 && Math.abs(callPL) < Math.abs(priceStep)) {
-                    breakevenUpper = price;
-                }
-                
-                const prevPutPL = putPLData[index - 1];
-                if (prevPutPL * putPL <= 0 && Math.abs(putPL) < Math.abs(priceStep)) {
-                    breakevenLower = price;
-                }
+            // Find breakeven points for calls
+            if (index > 0 && callPLData[index - 1] <= 0 && callPL >= 0) {
+                breakevenUpper = pricePoints[index - 1] + (priceStep / 2);
             }
+            
+            // Find breakeven points for puts
+            if (index > 0 && putPLData[index - 1] <= 0 && putPL >= 0) {
+                breakevenLower = pricePoints[index - 1] + (priceStep / 2);
+            }
+        });
+        
+        console.log('P&L Calculated:', {
+            maxProfit, maxLoss, breakevenUpper, breakevenLower,
+            dataPoints: pricePoints.length
         });
         
         // Update P&L chart
@@ -900,8 +909,10 @@ function calculatePL() {
         // Update P&L statistics
         document.getElementById('plMaxProfit').textContent = formatCurrency(maxProfit);
         document.getElementById('plMaxLoss').textContent = formatCurrency(maxLoss);
-        document.getElementById('plBreakevenUpper').textContent = breakevenUpper ? formatCurrency(breakevenUpper, true) : 'N/A';
-        document.getElementById('plBreakevenLower').textContent = breakevenLower ? formatCurrency(breakevenLower, true) : 'N/A';
+        document.getElementById('plBreakevenUpper').textContent = breakevenUpper ? 
+            formatCurrency(breakevenUpper, true) : 'N/A';
+        document.getElementById('plBreakevenLower').textContent = breakevenLower ? 
+            formatCurrency(breakevenLower, true) : 'N/A';
         
         // Update detailed P&L table
         updatePLTable(pricePoints, callPLData, putPLData, combinedPLData);
@@ -912,14 +923,18 @@ function calculatePL() {
             priceRangePercent,
             priceSteps,
             includePremium,
+            maxProfit,
+            maxLoss,
             currency: 'INR'
         });
         
         console.log('P&L calculation completed successfully');
+        return true;
         
     } catch (error) {
         console.error('Error in P&L calculation:', error);
         displayError(`P&L calculation error: ${error.message}`);
+        return false;
     }
 }
 
