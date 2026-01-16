@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Options Premium Erosion Calculator | Calculate Theta Decay in ₹</title>
-    <meta name="description" content="Professional Indian options calculator for theta decay (premium erosion) of call and put options. Free NSE & BSE options trading calculator with visualization and P&L simulator.">
-    <meta name="keywords" content="options calculator india, premium erosion, theta decay, nse options, bse options, indian options trading, call options, put options, options Greeks, profit loss calculator">
+    <title>Options Premium Erosion Calculator | Active Trader Pro</title>
+    <meta name="description" content="Professional Indian options calculator for active traders. Calculate theta decay, premium erosion, and P&L with real-time updates, keyboard shortcuts, and multi-scenario analysis.">
+    <meta name="keywords" content="options calculator india, premium erosion, theta decay, active trader, nse options, bse options, options Greeks, p&l simulator">
     <meta name="author" content="Options Premium Erosion Calculator">
     
     <!-- Bootstrap 5 CSS -->
@@ -23,63 +23,173 @@
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
     
-    <!-- Open Graph / Social Media Meta Tags -->
-    <meta property="og:title" content="Indian Options Premium Erosion Calculator">
-    <meta property="og:description" content="Calculate theta decay for Indian call and put options with interactive visualization in Rupees">
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Active Trader Options Calculator">
+    <meta property="og:description" content="Professional options calculator with real-time updates and keyboard shortcuts">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://reventhtv.github.io/options-premium-erosion-calculator/">
 </head>
 <body>
-    <div class="container-fluid py-4">
+    <div class="container-fluid py-3">
         <!-- Header -->
-        <header class="text-center mb-5">
-            <h1 class="display-4 fw-bold mb-3">📊 Indian Options Premium Erosion Calculator</h1>
-            <p class="lead text-muted">Professional tool for calculating theta decay (premium erosion) of Indian call and put options in ₹</p>
-            <div class="d-flex justify-content-center gap-3 mt-4">
-                <button class="btn btn-primary" onclick="calculateBoth()">
-                    <i class="bi bi-calculator me-2"></i>Calculate Both Options
+        <header class="text-center mb-3">
+            <h1 class="h3 fw-bold mb-1">📊 OPTIONS PREMIUM EROSION CALCULATOR</h1>
+            <p class="text-muted small mb-2">Professional tool for active Indian options traders | Real-time updates | Keyboard shortcuts</p>
+            
+            <!-- Quick Action Bar -->
+            <div class="d-flex flex-wrap gap-2 justify-content-center mb-3">
+                <!-- Quick Presets -->
+                <button class="btn btn-sm btn-outline-primary" onclick="loadPreset('nifty_atm')" title="F1">
+                    <i class="bi bi-lightning-charge"></i> NIFTY ATM
                 </button>
-                <button class="btn btn-success" onclick="exportToCSV()">
-                    <i class="bi bi-download me-2"></i>Export to CSV
+                <button class="btn btn-sm btn-outline-primary" onclick="loadPreset('banknifty_weekly')" title="F2">
+                    <i class="bi bi-calendar-week"></i> Weekly Expiry
                 </button>
-                <button class="btn btn-outline-secondary" onclick="resetAll()">
-                    <i class="bi bi-arrow-clockwise me-2"></i>Reset All
+                <button class="btn btn-sm btn-outline-primary" onclick="loadPreset('straddle')">
+                    <i class="bi bi-arrows-angle-contract"></i> Straddle
+                </button>
+                
+                <!-- Quick Days -->
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-secondary" onclick="setDaysToExpiry(1)" title="1 Day">T+1</button>
+                    <button class="btn btn-outline-secondary" onclick="setDaysToExpiry(7)" title="1 Week">T+7</button>
+                    <button class="btn btn-outline-secondary" onclick="setDaysToExpiry(30)" title="1 Month">T+30</button>
+                </div>
+                
+                <!-- Action Buttons -->
+                <button class="btn btn-sm btn-success" onclick="calculateAll()" title="Alt+C">
+                    <i class="bi bi-calculator"></i> Calculate All
+                </button>
+                <button class="btn btn-sm btn-warning" onclick="exportToCSV()" title="Alt+E">
+                    <i class="bi bi-download"></i> Export
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="resetAll()" title="Alt+R">
+                    <i class="bi bi-arrow-clockwise"></i> Reset
+                </button>
+                
+                <!-- View Toggles -->
+                <div class="btn-group btn-group-sm ms-auto d-none d-md-flex">
+                    <button class="btn btn-outline-secondary active" onclick="toggleView('simple')" title="Simple View">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="toggleView('advanced')" title="Advanced View (F3)">
+                        <i class="bi bi-eye-fill"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="toggleView('pro')" title="Pro View (F4)">
+                        <i class="bi bi-gear"></i>
+                    </button>
+                </div>
+                
+                <!-- Help -->
+                <button class="btn btn-sm btn-info" onclick="showShortcuts()" title="Keyboard Shortcuts">
+                    <i class="bi bi-keyboard"></i>
                 </button>
             </div>
         </header>
 
-        <!-- Underlying Asset Information -->
-        <div class="row mb-4">
+        <!-- Trading Terminal Header -->
+        <div class="row mb-3">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-secondary text-white">
-                        <h4 class="h6 mb-0">
-                            <i class="bi bi-currency-rupee me-2"></i>Underlying Asset Information
-                        </h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="underlyingName" class="form-label">
-                                    Underlying Asset
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Name of the underlying (e.g., NIFTY, BANKNIFTY, RELIANCE, TCS)">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="text" class="form-control" id="underlyingName" 
-                                       placeholder="e.g., NIFTY" value="NIFTY">
+                <div class="card card-terminal">
+                    <div class="card-header bg-dark text-white py-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">
+                                <i class="bi bi-graph-up"></i> TRADING TERMINAL
+                                <span class="badge bg-warning ms-2" id="liveStatus">LIVE</span>
+                            </span>
+                            <div>
+                                <small class="me-2">Quick:</small>
+                                <button class="btn btn-sm btn-outline-light" onclick="setATM()" title="At The Money">
+                                    <i class="bi bi-bullseye"></i> ATM
+                                </button>
+                                <button class="btn btn-sm btn-outline-light ms-1" onclick="setITM()" title="In The Money">
+                                    <i class="bi bi-arrow-up-right"></i> ITM
+                                </button>
+                                <button class="btn btn-sm btn-outline-light ms-1" onclick="setOTM()" title="Out of Money">
+                                    <i class="bi bi-arrow-down-right"></i> OTM
+                                </button>
                             </div>
-                            <div class="col-md-6">
-                                <label for="spotPrice" class="form-label">
-                                    Spot Price (Underlying)
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Current market price of the underlying asset">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text rupee">₹</span>
-                                    <input type="number" class="form-control" id="spotPrice" 
-                                           placeholder="e.g., 17450" value="17450" step="1" min="0" max="100000">
+                        </div>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="row g-2 align-items-end">
+                            <!-- Underlying -->
+                            <div class="col-md-2 col-6">
+                                <label class="small mb-1">Underlying</label>
+                                <select class="form-select form-select-sm" id="underlyingSelect" onchange="updateUnderlying()">
+                                    <option value="NIFTY" selected>NIFTY</option>
+                                    <option value="BANKNIFTY">BANKNIFTY</option>
+                                    <option value="FINNIFTY">FINNIFTY</option>
+                                    <option value="SENSEX">SENSEX</option>
+                                    <option value="RELIANCE">RELIANCE</option>
+                                    <option value="TCS">TCS</option>
+                                    <option value="INFY">INFY</option>
+                                    <option value="HDFCBANK">HDFC BANK</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Spot Price -->
+                            <div class="col-md-2 col-6">
+                                <label class="small mb-1">Spot Price</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" class="form-control" id="spotPrice" value="17450" 
+                                           onchange="updateAllCalculations()">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="adjustSpot(-10)">
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="adjustSpot(10)">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- IV Input -->
+                            <div class="col-md-2 col-6">
+                                <label class="small mb-1">Implied Vol</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" class="form-control" id="impliedVol" value="15" 
+                                           onchange="updateAllCalculations()">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Days to Expiry -->
+                            <div class="col-md-2 col-6">
+                                <label class="small mb-1">Days to Expiry</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" class="form-control" id="daysToExpiry" value="30" 
+                                           onchange="updateAllCalculations()">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="adjustDays(-1)">
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="adjustDays(1)">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Risk-Free Rate -->
+                            <div class="col-md-2 col-6">
+                                <label class="small mb-1">Risk-Free Rate</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" class="form-control" id="riskFreeRate" value="6.5" 
+                                           onchange="updateAllCalculations()">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Auto-calc Toggle -->
+                            <div class="col-md-2 col-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="autoCalculate" checked 
+                                           onchange="toggleAutoCalculate()">
+                                    <label class="form-check-label small" for="autoCalculate">
+                                        Auto-calc <span class="badge bg-success">ON</span>
+                                    </label>
+                                </div>
+                                <div class="mt-1">
+                                    <small class="text-muted">Updates in real-time</small>
                                 </div>
                             </div>
                         </div>
@@ -88,636 +198,188 @@
             </div>
         </div>
 
-        <!-- Main Calculator Section -->
-        <div class="row g-4">
-            <!-- Call Option Card -->
-            <div class="col-lg-6">
-                <div class="card call-option h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h2 class="h4 mb-0">
-                            <i class="bi bi-graph-up-arrow me-2"></i>Call Option Calculator
-                        </h2>
-                        <span class="option-type-badge badge-call">CALL OPTION</span>
-                    </div>
-                    <div class="card-body">
-                        <!-- Moneyness Indicator -->
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <div class="d-flex align-items-center">
-                                    <span class="me-2 fw-bold">Status:</span>
-                                    <span class="moneyness-badge badge-atm" id="callMoneyness">ATM (At The Money)</span>
-                                    <div class="ms-auto">
-                                        <small class="text-muted">Theta Acceleration:</small>
-                                        <div class="theta-acceleration-bar">
-                                            <div class="theta-acceleration-fill" id="callThetaAcceleration" style="width: 30%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Input Grid -->
-                        <div class="row g-3">
-                            <!-- Strike Price -->
-                            <div class="col-md-6">
-                                <label for="callStrike" class="form-label">
-                                    Strike Price 
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="The price at which the option can be exercised">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text rupee">₹</span>
-                                    <input type="number" class="form-control" id="callStrike" 
-                                           placeholder="e.g., 17500" value="17500" step="1" min="0" max="100000">
-                                </div>
-                            </div>
-                            
-                            <!-- Current Premium -->
-                            <div class="col-md-6">
-                                <label for="callPremium" class="form-label">
-                                    Current Premium
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Current market price of the option">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text rupee">₹</span>
-                                    <input type="number" class="form-control" id="callPremium" 
-                                           placeholder="e.g., 450" value="450" step="1" min="0" max="10000">
-                                </div>
-                            </div>
-                            
-                            <!-- Theta -->
-                            <div class="col-md-6">
-                                <label for="callTheta" class="form-label">
-                                    Theta (θ) - Daily Decay
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Daily time decay - premium lost per day (negative value)">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text rupee">₹</span>
-                                    <input type="number" class="form-control" id="callTheta" 
-                                           placeholder="e.g., -4.50" value="-4.50" step="0.01" min="-1000" max="0">
-                                </div>
-                            </div>
-                            
-                            <!-- Gamma -->
-                            <div class="col-md-6">
-                                <label for="callGamma" class="form-label">
-                                    Gamma (Γ)
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Rate of change of delta with respect to underlying price">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="callGamma" 
-                                       placeholder="e.g., 0.0002" value="0.0002" step="0.0001" min="0" max="1">
-                            </div>
-                            
-                            <!-- Delta -->
-                            <div class="col-md-6">
-                                <label for="callDelta" class="form-label">
-                                    Delta (Δ)
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Rate of change of option price with respect to underlying price (0 to 1 for calls)">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="callDelta" 
-                                       placeholder="e.g., 0.55" value="0.55" step="0.01" min="0" max="1">
-                            </div>
-                            
-                            <!-- Vega -->
-                            <div class="col-md-6">
-                                <label for="callVega" class="form-label">
-                                    Vega (ν)
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Sensitivity to implied volatility changes">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="callVega" 
-                                       placeholder="e.g., 12.50" value="12.50" step="0.01" min="0" max="100">
-                            </div>
-                            
-                            <!-- Days to Expiry -->
-                            <div class="col-12">
-                                <label for="callDaysToExpiry" class="form-label">
-                                    Days to Expiry
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Number of calendar days until option expiration">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="callDaysToExpiry" 
-                                       placeholder="e.g., 30" value="30" min="1" max="365">
-                            </div>
-                            
-                            <!-- Calculate Button -->
-                            <div class="col-12">
-                                <button class="btn btn-call w-100 py-3" onclick="calculateCallPremiumErosion()">
-                                    <i class="bi bi-lightning-charge me-2"></i>
-                                    Calculate Call Premium Erosion
+        <!-- Options Chain Table -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white py-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">OPTION CHAIN</span>
+                            <div>
+                                <button class="btn btn-sm btn-light" onclick="addOptionRow()">
+                                    <i class="bi bi-plus-circle"></i> Add Option
+                                </button>
+                                <button class="btn btn-sm btn-outline-light ms-1" onclick="clearAllOptions()">
+                                    <i class="bi bi-trash"></i> Clear All
                                 </button>
                             </div>
                         </div>
-                        
-                        <!-- Results Section -->
-                        <div id="callResults" class="mt-4" style="display: none;">
-                            <h5 class="border-bottom pb-2 mb-3">
-                                <i class="bi bi-bar-chart-line me-2"></i>Call Option Results
-                            </h5>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="result-box">
-                                        <small class="text-muted">Daily Erosion (Theta)</small>
-                                        <div class="greek-value text-danger" id="callDailyErosion">-₹4.50</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="result-box">
-                                        <small class="text-muted">Weekly Erosion</small>
-                                        <div class="greek-value text-warning" id="callWeeklyErosion">-₹31.50</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="result-box">
-                                        <small class="text-muted">Remaining Premium in 7 Days</small>
-                                        <div class="highlight" id="callPremiumWeek">₹418.50</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="result-box">
-                                        <small class="text-muted">Remaining Premium at Expiry</small>
-                                        <div class="highlight" id="callPremiumExpiry">₹320.25</div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="result-box">
-                                        <small class="text-muted">Total Erosion to Expiry</small>
-                                        <div class="highlight text-danger" id="callTotalErosion">-₹129.75</div>
-                                    </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="optionsTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th width="3%">#</th>
+                                        <th width="8%">Type</th>
+                                        <th width="12%">Strike</th>
+                                        <th width="12%">Premium</th>
+                                        <th width="10%">Theta</th>
+                                        <th width="10%">Delta</th>
+                                        <th width="10%">Gamma</th>
+                                        <th width="10%">Vega</th>
+                                        <th width="8%">Days</th>
+                                        <th width="17%">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="optionsTableBody">
+                                    <!-- Options will be dynamically added here -->
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="10" class="text-center py-2">
+                                            <button class="btn btn-sm btn-outline-primary" onclick="addCallOption()">
+                                                <i class="bi bi-plus-circle"></i> Add Call
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger ms-2" onclick="addPutOption()">
+                                                <i class="bi bi-plus-circle"></i> Add Put
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-warning ms-2" onclick="addPair()">
+                                                <i class="bi bi-arrows-angle-contract"></i> Add Call+Put
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-time Results Panel -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white py-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">REAL-TIME METRICS</span>
+                            <span class="badge bg-warning" id="lastUpdate">Last: Just now</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="row text-center">
+                            <div class="col-md-2 col-4">
+                                <div class="metric-box">
+                                    <small class="text-muted">Total Theta/day</small>
+                                    <div class="h5 text-danger" id="totalTheta">-₹0.00</div>
                                 </div>
                             </div>
+                            <div class="col-md-2 col-4">
+                                <div class="metric-box">
+                                    <small class="text-muted">Weekly Erosion</small>
+                                    <div class="h5 text-warning" id="totalWeeklyErosion">-₹0.00</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-4">
+                                <div class="metric-box">
+                                    <small class="text-muted">Daily Carry Cost</small>
+                                    <div class="h5" id="dailyCarryCost">₹0.00</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-4">
+                                <div class="metric-box">
+                                    <small class="text-muted">Time Value</small>
+                                    <div class="h5" id="totalTimeValue">₹0.00</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-4">
+                                <div class="metric-box">
+                                    <small class="text-muted">IV Impact</small>
+                                    <div class="h5 text-info" id="totalVegaImpact">₹0.00</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-4">
+                                <div class="metric-box">
+                                    <small class="text-muted">Prob ITM</small>
+                                    <div class="h5" id="avgProbITM">0%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row mb-3">
+            <!-- Premium Erosion Chart -->
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white py-2">
+                        <h6 class="mb-0">
+                            <i class="bi bi-graph-down-arrow me-2"></i>PREMIUM EROSION TIMELINE
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="erosionChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Put Option Card -->
+            <!-- P&L Chart -->
             <div class="col-lg-6">
-                <div class="card put-option h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h2 class="h4 mb-0">
-                            <i class="bi bi-graph-down-arrow me-2"></i>Put Option Calculator
-                        </h2>
-                        <span class="option-type-badge badge-put">PUT OPTION</span>
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white py-2">
+                        <h6 class="mb-0">
+                            <i class="bi bi-currency-exchange me-2"></i>P&L AT EXPIRY
+                        </h6>
                     </div>
                     <div class="card-body">
-                        <!-- Moneyness Indicator -->
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <div class="d-flex align-items-center">
-                                    <span class="me-2 fw-bold">Status:</span>
-                                    <span class="moneyness-badge badge-otm" id="putMoneyness">OTM (Out of Money)</span>
-                                    <div class="ms-auto">
-                                        <small class="text-muted">Theta Acceleration:</small>
-                                        <div class="theta-acceleration-bar">
-                                            <div class="theta-acceleration-fill" id="putThetaAcceleration" style="width: 30%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Input Grid -->
-                        <div class="row g-3">
-                            <!-- Strike Price -->
-                            <div class="col-md-6">
-                                <label for="putStrike" class="form-label">
-                                    Strike Price
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="The price at which the option can be exercised">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text rupee">₹</span>
-                                    <input type="number" class="form-control" id="putStrike" 
-                                           placeholder="e.g., 17500" value="17500" step="1" min="0" max="100000">
-                                </div>
-                            </div>
-                            
-                            <!-- Current Premium -->
-                            <div class="col-md-6">
-                                <label for="putPremium" class="form-label">
-                                    Current Premium
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Current market price of the option">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text rupee">₹</span>
-                                    <input type="number" class="form-control" id="putPremium" 
-                                           placeholder="e.g., 380" value="380" step="1" min="0" max="10000">
-                                </div>
-                            </div>
-                            
-                            <!-- Theta -->
-                            <div class="col-md-6">
-                                <label for="putTheta" class="form-label">
-                                    Theta (θ) - Daily Decay
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Daily time decay - premium lost per day (negative value)">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text rupee">₹</span>
-                                    <input type="number" class="form-control" id="putTheta" 
-                                           placeholder="e.g., -3.80" value="-3.80" step="0.01" min="-1000" max="0">
-                                </div>
-                            </div>
-                            
-                            <!-- Gamma -->
-                            <div class="col-md-6">
-                                <label for="putGamma" class="form-label">
-                                    Gamma (Γ)
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Rate of change of delta with respect to underlying price">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="putGamma" 
-                                       placeholder="e.g., 0.00018" value="0.00018" step="0.0001" min="0" max="1">
-                            </div>
-                            
-                            <!-- Delta -->
-                            <div class="col-md-6">
-                                <label for="putDelta" class="form-label">
-                                    Delta (Δ)
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Rate of change of option price with respect to underlying price (-1 to 0 for puts)">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="putDelta" 
-                                       placeholder="e.g., -0.45" value="-0.45" step="0.01" min="-1" max="0">
-                            </div>
-                            
-                            <!-- Vega -->
-                            <div class="col-md-6">
-                                <label for="putVega" class="form-label">
-                                    Vega (ν)
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Sensitivity to implied volatility changes">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="putVega" 
-                                       placeholder="e.g., 10.50" value="10.50" step="0.01" min="0" max="100">
-                            </div>
-                            
-                            <!-- Days to Expiry -->
-                            <div class="col-12">
-                                <label for="putDaysToExpiry" class="form-label">
-                                    Days to Expiry
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Number of calendar days until option expiration">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="putDaysToExpiry" 
-                                       placeholder="e.g., 30" value="30" min="1" max="365">
-                            </div>
-                            
-                            <!-- Calculate Button -->
-                            <div class="col-12">
-                                <button class="btn btn-put w-100 py-3" onclick="calculatePutPremiumErosion()">
-                                    <i class="bi bi-lightning-charge me-2"></i>
-                                    Calculate Put Premium Erosion
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Results Section -->
-                        <div id="putResults" class="mt-4" style="display: none;">
-                            <h5 class="border-bottom pb-2 mb-3">
-                                <i class="bi bi-bar-chart-line me-2"></i>Put Option Results
-                            </h5>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="result-box">
-                                        <small class="text-muted">Daily Erosion (Theta)</small>
-                                        <div class="greek-value text-danger" id="putDailyErosion">-₹3.80</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="result-box">
-                                        <small class="text-muted">Weekly Erosion</small>
-                                        <div class="greek-value text-warning" id="putWeeklyErosion">-₹26.60</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="result-box">
-                                        <small class="text-muted">Remaining Premium in 7 Days</small>
-                                        <div class="highlight" id="putPremiumWeek">₹353.40</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="result-box">
-                                        <small class="text-muted">Remaining Premium at Expiry</small>
-                                        <div class="highlight" id="putPremiumExpiry">₹270.50</div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="result-box">
-                                        <small class="text-muted">Total Erosion to Expiry</small>
-                                        <div class="highlight text-danger" id="putTotalErosion">-₹109.50</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Visualization & Comparison Section -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-dark text-white">
-                        <h3 class="h5 mb-0">
-                            <i class="bi bi-graph-up me-2"></i>Premium Erosion Comparison & Visualization
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <div class="card bg-light h-100">
-                                    <div class="card-body">
-                                        <h5 class="card-title">
-                                            <i class="bi bi-clipboard-data me-2"></i>Comparison Summary
-                                        </h5>
-                                        <div class="table-responsive">
-                                            <table class="table table-sm">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Metric</th>
-                                                        <th>Call</th>
-                                                        <th>Put</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td>Daily Theta</td>
-                                                        <td id="summaryCallTheta">-₹4.50</td>
-                                                        <td id="summaryPutTheta">-₹3.80</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Weekly Erosion</td>
-                                                        <td id="summaryCallWeekly">-₹31.50</td>
-                                                        <td id="summaryPutWeekly">-₹26.60</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Total Erosion</td>
-                                                        <td id="summaryCallTotal">-₹129.75</td>
-                                                        <td id="summaryPutTotal">-₹109.50</td>
-                                                    </tr>
-                                                    <tr class="table-info">
-                                                        <td>Erosion Ratio</td>
-                                                        <td colspan="2" id="erosionRatio">Call:Put = 1.18:1</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div class="mt-3">
-                                            <button class="btn btn-primary w-100" onclick="calculateBoth()">
-                                                <i class="bi bi-arrow-repeat me-2"></i>Recalculate Both
-                                            </button>
-                                        </div>
-                                        <div class="mt-2">
-                                            <button class="btn btn-outline-success w-100" onclick="exportToCSV()">
-                                                <i class="bi bi-file-earmark-spreadsheet me-2"></i>Export Results
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-8">
-                                <div class="chart-container">
-                                    <canvas id="erosionChart"></canvas>
-                                </div>
-                                <div class="text-center mt-3">
-                                    <small class="text-muted">
-                                        <i class="bi bi-info-circle me-1"></i>
-                                        Hover over the chart to see detailed values. Click and drag to zoom.
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Profit & Loss (P&L) Simulator -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-success text-white">
-                        <h3 class="h5 mb-0">
-                            <i class="bi bi-graph-up me-2"></i>Profit & Loss (P&L) Simulator
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <!-- P&L Settings -->
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-4">
-                                <label for="plPriceRange" class="form-label">
-                                    Price Range (% from Spot)
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Percentage range to simulate around current spot price">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control" id="plPriceRange" 
-                                           value="20" min="5" max="100" step="5">
-                                    <span class="input-group-text">%</span>
-                                </div>
-                                <small class="text-muted">Simulate prices ±% from spot</small>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="plPriceSteps" class="form-label">
-                                    Price Steps
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Number of price points to calculate">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="plPriceSteps" 
-                                       value="50" min="10" max="200" step="10">
-                                <small class="text-muted">More steps = smoother curve</small>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="plIncludePremium" class="form-label">
-                                    Include Premium Paid
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Account for premium paid when buying options">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="plIncludePremium" checked>
-                                    <label class="form-check-label" for="plIncludePremium">
-                                        Deduct premium from P&L
-                                    </label>
-                                </div>
-                                <small class="text-muted">Uncheck for naked option writing</small>
-                            </div>
-                        </div>
-
-                        <!-- P&L Chart -->
                         <div class="chart-container">
                             <canvas id="plChart"></canvas>
                         </div>
-                        
-                        <!-- P&L Statistics -->
-                        <div class="row mt-4">
-                            <div class="col-md-3">
-                                <div class="result-box text-center">
-                                    <small class="text-muted">Max Profit</small>
-                                    <div class="highlight text-success" id="plMaxProfit">₹0.00</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="result-box text-center">
-                                    <small class="text-muted">Max Loss</small>
-                                    <div class="highlight text-danger" id="plMaxLoss">₹0.00</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="result-box text-center">
-                                    <small class="text-muted">Breakeven (Upper)</small>
-                                    <div class="highlight" id="plBreakevenUpper">₹0.00</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="result-box text-center">
-                                    <small class="text-muted">Breakeven (Lower)</small>
-                                    <div class="highlight" id="plBreakevenLower">₹0.00</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- P&L Table (Detailed) -->
-                        <div class="mt-4">
-                            <h6 class="mb-3">
-                                <i class="bi bi-table me-2"></i>Detailed P&L at Key Price Points
-                            </h6>
-                            <div class="table-responsive">
-                                <table class="table table-sm" id="plDetailedTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Underlying Price</th>
-                                            <th>Call P&L</th>
-                                            <th>Put P&L</th>
-                                            <th>Call + Put P&L</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Will be populated by JavaScript -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="row mt-4">
-                            <div class="col-md-6">
-                                <button class="btn btn-success w-100" onclick="calculatePL()">
-                                    <i class="bi bi-calculator me-2"></i>Calculate P&L
-                                </button>
-                            </div>
-                            <div class="col-md-6">
-                                <button class="btn btn-outline-secondary w-100" onclick="exportPLToCSV()">
-                                    <i class="bi bi-download me-2"></i>Export P&L Data
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Information -->
-                        <div class="alert alert-info mt-4">
-                            <h6 class="alert-heading">
-                                <i class="bi bi-lightbulb me-2"></i>How to Use the P&L Simulator
-                            </h6>
-                            <ul class="mb-0">
-                                <li>Shows profit/loss at different underlying prices at expiry</li>
-                                <li>Green area = Profit, Red area = Loss</li>
-                                <li>Breakeven points show where you neither profit nor lose</li>
-                                <li>Max profit/loss shows your risk-reward potential</li>
-                                <li>Adjust price range to see different scenarios</li>
-                            </ul>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Advanced Settings Section -->
-        <div class="row mt-4">
+        <!-- P&L Simulator Controls -->
+        <div class="row mb-3">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h3 class="h5 mb-0">
-                            <i class="bi bi-gear me-2"></i>Advanced Settings
-                        </h3>
+                    <div class="card-header bg-dark text-white py-2">
+                        <h6 class="mb-0">
+                            <i class="bi bi-sliders me-2"></i>P&L SIMULATOR SETTINGS
+                        </h6>
                     </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label for="thetaAcceleration" class="form-label">
-                                    Theta Acceleration Factor
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Adjusts theta decay as expiration approaches (typically increases)">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="thetaAcceleration" 
-                                       placeholder="e.g., 1.2" value="1.2" step="0.1" min="0.5" max="3">
-                                <small class="text-muted">Higher = faster decay near expiry</small>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="volatilityChange" class="form-label">
-                                    Volatility Impact
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Annual volatility change assumption (%)">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control" id="volatilityChange" 
-                                           placeholder="e.g., -5" value="0" step="1" min="-50" max="50">
+                    <div class="card-body py-2">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-3 col-6">
+                                <label class="small mb-1">Price Range (±%)</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" class="form-control" id="plPriceRange" value="20" min="5" max="100">
                                     <span class="input-group-text">%</span>
                                 </div>
-                                <small class="text-muted">Positive = IV increase, Negative = IV decrease</small>
                             </div>
-                            <div class="col-md-4">
-                                <label for="projectionDays" class="form-label">
-                                    Days for Projection
-                                    <span class="info-icon" data-bs-toggle="tooltip" title="Number of days to project erosion in chart">
-                                        <i class="bi bi-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" class="form-control" id="projectionDays" 
-                                       placeholder="e.g., 30" value="30" min="1" max="365">
-                                <small class="text-muted">Affects chart projection range</small>
+                            <div class="col-md-3 col-6">
+                                <label class="small mb-1">Steps</label>
+                                <input type="number" class="form-control form-control-sm" id="plPriceSteps" value="50" min="10" max="200">
                             </div>
-                            <div class="col-12">
+                            <div class="col-md-3 col-6">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="includeWeekends">
-                                    <label class="form-check-label" for="includeWeekends">
-                                        Include weekend decay (3 days of decay over weekends)
+                                    <input class="form-check-input" type="checkbox" id="plIncludePremium" checked>
+                                    <label class="form-check-label small" for="plIncludePremium">
+                                        Include Premium
                                     </label>
                                 </div>
                             </div>
-                            <div class="col-12">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="nonLinearTheta" checked>
-                                    <label class="form-check-label" for="nonLinearTheta">
-                                        Use Non-Linear Theta Model (more accurate - accelerates near expiry)
-                                    </label>
-                                </div>
+                            <div class="col-md-3 col-6">
+                                <button class="btn btn-sm btn-success w-100" onclick="calculatePL()" title="Alt+P">
+                                    <i class="bi bi-graph-up"></i> Update P&L
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -725,79 +387,121 @@
             </div>
         </div>
 
-        <!-- Information & Education Section -->
-        <div class="row mt-4">
+        <!-- Detailed P&L Table -->
+        <div class="row mb-3">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header bg-info text-white">
-                        <h3 class="h5 mb-0">
-                            <i class="bi bi-book me-2"></i>Understanding Premium Erosion (Theta Decay)
-                        </h3>
+                    <div class="card-header bg-warning text-dark py-2">
+                        <h6 class="mb-0">
+                            <i class="bi bi-table me-2"></i>P&L AT KEY LEVELS
+                        </h6>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-key me-2"></i>Key Concepts:</h6>
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item">
-                                        <strong>Theta (θ)</strong>: Measures daily time decay of option premium
-                                    </li>
-                                    <li class="list-group-item">
-                                        <strong>Premium Erosion</strong>: Loss of option value over time due to theta
-                                    </li>
-                                    <li class="list-group-item">
-                                        <strong>Non-Linear Decay</strong>: Theta accelerates as expiration approaches (√time model)
-                                    </li>
-                                    <li class="list-group-item">
-                                        <strong>Moneyness Effect</strong>: ATM options decay fastest, OTM/ITM slower
-                                    </li>
-                                    <li class="list-group-item">
-                                        <strong>Weekend Effect</strong>: Options decay over weekends (3 days in 2)
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-calculator me-2"></i>Calculation Notes:</h6>
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item">
-                                        <strong>Non-linear model</strong>: Decay ∝ 1/√(time to expiry)
-                                    </li>
-                                    <li class="list-group-item">
-                                        Weekly erosion = Theta × 7 trading days
-                                    </li>
-                                    <li class="list-group-item">
-                                        Negative theta = premium decreases daily
-                                    </li>
-                                    <li class="list-group-item">
-                                        Gamma affects theta acceleration rate
-                                    </li>
-                                    <li class="list-group-item">
-                                        Vega accounts for volatility changes
-                                    </li>
-                                </ul>
-                            </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm mb-0" id="plDetailedTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="20%">Price</th>
+                                        <th width="20%">Call P&L</th>
+                                        <th width="20%">Put P&L</th>
+                                        <th width="20%">Net P&L</th>
+                                        <th width="20%">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Will be populated by JavaScript -->
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="alert alert-warning mt-4">
-                            <h6 class="alert-heading">
-                                <i class="bi bi-exclamation-triangle me-2"></i>Important Disclaimer
-                            </h6>
-                            <p class="mb-0">
-                                This calculator provides theoretical estimates based on the Black-Scholes model assumptions. 
-                                Actual premium erosion can vary significantly based on volatility changes, interest rates, 
-                                dividends, and market conditions. Options are complex financial instruments with risk of loss; 
-                                consider consulting a financial advisor before trading.
-                            </p>
-                        </div>
-                        <div class="alert alert-info mt-3">
-                            <h6 class="alert-heading">
-                                <i class="bi bi-lightbulb me-2"></i>Pro Tips for Indian Markets
-                            </h6>
-                            <ul class="mb-0">
-                                <li>NIFTY options typically have 30-45 days to expiry</li>
-                                <li>Premium values usually range from ₹50 to ₹500 for ATM options</li>
-                                <li>Use the non-linear model for weekly and monthly expiries</li>
-                                <li>Monitor VIX (India Volatility Index) for volatility changes</li>
-                            </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Statistics -->
+        <div class="row mb-3">
+            <div class="col-md-3 col-6">
+                <div class="card">
+                    <div class="card-body text-center p-2">
+                        <small class="text-muted">Max Profit</small>
+                        <div class="h5 text-success" id="plMaxProfit">₹0.00</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card">
+                    <div class="card-body text-center p-2">
+                        <small class="text-muted">Max Loss</small>
+                        <div class="h5 text-danger" id="plMaxLoss">₹0.00</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card">
+                    <div class="card-body text-center p-2">
+                        <small class="text-muted">Upper B/E</small>
+                        <div class="h5" id="plBreakevenUpper">₹0.00</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card">
+                    <div class="card-body text-center p-2">
+                        <small class="text-muted">Lower B/E</small>
+                        <div class="h5" id="plBreakevenLower">₹0.00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Settings (Collapsible) -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-2">
+                        <button class="btn btn-sm btn-outline-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#advancedSettings">
+                            <i class="bi bi-gear me-2"></i> ADVANCED SETTINGS
+                        </button>
+                    </div>
+                    <div class="collapse" id="advancedSettings">
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="small mb-1">Theta Acceleration</label>
+                                    <input type="number" class="form-control form-control-sm" id="thetaAcceleration" value="1.2" min="0.5" max="3" step="0.1">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="small mb-1">Volatility Change</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" class="form-control" id="volatilityChange" value="0" min="-50" max="50">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="small mb-1">Days to Project</label>
+                                    <input type="number" class="form-control form-control-sm" id="projectionDays" value="30" min="1" max="365">
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="includeWeekends" checked>
+                                        <label class="form-check-label small" for="includeWeekends">
+                                            Include weekend decay
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="nonLinearTheta" checked>
+                                        <label class="form-check-label small" for="nonLinearTheta">
+                                            Non-linear theta
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="showGreeks" checked>
+                                        <label class="form-check-label small" for="showGreeks">
+                                            Show Greeks
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -805,35 +509,36 @@
         </div>
 
         <!-- Footer -->
-        <footer class="mt-5 pt-4 border-top">
+        <footer class="mt-3 pt-3 border-top">
             <div class="row">
-                <div class="col-md-6">
-                    <h6>Indian Options Premium Erosion Calculator</h6>
-                    <p class="text-muted">
-                        A professional tool for Indian options traders to calculate theta decay and premium erosion in ₹.
-                        Free to use, open source. Optimized for NSE & BSE. Includes P&L simulator.
+                <div class="col-md-8">
+                    <h6 class="small fw-bold">Active Trader Options Calculator</h6>
+                    <p class="text-muted small mb-2">
+                        Professional tool for Indian options traders. Real-time updates, keyboard shortcuts, multi-scenario analysis.
+                        <br>Built for speed and accuracy. <span class="text-info">Press F1 for NIFTY ATM preset.</span>
                     </p>
                 </div>
-                <div class="col-md-6 text-md-end">
-                    <h6>Quick Links</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="#" onclick="resetAll()" class="text-decoration-none">Reset Calculator</a></li>
-                        <li><a href="#" onclick="exportToCSV()" class="text-decoration-none">Export Results</a></li>
-                        <li><a href="https://github.com/reventhtv/options-premium-erosion-calculator" 
-                               target="_blank" class="text-decoration-none">GitHub Repository</a></li>
-                        <li><a href="#" onclick="window.print()" class="text-decoration-none">Print Results</a></li>
-                    </ul>
+                <div class="col-md-4 text-md-end">
+                    <h6 class="small fw-bold">Quick Actions</h6>
+                    <div class="d-flex flex-column gap-1">
+                        <button class="btn btn-sm btn-outline-primary" onclick="calculateAll()">
+                            <i class="bi bi-calculator"></i> Calc All (Alt+C)
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="exportToCSV()">
+                            <i class="bi bi-download"></i> Export (Alt+E)
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="resetAll()">
+                            <i class="bi bi-arrow-clockwise"></i> Reset (Alt+R)
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="row mt-3">
+            <div class="row mt-2">
                 <div class="col-12 text-center">
                     <p class="text-muted small">
-                        <i class="bi bi-code-slash"></i> Built with HTML5, CSS3, JavaScript, Bootstrap 5, and Chart.js |
-                        <i class="bi bi-currency-rupee"></i> Indian Rupee (₹) Format |
-                        <i class="bi bi-shield-check"></i> No data stored on servers
-                    </p>
-                    <p class="text-muted small">
-                        Version 2.1.0 | Includes P&L Simulator | Last Updated: <span id="currentDate"></span>
+                        <i class="bi bi-code-slash"></i> Active Trader Pro v3.0 |
+                        <i class="bi bi-currency-rupee"></i> Indian Markets |
+                        <i class="bi bi-shield-check"></i> Client-side only
                     </p>
                 </div>
             </div>
@@ -846,12 +551,24 @@
     <!-- Custom JavaScript -->
     <script src="js/script.js"></script>
     
-    <!-- Set current date in footer -->
+    <!-- Initialize on load -->
     <script>
-        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-IN', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Load initial options
+            setTimeout(initializeDefaultOptions, 100);
+            
+            // Set current date
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-IN', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
         });
     </script>
 </body>
