@@ -514,6 +514,149 @@
             </div>
         </div>
 
+<!-- ==========================================================================
+     Profit & Loss (P&L) Simulator
+     ========================================================================== -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h3 class="h5 mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Profit & Loss (P&L) Simulator
+                </h3>
+            </div>
+            <div class="card-body">
+                <!-- P&L Settings -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label for="plPriceRange" class="form-label">
+                            Price Range (% from Spot)
+                            <span class="info-icon" data-bs-toggle="tooltip" title="Percentage range to simulate around current spot price">
+                                <i class="bi bi-info-circle"></i>
+                            </span>
+                        </label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="plPriceRange" 
+                                   value="20" min="5" max="100" step="5">
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <small class="text-muted">Simulate prices ±% from spot</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="plPriceSteps" class="form-label">
+                            Price Steps
+                            <span class="info-icon" data-bs-toggle="tooltip" title="Number of price points to calculate">
+                                <i class="bi bi-info-circle"></i>
+                            </span>
+                        </label>
+                        <input type="number" class="form-control" id="plPriceSteps" 
+                               value="50" min="10" max="200" step="10">
+                        <small class="text-muted">More steps = smoother curve</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="plIncludePremium" class="form-label">
+                            Include Premium Paid
+                            <span class="info-icon" data-bs-toggle="tooltip" title="Account for premium paid when buying options">
+                                <i class="bi bi-info-circle"></i>
+                            </span>
+                        </label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="plIncludePremium" checked>
+                            <label class="form-check-label" for="plIncludePremium">
+                                Deduct premium from P&L
+                            </label>
+                        </div>
+                        <small class="text-muted">Uncheck for naked option writing</small>
+                    </div>
+                </div>
+
+                <!-- P&L Chart -->
+                <div class="chart-container">
+                    <canvas id="plChart"></canvas>
+                </div>
+                
+                <!-- P&L Statistics -->
+                <div class="row mt-4">
+                    <div class="col-md-3">
+                        <div class="result-box text-center">
+                            <small class="text-muted">Max Profit</small>
+                            <div class="highlight text-success" id="plMaxProfit">₹0.00</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="result-box text-center">
+                            <small class="text-muted">Max Loss</small>
+                            <div class="highlight text-danger" id="plMaxLoss">₹0.00</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="result-box text-center">
+                            <small class="text-muted">Breakeven (Upper)</small>
+                            <div class="highlight" id="plBreakevenUpper">₹0.00</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="result-box text-center">
+                            <small class="text-muted">Breakeven (Lower)</small>
+                            <div class="highlight" id="plBreakevenLower">₹0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- P&L Table (Detailed) -->
+                <div class="mt-4">
+                    <h6 class="mb-3">
+                        <i class="bi bi-table me-2"></i>Detailed P&L at Key Price Points
+                    </h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm" id="plDetailedTable">
+                            <thead>
+                                <tr>
+                                    <th>Underlying Price</th>
+                                    <th>Call P&L</th>
+                                    <th>Put P&L</th>
+                                    <th>Call + Put P&L</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <button class="btn btn-success w-100" onclick="calculatePL()">
+                            <i class="bi bi-calculator me-2"></i>Calculate P&L
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-secondary w-100" onclick="exportPLToCSV()">
+                            <i class="bi bi-download me-2"></i>Export P&L Data
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Information -->
+                <div class="alert alert-info mt-4">
+                    <h6 class="alert-heading">
+                        <i class="bi bi-lightbulb me-2"></i>How to Use the P&L Simulator
+                    </h6>
+                    <ul class="mb-0">
+                        <li>Shows profit/loss at different underlying prices at expiry</li>
+                        <li>Green area = Profit, Red area = Loss</li>
+                        <li>Breakeven points show where you neither profit nor lose</li>
+                        <li>Max profit/loss shows your risk-reward potential</li>
+                        <li>Adjust price range to see different scenarios</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
         <!-- Advanced Settings Section -->
         <div class="row mt-4">
             <div class="col-12">

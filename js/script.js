@@ -5,6 +5,7 @@
 
 // Global variables
 let erosionChart = null;
+let plChart = null;
 let appStartTime = Date.now();
 let calculationHistory = [];
 
@@ -18,8 +19,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize tooltips
     initTooltips();
     
-    // Initialize chart
+    // Initialize charts
     initChart();
+    initPLChart();
     
     // Load saved data from localStorage
     loadSavedInputs();
@@ -59,7 +61,7 @@ function initTooltips() {
 }
 
 /**
- * Initialize Chart.js chart
+ * Initialize Chart.js chart for Premium Erosion
  */
 function initChart() {
     const ctx = document.getElementById('erosionChart');
@@ -191,10 +193,169 @@ function initChart() {
                 }
             }
         });
-        console.log('Chart initialized successfully');
+        console.log('Erosion Chart initialized successfully');
     } catch (error) {
-        console.error('Error initializing chart:', error);
-        displayError('Could not initialize chart. Please refresh the page.');
+        console.error('Error initializing erosion chart:', error);
+        displayError('Could not initialize erosion chart.');
+    }
+}
+
+/**
+ * Initialize Profit & Loss Chart
+ */
+function initPLChart() {
+    const ctx = document.getElementById('plChart');
+    if (!ctx) return;
+    
+    try {
+        plChart = new Chart(ctx.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Call Option P&L',
+                        data: [],
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.3,
+                        pointBackgroundColor: '#28a745',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 3
+                    },
+                    {
+                        label: 'Put Option P&L',
+                        data: [],
+                        borderColor: '#dc3545',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.3,
+                        pointBackgroundColor: '#dc3545',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 3
+                    },
+                    {
+                        label: 'Call + Put P&L',
+                        data: [],
+                        borderColor: '#0d6efd',
+                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.3,
+                        pointBackgroundColor: '#0d6efd',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    },
+                    {
+                        label: 'Breakeven',
+                        data: [],
+                        borderColor: '#ffc107',
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        fill: false,
+                        pointRadius: 0,
+                        tension: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Profit & Loss at Expiry',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 20
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: {
+                            size: 14
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${formatCurrency(context.raw)}`;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Underlying Price (₹)',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Profit/Loss (₹)',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return formatCurrency(value, true);
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'nearest'
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutQuart'
+                }
+            }
+        });
+        console.log('P&L Chart initialized successfully');
+    } catch (error) {
+        console.error('Error initializing P&L chart:', error);
+        displayError('Could not initialize P&L chart.');
     }
 }
 
@@ -539,8 +700,13 @@ function calculateBoth() {
                 }, 3000);
             }
             
-            // Update chart
+            // Update charts
             updateChart(callResult, putResult);
+            
+            // Trigger P&L calculation if both options have valid data
+            if (callResult && putResult) {
+                setTimeout(() => calculatePL(), 500); // Small delay to ensure UI updates
+            }
             
             // Track combined calculation
             trackEvent('calculate_both', {
@@ -645,11 +811,286 @@ function updateChart(callResult, putResult) {
         erosionChart.data.datasets[1].data = putData;
         erosionChart.update();
         
-        console.log('Chart updated successfully');
+        console.log('Erosion Chart updated successfully');
         
     } catch (error) {
-        console.error('Error updating chart:', error);
-        displayError('Could not update chart. Please check your inputs.');
+        console.error('Error updating erosion chart:', error);
+        displayError('Could not update erosion chart. Please check your inputs.');
+    }
+}
+
+/**
+ * Calculate Profit & Loss at Expiry
+ */
+function calculatePL() {
+    try {
+        // Get input values
+        const spotPrice = parseFloat(document.getElementById('spotPrice').value) || 17450;
+        const callStrike = parseFloat(document.getElementById('callStrike').value) || 17500;
+        const callPremium = parseFloat(document.getElementById('callPremium').value) || 450;
+        const putStrike = parseFloat(document.getElementById('putStrike').value) || 17500;
+        const putPremium = parseFloat(document.getElementById('putPremium').value) || 380;
+        
+        // Get P&L settings
+        const priceRangePercent = parseFloat(document.getElementById('plPriceRange').value) || 20;
+        const priceSteps = parseInt(document.getElementById('plPriceSteps').value) || 50;
+        const includePremium = document.getElementById('plIncludePremium').checked;
+        
+        // Validate inputs
+        if (isNaN(callPremium) || isNaN(putPremium) || callPremium < 0 || putPremium < 0) {
+            throw new Error('Please enter valid option premiums');
+        }
+        
+        // Calculate price range
+        const minPrice = spotPrice * (1 - priceRangePercent / 100);
+        const maxPrice = spotPrice * (1 + priceRangePercent / 100);
+        const priceStep = (maxPrice - minPrice) / priceSteps;
+        
+        // Generate price points
+        const pricePoints = [];
+        for (let i = 0; i <= priceSteps; i++) {
+            pricePoints.push(minPrice + i * priceStep);
+        }
+        
+        // Calculate P&L for each price point
+        const callPLData = [];
+        const putPLData = [];
+        const combinedPLData = [];
+        const breakevenPoints = [];
+        
+        let maxProfit = -Infinity;
+        let maxLoss = Infinity;
+        let breakevenUpper = null;
+        let breakevenLower = null;
+        
+        pricePoints.forEach((price, index) => {
+            // Call option P&L at expiry
+            const callPL = Math.max(0, price - callStrike) - (includePremium ? callPremium : 0);
+            callPLData.push(callPL);
+            
+            // Put option P&L at expiry
+            const putPL = Math.max(0, putStrike - price) - (includePremium ? putPremium : 0);
+            putPLData.push(putPL);
+            
+            // Combined P&L (both positions)
+            const combinedPL = callPL + putPL;
+            combinedPLData.push(combinedPL);
+            
+            // Track max profit/loss
+            maxProfit = Math.max(maxProfit, combinedPL, callPL, putPL);
+            maxLoss = Math.min(maxLoss, combinedPL, callPL, putPL);
+            
+            // Find breakeven points for calls (where PL = 0)
+            if (index > 0) {
+                const prevCallPL = callPLData[index - 1];
+                if (prevCallPL * callPL <= 0 && Math.abs(callPL) < Math.abs(priceStep)) {
+                    breakevenUpper = price;
+                }
+                
+                const prevPutPL = putPLData[index - 1];
+                if (prevPutPL * putPL <= 0 && Math.abs(putPL) < Math.abs(priceStep)) {
+                    breakevenLower = price;
+                }
+            }
+        });
+        
+        // Update P&L chart
+        updatePLChart(pricePoints, callPLData, putPLData, combinedPLData, spotPrice);
+        
+        // Update P&L statistics
+        document.getElementById('plMaxProfit').textContent = formatCurrency(maxProfit);
+        document.getElementById('plMaxLoss').textContent = formatCurrency(maxLoss);
+        document.getElementById('plBreakevenUpper').textContent = breakevenUpper ? formatCurrency(breakevenUpper, true) : 'N/A';
+        document.getElementById('plBreakevenLower').textContent = breakevenLower ? formatCurrency(breakevenLower, true) : 'N/A';
+        
+        // Update detailed P&L table
+        updatePLTable(pricePoints, callPLData, putPLData, combinedPLData);
+        
+        // Track P&L calculation
+        trackEvent('calculate_pl', {
+            spotPrice,
+            priceRangePercent,
+            priceSteps,
+            includePremium,
+            currency: 'INR'
+        });
+        
+        console.log('P&L calculation completed successfully');
+        
+    } catch (error) {
+        console.error('Error in P&L calculation:', error);
+        displayError(`P&L calculation error: ${error.message}`);
+    }
+}
+
+/**
+ * Update the Profit & Loss Chart
+ */
+function updatePLChart(pricePoints, callPLData, putPLData, combinedPLData, spotPrice) {
+    if (!plChart) {
+        initPLChart();
+        if (!plChart) return;
+    }
+    
+    try {
+        // Update chart data
+        plChart.data.labels = pricePoints.map(p => formatCurrency(p, true));
+        plChart.data.datasets[0].data = callPLData;
+        plChart.data.datasets[1].data = putPLData;
+        plChart.data.datasets[2].data = combinedPLData;
+        
+        // Add breakeven line (horizontal at zero)
+        const breakevenLine = pricePoints.map(() => 0);
+        plChart.data.datasets[3].data = breakevenLine;
+        
+        // Add vertical line at current spot price
+        const annotations = {
+            annotations: {
+                line1: {
+                    type: 'line',
+                    yMin: Math.min(...combinedPLData),
+                    yMax: Math.max(...combinedPLData),
+                    xMin: spotPrice,
+                    xMax: spotPrice,
+                    borderColor: '#ffc107',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    label: {
+                        display: true,
+                        content: `Spot: ${formatCurrency(spotPrice, true)}`,
+                        position: 'end',
+                        backgroundColor: '#ffc107',
+                        color: '#000',
+                        font: {
+                            size: 12,
+                            weight: 'bold'
+                        }
+                    }
+                }
+            }
+        };
+        
+        // Update chart options with annotations
+        plChart.options.plugins.annotation = annotations;
+        
+        // Update chart
+        plChart.update();
+        
+        console.log('P&L Chart updated successfully');
+        
+    } catch (error) {
+        console.error('Error updating P&L chart:', error);
+    }
+}
+
+/**
+ * Update Detailed P&L Table
+ */
+function updatePLTable(pricePoints, callPLData, putPLData, combinedPLData) {
+    try {
+        const tableBody = document.getElementById('plDetailedTable').getElementsByTagName('tbody')[0];
+        tableBody.innerHTML = '';
+        
+        // Show key price points (every 10th point for readability)
+        for (let i = 0; i < pricePoints.length; i += Math.ceil(pricePoints.length / 10)) {
+            const price = pricePoints[i];
+            const callPL = callPLData[i];
+            const putPL = putPLData[i];
+            const combinedPL = combinedPLData[i];
+            
+            // Determine status
+            let status = '';
+            if (combinedPL > 0) {
+                status = '<span class="badge bg-success">Profit</span>';
+            } else if (combinedPL < 0) {
+                status = '<span class="badge bg-danger">Loss</span>';
+            } else {
+                status = '<span class="badge bg-warning">Breakeven</span>';
+            }
+            
+            const row = tableBody.insertRow();
+            row.innerHTML = `
+                <td>${formatCurrency(price)}</td>
+                <td class="${callPL >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(callPL)}</td>
+                <td class="${putPL >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(putPL)}</td>
+                <td class="${combinedPL >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold'}">${formatCurrency(combinedPL)}</td>
+                <td>${status}</td>
+            `;
+        }
+        
+    } catch (error) {
+        console.error('Error updating P&L table:', error);
+    }
+}
+
+/**
+ * Export P&L Data to CSV
+ */
+function exportPLToCSV() {
+    try {
+        // Get P&L chart data
+        const chart = plChart;
+        if (!chart || !chart.data.labels || chart.data.labels.length === 0) {
+            displayError('No P&L data to export. Please calculate P&L first.');
+            return;
+        }
+        
+        const underlyingName = document.getElementById('underlyingName').value || 'NIFTY';
+        const spotPrice = document.getElementById('spotPrice').value || '17450';
+        const callStrike = document.getElementById('callStrike').value || '17500';
+        const putStrike = document.getElementById('putStrike').value || '17500';
+        const callPremium = document.getElementById('callPremium').value || '450';
+        const putPremium = document.getElementById('putPremium').value || '380';
+        
+        let csv = 'Indian Options P&L Simulator Results\n';
+        csv += `Underlying: ${underlyingName}, Spot Price: ₹${spotPrice}\n`;
+        csv += `Call Strike: ₹${callStrike}, Put Strike: ₹${putStrike}\n`;
+        csv += `Call Premium: ₹${callPremium}, Put Premium: ₹${putPremium}\n`;
+        csv += 'Generated: ' + new Date().toLocaleString('en-IN') + '\n\n';
+        
+        // Add P&L data
+        csv += 'Underlying Price,Call P&L,Put P&L,Combined P&L,Status\n';
+        
+        const labels = chart.data.labels;
+        const callData = chart.data.datasets[0].data;
+        const putData = chart.data.datasets[1].data;
+        const combinedData = chart.data.datasets[2].data;
+        
+        for (let i = 0; i < labels.length; i++) {
+            const price = labels[i];
+            const callPL = callData[i] || 0;
+            const putPL = putData[i] || 0;
+            const combinedPL = combinedData[i] || 0;
+            const status = combinedPL > 0 ? 'Profit' : combinedPL < 0 ? 'Loss' : 'Breakeven';
+            
+            csv += `${price.replace('₹', '')},${callPL.toFixed(2)},${putPL.toFixed(2)},${combinedPL.toFixed(2)},${status}\n`;
+        }
+        
+        // Add summary statistics
+        csv += '\nSUMMARY STATISTICS\n';
+        csv += 'Metric,Value\n';
+        csv += `Max Profit,${document.getElementById('plMaxProfit').textContent.replace('₹', '')}\n`;
+        csv += `Max Loss,${document.getElementById('plMaxLoss').textContent.replace('₹', '')}\n`;
+        csv += `Breakeven (Upper),${document.getElementById('plBreakevenUpper').textContent.replace('₹', '')}\n`;
+        csv += `Breakeven (Lower),${document.getElementById('plBreakevenLower').textContent.replace('₹', '')}\n`;
+        
+        // Create download
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `option-pl-${underlyingName}-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        console.log('P&L CSV exported successfully');
+        trackEvent('export_pl_csv', { currency: 'INR' });
+        
+    } catch (error) {
+        console.error('Error exporting P&L CSV:', error);
+        displayError('Could not export P&L data');
     }
 }
 
@@ -854,7 +1295,10 @@ function saveInputs() {
             volatilityChange: document.getElementById('volatilityChange').value,
             projectionDays: document.getElementById('projectionDays').value,
             includeWeekends: document.getElementById('includeWeekends').checked,
-            nonLinearTheta: document.getElementById('nonLinearTheta').checked
+            nonLinearTheta: document.getElementById('nonLinearTheta').checked,
+            plPriceRange: document.getElementById('plPriceRange').value,
+            plPriceSteps: document.getElementById('plPriceSteps').value,
+            plIncludePremium: document.getElementById('plIncludePremium').checked
         };
         
         localStorage.setItem('optionCalculatorInputs', JSON.stringify(inputs));
@@ -1064,19 +1508,43 @@ function resetAll() {
         document.getElementById('includeWeekends').checked = false;
         document.getElementById('nonLinearTheta').checked = true;
         
+        // Reset P&L settings
+        document.getElementById('plPriceRange').value = '20';
+        document.getElementById('plPriceSteps').value = '50';
+        document.getElementById('plIncludePremium').checked = true;
+        
         // Hide results
         document.getElementById('callResults').style.display = 'none';
         document.getElementById('putResults').style.display = 'none';
         
+        // Clear P&L stats
+        document.getElementById('plMaxProfit').textContent = '₹0.00';
+        document.getElementById('plMaxLoss').textContent = '₹0.00';
+        document.getElementById('plBreakevenUpper').textContent = '₹0.00';
+        document.getElementById('plBreakevenLower').textContent = '₹0.00';
+        
+        // Clear P&L table
+        const tableBody = document.getElementById('plDetailedTable').getElementsByTagName('tbody')[0];
+        tableBody.innerHTML = '';
+        
         // Update moneyness indicators
         updateInitialMoneyness();
         
-        // Clear chart
+        // Clear charts
         if (erosionChart) {
             erosionChart.data.labels = [];
             erosionChart.data.datasets[0].data = [];
             erosionChart.data.datasets[1].data = [];
             erosionChart.update();
+        }
+        
+        if (plChart) {
+            plChart.data.labels = [];
+            plChart.data.datasets[0].data = [];
+            plChart.data.datasets[1].data = [];
+            plChart.data.datasets[2].data = [];
+            plChart.data.datasets[3].data = [];
+            plChart.update();
         }
         
         // Clear summary
@@ -1133,6 +1601,21 @@ function setupEventListeners() {
                 this.id === 'thetaAcceleration' || this.id === 'nonLinearTheta') {
                 updateSummaryDisplay();
             }
+            
+            // Auto-calculate P&L when relevant inputs change
+            if (this.id.includes('Premium') || this.id.includes('Strike') || 
+                this.id.includes('plPriceRange') || this.id.includes('plPriceSteps') ||
+                this.id === 'plIncludePremium' || this.id === 'spotPrice') {
+                // Debounce P&L calculation
+                clearTimeout(window.plTimeout);
+                window.plTimeout = setTimeout(() => {
+                    const callResultsVisible = document.getElementById('callResults').style.display !== 'none';
+                    const putResultsVisible = document.getElementById('putResults').style.display !== 'none';
+                    if (callResultsVisible && putResultsVisible) {
+                        calculatePL();
+                    }
+                }, 1000);
+            }
         });
         
         input.addEventListener('input', function() {
@@ -1150,6 +1633,18 @@ function setupEventListeners() {
             }
         });
     });
+    
+    // Add P&L calculate button event listener
+    const plCalculateBtn = document.querySelector('[onclick="calculatePL()"]');
+    if (plCalculateBtn) {
+        plCalculateBtn.addEventListener('click', calculatePL);
+    }
+    
+    // Add P&L export button event listener
+    const plExportBtn = document.querySelector('[onclick="exportPLToCSV()"]');
+    if (plExportBtn) {
+        plExportBtn.addEventListener('click', exportPLToCSV);
+    }
     
     // Add reset button event listener
     const resetBtn = document.querySelector('[onclick="resetAll()"]');
@@ -1169,6 +1664,12 @@ function setupEventListeners() {
         if (event.ctrlKey && event.key === 'Enter') {
             event.preventDefault();
             calculateBoth();
+        }
+        
+        // Ctrl+P to calculate P&L
+        if (event.ctrlKey && event.key === 'p') {
+            event.preventDefault();
+            calculatePL();
         }
         
         // Escape to reset
@@ -1194,12 +1695,14 @@ window.OptionCalculator = {
     calculateCall: calculateCallPremiumErosion,
     calculatePut: calculatePutPremiumErosion,
     calculateBoth: calculateBoth,
+    calculatePL: calculatePL,
     resetAll: resetAll,
     exportToCSV: exportToCSV,
+    exportPLToCSV: exportPLToCSV,
     getHistory: () => calculationHistory,
     testRupeeFormatting: testRupeeFormatting,
-    version: '2.0.0',
+    version: '2.1.0',
     currency: 'INR'
 };
 
-console.log('Indian Options Premium Erosion Calculator initialized successfully');
+console.log('Indian Options Premium Erosion Calculator with P&L initialized successfully');
