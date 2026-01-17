@@ -24,7 +24,7 @@ const BSM_MODEL = {
 };
 
 // ============================================================================
-// THEME MANAGEMENT
+// THEME MANAGEMENT (UPDATED FOR HTML BUTTON STRUCTURE)
 // ============================================================================
 
 function initializeTheme() {
@@ -33,42 +33,40 @@ function initializeTheme() {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
     if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-        enableDarkTheme();
+        document.documentElement.setAttribute('data-theme', 'dark');
+        updateThemeIcon(true);
     } else {
-        enableLightTheme();
+        document.documentElement.setAttribute('data-theme', 'light');
+        updateThemeIcon(false);
     }
     
-    // Add theme toggle button to the page
-    addThemeToggleButton();
+    // Update chart colors when theme changes
+    setTimeout(updateChartColorsForCurrentTheme, 100);
 }
 
-function addThemeToggleButton() {
-    // Remove existing toggle if any
-    const existingToggle = document.querySelector('.theme-toggle');
-    if (existingToggle) existingToggle.remove();
+function updateThemeIcon(isDark) {
+    const themeToggle = document.getElementById('themeToggle');
+    if (!themeToggle) return;
     
-    // Create theme toggle button
-    const themeToggle = document.createElement('div');
-    themeToggle.className = 'theme-toggle';
-    themeToggle.innerHTML = `
-        <i class="bi bi-sun-fill"></i>
-        <i class="bi bi-moon-fill"></i>
-    `;
-    themeToggle.title = 'Toggle Dark/Light Theme';
-    themeToggle.onclick = toggleTheme;
-    
-    // Add to page
-    document.body.appendChild(themeToggle);
+    const icon = themeToggle.querySelector('i');
+    if (icon) {
+        if (isDark) {
+            icon.className = 'bi bi-sun-fill';
+        } else {
+            icon.className = 'bi bi-moon-fill';
+        }
+    }
 }
 
 function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     
-    if (currentTheme === 'dark') {
-        enableLightTheme();
-    } else {
-        enableDarkTheme();
-    }
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('bsm-theme', newTheme);
+    
+    // Update icon
+    updateThemeIcon(newTheme === 'dark');
     
     // Trigger chart redraw if they exist
     if (erosionChart) {
@@ -78,27 +76,26 @@ function toggleTheme() {
     if (plChart) {
         plChart.destroy();
         setTimeout(() => updatePLChart(), 50);
+    } else {
+        // If charts don't exist yet, still update colors for future charts
+        updateChartColorsForCurrentTheme();
     }
     
-    showNotification(`Theme switched to ${currentTheme === 'dark' ? 'Light' : 'Dark'} mode`);
+    showNotification(`Theme switched to ${newTheme === 'dark' ? 'Dark' : 'Light'} mode`);
+    console.log(`%c⚡ Theme changed to: ${newTheme} mode`, 
+        `color: ${newTheme === 'dark' ? '#0dcaf0' : '#ffc107'}; font-weight: bold;`);
 }
 
-function enableDarkTheme() {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    localStorage.setItem('bsm-theme', 'dark');
+function updateChartColorsForCurrentTheme() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     
-    // Update chart colors if they exist
-    if (erosionChart) updateChartColorsForTheme(erosionChart, true);
-    if (plChart) updateChartColorsForTheme(plChart, true);
-}
-
-function enableLightTheme() {
-    document.documentElement.setAttribute('data-theme', 'light');
-    localStorage.setItem('bsm-theme', 'light');
+    if (window.erosionChart) {
+        updateChartColorsForTheme(window.erosionChart, isDark);
+    }
     
-    // Update chart colors if they exist
-    if (erosionChart) updateChartColorsForTheme(erosionChart, false);
-    if (plChart) updateChartColorsForTheme(plChart, false);
+    if (window.plChart) {
+        updateChartColorsForTheme(window.plChart, isDark);
+    }
 }
 
 function updateChartColorsForTheme(chart, isDark) {
@@ -1139,6 +1136,9 @@ function updatePLChart(priceLevels = null, plData = null) {
             }
         }
     });
+    
+    // Store reference in window for theme updates
+    window.plChart = plChart;
 }
 
 function updatePLTable(plData) {
@@ -1523,6 +1523,9 @@ function updateErosionChart() {
             }
         }
     });
+    
+    // Store reference in window for theme updates
+    window.erosionChart = erosionChart;
 }
 
 // ============================================================================
@@ -1791,6 +1794,7 @@ Alt+I: Calculate Implied Volatility
 Alt+V: Validate Put-Call Parity
 Alt+1: Recalc option 1 (BSM)
 Alt+2: Recalc option 2 (BSM)
+Alt+T: Toggle Dark/Light Theme
 
 +/- on number inputs: Quick adjust
 Up/Down Arrow: Adjust spot price
@@ -1805,7 +1809,7 @@ Theme Toggle: Click the sun/moon icon in top-right`);
 }
 
 // ============================================================================
-// KEYBOARD SHORTCUTS
+// KEYBOARD SHORTCUTS (UPDATED WITH THEME TOGGLE)
 // ============================================================================
 document.addEventListener('keydown', function(e) {
     if (e.altKey) {
@@ -1817,9 +1821,9 @@ document.addEventListener('keydown', function(e) {
             case 'p': calculatePL(); break;
             case 'i': calculateImpliedVolatility(); break;
             case 'v': validatePutCallParity(); break;
+            case 't': toggleTheme(); break; // Theme toggle shortcut
             case '1': if (options.length > 0) recalculateBSM(options[0].id); break;
             case '2': if (options.length > 1) recalculateBSM(options[1].id); break;
-            case 't': toggleTheme(); break; // Add theme toggle shortcut
         }
     }
     
@@ -1858,7 +1862,9 @@ function initializeCharts() {
     updatePLChart();
 }
 
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
@@ -1866,6 +1872,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize theme first
     initializeTheme();
+    
+    // Add event listener to theme toggle button
+    const themeToggleBtn = document.getElementById('themeToggle');
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', toggleTheme);
+        
+        // Add tooltip to theme toggle button
+        new bootstrap.Tooltip(themeToggleBtn, {
+            placement: 'left',
+            title: 'Toggle dark/light mode (Alt+T)'
+        });
+    }
     
     setTimeout(() => {
         addBSMFeaturesToUI();
