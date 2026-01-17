@@ -646,6 +646,16 @@ table td,
     background-color: var(--bsm-color) !important;
 }
 
+.bg-secondary {
+    background-color: var(--neutral-color) !important;
+    color: white !important;
+}
+
+[data-theme="dark"] .bg-secondary {
+    background-color: var(--neutral-color) !important;
+    color: var(--text-primary) !important;
+}
+
 /* ===== FOOTER ===== */
 footer {
     background-color: var(--bg-secondary) !important;
