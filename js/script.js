@@ -2,14 +2,15 @@
 // Version 4.0 - Complete Black-Scholes/Merton implementation
 // Based on CBOE/NSE industry standards
 
-// Global variables
+// ============================================================================
+// GLOBAL VARIABLES AND CONSTANTS
+// ============================================================================
 let options = [];
 let erosionChart = null;
 let plChart = null;
 let autoCalculate = true;
 let lastCalculationTime = null;
 
-// Black-Scholes-Merton model constants
 const BSM_MODEL = {
     VERSION: '4.0',
     STANDARD: 'CBOE/NSE Industry Standard',
@@ -22,9 +23,10 @@ const BSM_MODEL = {
     ]
 };
 
-// Math utility functions
+// ============================================================================
+// MATH UTILITIES AND BSM ENGINE
+// ============================================================================
 const MathUtils = {
-    // Normal CDF (industry standard approximation)
     normCDF: function(x) {
         const t = 1 / (1 + 0.2316419 * Math.abs(x));
         const d = 0.3989423 * Math.exp(-x * x / 2);
@@ -32,47 +34,34 @@ const MathUtils = {
         return x > 0 ? 1 - prob : prob;
     },
 
-    // Normal PDF
     normPDF: function(x) {
         return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x);
     },
 
-    // Calculate d1 and d2 for Black-Scholes
     calculateD1D2: function(S, K, T, r, sigma, q = 0) {
         if (T <= 0) return { d1: 0, d2: 0 };
-        
         const sqrtT = Math.sqrt(T);
         const d1 = (Math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / (sigma * sqrtT);
         const d2 = d1 - sigma * sqrtT;
-        
         return { d1, d2 };
     }
 };
 
-// Complete Black-Scholes-Merton Pricing Engine
 class BlackScholesPricing {
-    // Price European option
     static priceOption(type, S, K, T, r, sigma, q = 0) {
         if (T <= 0) {
-            // At expiration
-            if (type === 'CALL') return Math.max(S - K, 0);
-            else return Math.max(K - S, 0);
+            return type === 'CALL' ? Math.max(S - K, 0) : Math.max(K - S, 0);
         }
         
         const { d1, d2 } = MathUtils.calculateD1D2(S, K, T, r, sigma, q);
-        const Nd1 = MathUtils.normCDF(type === 'CALL' ? d1 : -d1);
-        const Nd2 = MathUtils.normCDF(type === 'CALL' ? d2 : -d2);
-        
         const callPrice = S * Math.exp(-q * T) * MathUtils.normCDF(d1) - K * Math.exp(-r * T) * MathUtils.normCDF(d2);
         const putPrice = K * Math.exp(-r * T) * MathUtils.normCDF(-d2) - S * Math.exp(-q * T) * MathUtils.normCDF(-d1);
         
         return type === 'CALL' ? callPrice : putPrice;
     }
 
-    // Calculate all Greeks
     static calculateGreeks(type, S, K, T, r, sigma, q = 0) {
         if (T <= 0) {
-            // At expiration Greeks
             const intrinsic = type === 'CALL' ? Math.max(S - K, 0) : Math.max(K - S, 0);
             return {
                 delta: type === 'CALL' ? (S > K ? 1 : 0) : (S < K ? -1 : 0),
@@ -87,44 +76,25 @@ class BlackScholesPricing {
         
         const { d1, d2 } = MathUtils.calculateD1D2(S, K, T, r, sigma, q);
         const sqrtT = Math.sqrt(T);
-        const Nd1 = MathUtils.normCDF(type === 'CALL' ? d1 : -d1);
-        const Nd2 = MathUtils.normCDF(type === 'CALL' ? d2 : -d2);
         const nd1 = MathUtils.normPDF(d1);
         
-        // Delta: ∂V/∂S
-        let delta;
+        let delta, theta, rho;
         if (type === 'CALL') {
             delta = Math.exp(-q * T) * MathUtils.normCDF(d1);
-        } else {
-            delta = Math.exp(-q * T) * (MathUtils.normCDF(d1) - 1);
-        }
-        
-        // Gamma: ∂²V/∂S²
-        const gamma = Math.exp(-q * T) * (nd1 / (S * sigma * sqrtT));
-        
-        // Theta: ∂V/∂t (per day, negative for decay)
-        let theta;
-        const term1 = -(S * sigma * Math.exp(-q * T) * nd1) / (2 * sqrtT);
-        if (type === 'CALL') {
-            theta = term1 + q * S * Math.exp(-q * T) * MathUtils.normCDF(d1) 
-                    - r * K * Math.exp(-r * T) * MathUtils.normCDF(d2);
-        } else {
-            theta = term1 - q * S * Math.exp(-q * T) * MathUtils.normCDF(-d1) 
-                    + r * K * Math.exp(-r * T) * MathUtils.normCDF(-d2);
-        }
-        theta = theta / 365; // Convert annual to daily
-        
-        // Vega: ∂V/∂σ (per 1% change in volatility)
-        const vega = S * Math.exp(-q * T) * sqrtT * nd1 * 0.01; // For 1% vol change
-        
-        // Rho: ∂V/∂r (per 1% change in interest rate)
-        let rho;
-        if (type === 'CALL') {
+            theta = (-(S * sigma * Math.exp(-q * T) * nd1) / (2 * sqrtT) + 
+                     q * S * Math.exp(-q * T) * MathUtils.normCDF(d1) - 
+                     r * K * Math.exp(-r * T) * MathUtils.normCDF(d2)) / 365;
             rho = K * T * Math.exp(-r * T) * MathUtils.normCDF(d2) * 0.01;
         } else {
+            delta = Math.exp(-q * T) * (MathUtils.normCDF(d1) - 1);
+            theta = (-(S * sigma * Math.exp(-q * T) * nd1) / (2 * sqrtT) - 
+                     q * S * Math.exp(-q * T) * MathUtils.normCDF(-d1) + 
+                     r * K * Math.exp(-r * T) * MathUtils.normCDF(-d2)) / 365;
             rho = -K * T * Math.exp(-r * T) * MathUtils.normCDF(-d2) * 0.01;
         }
         
+        const gamma = Math.exp(-q * T) * (nd1 / (S * sigma * sqrtT));
+        const vega = S * Math.exp(-q * T) * sqrtT * nd1 * 0.01;
         const price = this.priceOption(type, S, K, T, r, sigma, q);
         const intrinsic = type === 'CALL' ? Math.max(S - K, 0) : Math.max(K - S, 0);
         const extrinsic = Math.max(price - intrinsic, 0);
@@ -143,21 +113,16 @@ class BlackScholesPricing {
         };
     }
 
-    // Calculate implied volatility from price (numerical method)
     static calculateImpliedVol(type, S, K, T, r, price, q = 0, maxIterations = 100, precision = 0.0001) {
         if (T <= 0) return 0;
-        
-        let sigma = 0.3; // Initial guess
+        let sigma = 0.3;
         let sigmaUpper = 5.0;
         let sigmaLower = 0.001;
         
         for (let i = 0; i < maxIterations; i++) {
             const calculatedPrice = this.priceOption(type, S, K, T, r, sigma, q);
             const diff = calculatedPrice - price;
-            
-            if (Math.abs(diff) < precision) {
-                return sigma;
-            }
+            if (Math.abs(diff) < precision) return sigma;
             
             if (diff > 0) {
                 sigmaUpper = sigma;
@@ -167,19 +132,16 @@ class BlackScholesPricing {
                 sigma = (sigma + sigmaUpper) / 2;
             }
         }
-        
         return sigma;
     }
 
-    // Check put-call parity
     static checkPutCallParity(callPrice, putPrice, S, K, T, r, q = 0) {
         const callPV = callPrice;
         const putPV = putPrice;
         const stockPV = S * Math.exp(-q * T);
         const strikePV = K * Math.exp(-r * T);
-        
         const parityCheck = callPV + strikePV - (putPV + stockPV);
-        const parityValid = Math.abs(parityCheck) < 0.01; // Allow 1 paisa tolerance
+        const parityValid = Math.abs(parityCheck) < 0.01;
         
         return {
             valid: parityValid,
@@ -191,36 +153,30 @@ class BlackScholesPricing {
         };
     }
 
-    // Calculate probability ITM (N(d2) for calls, N(-d2) for puts)
     static probabilityITM(type, S, K, T, sigma, q = 0) {
         if (T <= 0) {
-            if (type === 'CALL') return S > K ? 100 : 0;
-            else return S < K ? 100 : 0;
+            return type === 'CALL' ? (S > K ? 100 : 0) : (S < K ? 100 : 0);
         }
-        
-        const { d1, d2 } = MathUtils.calculateD1D2(S, K, T, 0, sigma, q);
+        const { d2 } = MathUtils.calculateD1D2(S, K, T, 0, sigma, q);
         const prob = type === 'CALL' ? MathUtils.normCDF(d2) : MathUtils.normCDF(-d2);
         return Math.min(Math.max(prob * 100, 0), 100);
     }
 }
 
-// Volatility Surface Model (basic)
 class VolatilitySurface {
     constructor() {
         this.surface = {
             atmVol: 0.15,
-            skew: -0.002, // Volatility skew per 100 points OTM
-            smile: 0.0001, // Volatility smile curvature
-            termStructure: { '30': 0.15, '7': 0.18, '1': 0.25 } // Days -> Volatility
+            skew: -0.002,
+            smile: 0.0001,
+            termStructure: { '30': 0.15, '7': 0.18, '1': 0.25 }
         };
     }
 
     getVolatility(moneyness, days) {
-        // moneyness = (strike - spot) / spot
         const atmVol = this.surface.termStructure[days] || this.surface.atmVol;
         const skewEffect = this.surface.skew * moneyness * 100;
         const smileEffect = this.surface.smile * Math.pow(moneyness * 100, 2);
-        
         return Math.max(0.05, atmVol + skewEffect + smileEffect);
     }
 
@@ -231,22 +187,19 @@ class VolatilitySurface {
     }
 }
 
-// Initialize with industry standard models
 const volSurface = new VolatilitySurface();
 
-// Initialize default options
+// ============================================================================
+// CORE OPTION MANAGEMENT
+// ============================================================================
 function initializeDefaultOptions() {
-    // Clear any existing options
     options = [];
-    
     const spot = parseFloat(document.getElementById('spotPrice').value);
     const iv = parseFloat(document.getElementById('impliedVol').value) / 100;
     const days = parseInt(document.getElementById('daysToExpiry').value);
     const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
     
-    // Add default call option (calculated using BSM)
     const callGreeks = BlackScholesPricing.calculateGreeks('CALL', spot, spot, days/365, r, iv);
-    
     addOption({
         id: 1,
         type: 'CALL',
@@ -265,9 +218,7 @@ function initializeDefaultOptions() {
         theoreticalPrice: callGreeks.price
     });
     
-    // Add default put option (calculated using BSM)
     const putGreeks = BlackScholesPricing.calculateGreeks('PUT', spot, spot, days/365, r, iv);
-    
     addOption({
         id: 2,
         type: 'PUT',
@@ -286,30 +237,19 @@ function initializeDefaultOptions() {
         theoreticalPrice: putGreeks.price
     });
     
-    // Update UI
     updateOptionsTable();
-    if (autoCalculate) {
-        updateAllCalculations();
-    }
-    
-    // Show industry standard mode
-    console.log(`Options Calculator ${BSM_MODEL.VERSION} - ${BSM_MODEL.STANDARD}`);
-    console.log('Features:', BSM_MODEL.FEATURES.join(', '));
+    if (autoCalculate) updateAllCalculations();
 }
 
-// Enhanced option object with BSM support
 function addOption(optionData) {
     const id = options.length > 0 ? Math.max(...options.map(o => o.id)) + 1 : 1;
-    
-    // Get market parameters
     const spot = parseFloat(document.getElementById('spotPrice').value);
     const iv = parseFloat(document.getElementById('impliedVol').value) / 100;
     const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
-    const q = 0; // Dividend yield (can be added later)
+    const q = 0;
     const days = parseInt(document.getElementById('daysToExpiry').value);
     const T = days / 365;
     
-    // Calculate using Black-Scholes if not provided
     let premium = parseFloat(optionData.premium) || 0;
     let greeks = {};
     
@@ -324,13 +264,7 @@ function addOption(optionData) {
             q
         );
         
-        // Use calculated price if premium not provided
-        if (!optionData.premium) {
-            premium = greeks.price;
-        }
-        
-        // Calculate implied volatility from price if different
-        const theoreticalIV = iv;
+        if (!optionData.premium) premium = greeks.price;
         const actualIV = BlackScholesPricing.calculateImpliedVol(
             optionData.type || 'CALL',
             spot,
@@ -340,7 +274,6 @@ function addOption(optionData) {
             premium,
             q
         );
-        
         optionData.iv = actualIV * 100;
     }
     
@@ -363,7 +296,6 @@ function addOption(optionData) {
         d1: greeks.d1 || 0,
         d2: greeks.d2 || 0,
         lastCalculated: new Date(),
-        // BSM model data
         model: 'Black-Scholes-Merton',
         parameters: {
             S: spot,
@@ -379,22 +311,19 @@ function addOption(optionData) {
     return option;
 }
 
-// Update UI to show BSM data
 function updateOptionsTable() {
     const tbody = document.getElementById('optionsTableBody');
     tbody.innerHTML = '';
     
     options.forEach((option, index) => {
-        const row = document.createElement('tr');
-        row.className = option.type === 'CALL' ? 'call-row' : 'put-row';
-        
-        // Calculate price difference from theoretical
         const priceDiff = option.premium - option.theoreticalPrice;
         const priceDiffClass = Math.abs(priceDiff) > 0.5 ? 
             (priceDiff > 0 ? 'text-danger' : 'text-success') : 'text-muted';
         const priceDiffIcon = priceDiff > 0 ? 'bi-arrow-up' : 
                             priceDiff < 0 ? 'bi-arrow-down' : 'bi-dash';
         
+        const row = document.createElement('tr');
+        row.className = option.type === 'CALL' ? 'call-row' : 'put-row';
         row.innerHTML = `
             <td>${index + 1}</td>
             <td>
@@ -453,9 +382,12 @@ function updateOptionsTable() {
             </td>
             <td>
                 <input type="number" class="form-control form-control-sm option-input" 
-                       data-id="${option.id}" data-field="days" 
-                       value="${option.days}" min="1" max="365">
+                       data-id="${option.id}" data-field="rho" 
+                       value="${option.rho.toFixed(2)}" step="0.01">
+                <small class="text-muted">ρ=${option.rho.toFixed(2)}</small>
             </td>
+            <td>${option.iv.toFixed(2)}%</td>
+            <td>${option.days}</td>
             <td>
                 <div class="btn-group btn-group-sm">
                     <button class="btn btn-outline-primary" onclick="recalculateBSM(${option.id})" title="Recalc BSM">
@@ -473,19 +405,15 @@ function updateOptionsTable() {
                 </div>
             </td>
         `;
-        
         tbody.appendChild(row);
     });
     
-    // Add event listeners
     document.querySelectorAll('.option-input').forEach(input => {
         input.addEventListener('input', function() {
             const id = parseInt(this.dataset.id);
             const field = this.dataset.field;
             const value = this.value;
-            
             updateOptionField(id, field, value);
-            
             if (autoCalculate) {
                 recalculateBSM(id);
                 updateAllCalculations();
@@ -494,7 +422,6 @@ function updateOptionsTable() {
     });
 }
 
-// Recalculate using Black-Scholes
 function recalculateBSM(id) {
     const option = options.find(o => o.id === id);
     if (!option) return;
@@ -505,7 +432,6 @@ function recalculateBSM(id) {
     const q = 0;
     const T = option.days / 365;
     
-    // Recalculate using BSM
     const greeks = BlackScholesPricing.calculateGreeks(
         option.type,
         spot,
@@ -516,7 +442,6 @@ function recalculateBSM(id) {
         q
     );
     
-    // Update option with BSM values
     option.theta = greeks.theta;
     option.delta = greeks.delta;
     option.gamma = greeks.gamma;
@@ -529,7 +454,6 @@ function recalculateBSM(id) {
     option.d2 = greeks.d2;
     option.iv = iv * 100;
     
-    // Update moneyness
     if (option.type === 'CALL') {
         if (option.strike < spot * 0.98) option.moneyness = 'Deep ITM';
         else if (option.strike < spot * 0.995) option.moneyness = 'ITM';
@@ -547,126 +471,557 @@ function recalculateBSM(id) {
     updateOptionsTable();
 }
 
-// Enhanced updateAllCalculations with BSM features
-function updateAllCalculations() {
-    if (options.length === 0) return;
-    
-    const spot = parseFloat(document.getElementById('spotPrice').value);
-    const iv = parseFloat(document.getElementById('impliedVol').value) / 100;
-    const days = parseInt(document.getElementById('daysToExpiry').value);
-    const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
-    
-    // Calculate totals
-    let totalTheta = 0;
-    let totalWeeklyErosion = 0;
-    let totalTimeValue = 0;
-    let totalVegaImpact = 0;
-    let totalDelta = 0;
-    let totalGamma = 0;
-    let totalRho = 0;
-    let totalExtrinsic = 0;
-    let totalIntrinsic = 0;
-    
-    // Check put-call parity for ATM options
-    let atmCall = null;
-    let atmPut = null;
-    
-    options.forEach(option => {
-        totalTheta += option.theta;
-        totalWeeklyErosion += option.theta * 7;
-        totalTimeValue += option.premium;
-        totalVegaImpact += option.vega;
-        totalDelta += option.delta;
-        totalGamma += option.gamma;
-        totalRho += option.rho;
-        totalExtrinsic += option.extrinsic;
-        totalIntrinsic += option.intrinsic;
-        
-        // Find ATM options for parity check
-        if (option.moneyness === 'ATM' || option.moneyness === 'ATM') {
-            if (option.type === 'CALL') atmCall = option;
-            if (option.type === 'PUT') atmPut = option;
-        }
-    });
-    
-    // Update real-time metrics
-    document.getElementById('totalTheta').textContent = `-₹${Math.abs(totalTheta).toFixed(2)}`;
-    document.getElementById('totalWeeklyErosion').textContent = `-₹${Math.abs(totalWeeklyErosion).toFixed(2)}`;
-    document.getElementById('dailyCarryCost').textContent = `₹${Math.abs(totalTheta).toFixed(2)}`;
-    document.getElementById('totalTimeValue').textContent = `₹${totalTimeValue.toFixed(2)}`;
-    document.getElementById('totalVegaImpact').textContent = `₹${totalVegaImpact.toFixed(2)}`;
-    
-    // Add new metrics if elements exist
-    const totalExtrinsicElem = document.getElementById('totalExtrinsic');
-    const totalIntrinsicElem = document.getElementById('totalIntrinsic');
-    const totalDeltaElem = document.getElementById('totalDelta');
-    
-    if (totalExtrinsicElem) totalExtrinsicElem.textContent = `₹${totalExtrinsic.toFixed(2)}`;
-    if (totalIntrinsicElem) totalIntrinsicElem.textContent = `₹${totalIntrinsic.toFixed(2)}`;
-    if (totalDeltaElem) totalDeltaElem.textContent = totalDelta.toFixed(4);
-    
-    // Calculate average probability ITM using BSM
-    let totalProbITM = 0;
-    options.forEach(option => {
-        const prob = BlackScholesPricing.probabilityITM(
-            option.type,
-            spot,
-            option.strike,
-            option.days/365,
-            iv
-        );
-        totalProbITM += prob;
-    });
-    
-    const avgProbITM = options.length > 0 ? (totalProbITM / options.length) : 0;
-    document.getElementById('avgProbITM').textContent = `${avgProbITM.toFixed(1)}%`;
-    
-    // Check put-call parity
-    if (atmCall && atmPut) {
-        const parity = BlackScholesPricing.checkPutCallParity(
-            atmCall.premium,
-            atmPut.premium,
-            spot,
-            atmCall.strike,
-            days/365,
-            r
-        );
-        
-        // Display parity status
-        const parityElem = document.getElementById('putCallParity');
-        if (parityElem) {
-            if (parity.valid) {
-                parityElem.innerHTML = `<span class="badge bg-success">Parity ✓</span>`;
-            } else {
-                parityElem.innerHTML = `<span class="badge bg-warning">Parity ₹${parity.discrepancy}</span>`;
-            }
-        }
+// ============================================================================
+// MISSING CORE FUNCTIONS IMPLEMENTATION
+// ============================================================================
+function loadPreset(presetName) {
+    console.log(`Loading preset: ${presetName}`);
+    switch(presetName) {
+        case 'nifty_atm':
+            document.getElementById('spotPrice').value = 17450;
+            document.getElementById('impliedVol').value = 15;
+            document.getElementById('daysToExpiry').value = 30;
+            document.getElementById('riskFreeRate').value = 6.5;
+            document.getElementById('dividendYield').value = 0;
+            options = [];
+            addCallOption();
+            addPutOption();
+            showNotification('NIFTY ATM preset loaded!');
+            break;
+        case 'banknifty_weekly':
+            document.getElementById('underlyingSelect').value = 'BANKNIFTY';
+            document.getElementById('spotPrice').value = 42000;
+            document.getElementById('impliedVol').value = 18;
+            document.getElementById('daysToExpiry').value = 7;
+            document.getElementById('riskFreeRate').value = 6.5;
+            options = [];
+            addCallOption();
+            addPutOption();
+            showNotification('BANKNIFTY Weekly preset loaded!');
+            break;
+        case 'straddle':
+            options = [];
+            addCallOption();
+            addPutOption();
+            showNotification('ATM Straddle preset loaded!');
+            break;
     }
-    
-    // Update last calculation time
-    lastCalculationTime = new Date();
-    document.getElementById('lastUpdate').textContent = `Last: ${lastCalculationTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
-    
-    // Update charts with BSM-calculated erosion
-    updateErosionChart();
-    updatePLChart();
-    updatePLTable();
+    updateAllCalculations();
 }
 
-// Enhanced erosion chart with BSM decay
+function setATM() {
+    const spot = parseFloat(document.getElementById('spotPrice').value);
+    if (options.length === 0) {
+        addCallOption();
+        addPutOption();
+    } else {
+        options.forEach(option => {
+            option.strike = spot;
+            option.moneyness = 'ATM';
+        });
+    }
+    updateOptionsTable();
+    updateAllCalculations();
+    showNotification('All strikes set to At The Money');
+}
+
+function setITM() {
+    const spot = parseFloat(document.getElementById('spotPrice').value);
+    options.forEach(option => {
+        if (option.type === 'CALL') {
+            option.strike = spot * 0.98;
+            option.moneyness = 'ITM';
+        } else {
+            option.strike = spot * 1.02;
+            option.moneyness = 'ITM';
+        }
+    });
+    updateOptionsTable();
+    updateAllCalculations();
+    showNotification('All strikes set to In The Money');
+}
+
+function setOTM() {
+    const spot = parseFloat(document.getElementById('spotPrice').value);
+    options.forEach(option => {
+        if (option.type === 'CALL') {
+            option.strike = spot * 1.02;
+            option.moneyness = 'OTM';
+        } else {
+            option.strike = spot * 0.98;
+            option.moneyness = 'OTM';
+        }
+    });
+    updateOptionsTable();
+    updateAllCalculations();
+    showNotification('All strikes set to Out of The Money');
+}
+
+function resetAll() {
+    if (!confirm('Reset all options and settings?')) return;
+    document.getElementById('spotPrice').value = 17450;
+    document.getElementById('impliedVol').value = 15;
+    document.getElementById('daysToExpiry').value = 30;
+    document.getElementById('riskFreeRate').value = 6.5;
+    document.getElementById('dividendYield').value = 0;
+    document.getElementById('volatilitySkew').value = -0.002;
+    document.getElementById('volatilitySmile').value = 0.0001;
+    document.getElementById('termStructure').value = 'normal';
+    options = [];
+    updateOptionsTable();
+    updateAllCalculations();
+    if (erosionChart) erosionChart.destroy();
+    if (plChart) plChart.destroy();
+    showNotification('All options and settings reset');
+}
+
+function calculatePL() {
+    const spot = parseFloat(document.getElementById('spotPrice').value);
+    const rangePercent = parseFloat(document.getElementById('plPriceRange').value) / 100;
+    const steps = parseInt(document.getElementById('plPriceSteps').value);
+    const includePremium = document.getElementById('plIncludePremium').checked;
+    const useBSMpricing = document.getElementById('plBSMpricing').checked;
+    
+    const minPrice = spot * (1 - rangePercent);
+    const maxPrice = spot * (1 + rangePercent);
+    const priceStep = (maxPrice - minPrice) / steps;
+    
+    const priceLevels = [];
+    for (let i = 0; i <= steps; i++) {
+        priceLevels.push(minPrice + i * priceStep);
+    }
+    
+    const plData = priceLevels.map(price => {
+        let callPL = 0, putPL = 0, netPL = 0, extrinsicValue = 0;
+        
+        options.forEach(option => {
+            const T = option.days / 365;
+            const iv = option.iv / 100;
+            const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
+            let optionPL = 0;
+            
+            if (useBSMpricing && T > 0) {
+                const greeks = BlackScholesPricing.calculateGreeks(
+                    option.type,
+                    price,
+                    option.strike,
+                    T,
+                    r,
+                    iv
+                );
+                optionPL = greeks.price;
+                extrinsicValue += greeks.extrinsic;
+            } else {
+                optionPL = option.type === 'CALL' ? 
+                    Math.max(price - option.strike, 0) : 
+                    Math.max(option.strike - price, 0);
+            }
+            
+            if (includePremium) {
+                optionPL = optionPL - option.premium;
+            }
+            
+            if (option.type === 'CALL') callPL += optionPL;
+            else putPL += optionPL;
+            netPL += optionPL;
+        });
+        
+        return { price, callPL, putPL, netPL, extrinsic: extrinsicValue };
+    });
+    
+    updatePLChart(priceLevels, plData);
+    updatePLTable(plData);
+    calculatePLStatistics(plData);
+    showNotification('P&L calculation completed');
+}
+
+function updatePLChart(priceLevels = null, plData = null) {
+    const ctx = document.getElementById('plChart').getContext('2d');
+    
+    if (!priceLevels || !plData) {
+        priceLevels = Array.from({length: 20}, (_, i) => 17000 + i * 50);
+        plData = priceLevels.map(price => ({
+            price: price,
+            callPL: Math.sin(price / 1000) * 100,
+            putPL: Math.cos(price / 1000) * 100,
+            netPL: Math.sin(price / 1000) * 100 + Math.cos(price / 1000) * 100,
+            extrinsic: 50
+        }));
+    }
+    
+    if (plChart) plChart.destroy();
+    
+    plChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: priceLevels.map(p => `₹${p.toFixed(0)}`),
+            datasets: [
+                {
+                    label: 'Net P&L',
+                    data: plData.map(d => d.netPL),
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    fill: true,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Call P&L',
+                    data: plData.map(d => d.callPL),
+                    borderColor: '#28a745',
+                    backgroundColor: 'transparent',
+                    borderWidth: 1,
+                    borderDash: [5, 5],
+                    tension: 0.3,
+                    fill: false,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Put P&L',
+                    data: plData.map(d => d.putPL),
+                    borderColor: '#dc3545',
+                    backgroundColor: 'transparent',
+                    borderWidth: 1,
+                    borderDash: [5, 5],
+                    tension: 0.3,
+                    fill: false,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Breakeven',
+                    data: priceLevels.map(() => 0),
+                    borderColor: '#6c757d',
+                    backgroundColor: 'transparent',
+                    borderWidth: 1,
+                    borderDash: [3, 3],
+                    pointRadius: 0,
+                    fill: false,
+                    yAxisID: 'y'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label || ''}: ₹${context.parsed.y.toFixed(2)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Underlying Price (₹)' },
+                    grid: { drawBorder: false }
+                },
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: { display: true, text: 'P&L (₹)' },
+                    grid: { drawBorder: false }
+                }
+            }
+        }
+    });
+}
+
+function updatePLTable(plData) {
+    const tbody = document.querySelector('#plDetailedTable tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    const spot = parseFloat(document.getElementById('spotPrice').value);
+    const keyPercentages = [0, -0.05, -0.10, -0.15, -0.20, 0.05, 0.10, 0.15, 0.20];
+    
+    keyPercentages.forEach(percent => {
+        const price = spot * (1 + percent);
+        let closestData = plData.reduce((prev, curr) => {
+            return Math.abs(curr.price - price) < Math.abs(prev.price - price) ? curr : prev;
+        });
+        
+        let status = '', statusClass = '';
+        if (percent === 0) {
+            status = '<span class="badge bg-info">Current</span>';
+        } else if (closestData.netPL > 0) {
+            status = '<span class="badge bg-success">Profit</span>';
+            statusClass = 'table-success';
+        } else if (closestData.netPL < 0) {
+            status = '<span class="badge bg-danger">Loss</span>';
+            statusClass = 'table-danger';
+        } else {
+            status = '<span class="badge bg-warning">B/E</span>';
+            statusClass = 'table-warning';
+        }
+        
+        const row = document.createElement('tr');
+        row.className = statusClass;
+        row.innerHTML = `
+            <td>₹${closestData.price.toFixed(2)}</td>
+            <td>₹${closestData.callPL.toFixed(2)}</td>
+            <td>₹${closestData.putPL.toFixed(2)}</td>
+            <td>₹${closestData.netPL.toFixed(2)}</td>
+            <td>₹${closestData.extrinsic.toFixed(2)}</td>
+            <td>${status}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function calculatePLStatistics(plData) {
+    if (!plData || plData.length === 0) return;
+    let maxProfit = -Infinity, maxLoss = Infinity;
+    let breakevenUpper = null, breakevenLower = null;
+    const spot = parseFloat(document.getElementById('spotPrice').value);
+    
+    const currentData = plData.reduce((prev, curr) => {
+        return Math.abs(curr.price - spot) < Math.abs(prev.price - spot) ? curr : prev;
+    });
+    
+    plData.forEach(data => {
+        if (data.netPL > maxProfit) maxProfit = data.netPL;
+        if (data.netPL < maxLoss) maxLoss = data.netPL;
+        if (data.netPL >= 0 && data.netPL <= 0.01) {
+            if (data.price > spot && !breakevenUpper) breakevenUpper = data.price;
+            else if (data.price < spot && !breakevenLower) breakevenLower = data.price;
+        }
+    });
+    
+    if (document.getElementById('plMaxProfit')) 
+        document.getElementById('plMaxProfit').textContent = `₹${maxProfit.toFixed(2)}`;
+    if (document.getElementById('plMaxLoss')) 
+        document.getElementById('plMaxLoss').textContent = `₹${maxLoss.toFixed(2)}`;
+    if (document.getElementById('plBreakevenUpper')) 
+        document.getElementById('plBreakevenUpper').textContent = breakevenUpper ? `₹${breakevenUpper.toFixed(2)}` : 'N/A';
+    if (document.getElementById('plBreakevenLower')) 
+        document.getElementById('plBreakevenLower').textContent = breakevenLower ? `₹${breakevenLower.toFixed(2)}` : 'N/A';
+}
+
+function clearAllOptions() {
+    if (options.length === 0) {
+        showNotification('No options to clear');
+        return;
+    }
+    if (confirm(`Clear all ${options.length} options?`)) {
+        options = [];
+        updateOptionsTable();
+        updateAllCalculations();
+        showNotification('All options cleared');
+    }
+}
+
+function addPair() {
+    addCallOption();
+    addPutOption();
+    showNotification('ATM Straddle pair added');
+}
+
+function setDaysToExpiry(days) {
+    document.getElementById('daysToExpiry').value = days;
+    options.forEach(option => option.days = days);
+    updateAllCalculations();
+    showNotification(`Days to expiry set to ${days}`);
+}
+
+function adjustSpot(amount) {
+    const spotInput = document.getElementById('spotPrice');
+    spotInput.value = parseFloat(spotInput.value) + amount;
+    spotInput.dispatchEvent(new Event('change'));
+}
+
+function adjustDays(amount) {
+    const daysInput = document.getElementById('daysToExpiry');
+    daysInput.value = Math.max(1, parseInt(daysInput.value) + amount);
+    daysInput.dispatchEvent(new Event('change'));
+}
+
+function updateUnderlying() {
+    const underlying = document.getElementById('underlyingSelect').value;
+    let spotPrice = 17450;
+    switch(underlying) {
+        case 'NIFTY': spotPrice = 17450; break;
+        case 'BANKNIFTY': spotPrice = 42000; break;
+        case 'FINNIFTY': spotPrice = 19500; break;
+        case 'SENSEX': spotPrice = 72000; break;
+        case 'RELIANCE': spotPrice = 2500; break;
+        case 'TCS': spotPrice = 3800; break;
+        case 'INFY': spotPrice = 1500; break;
+        case 'HDFCBANK': spotPrice = 1650; break;
+    }
+    document.getElementById('spotPrice').value = spotPrice;
+    updateAllCalculations();
+    showNotification(`Underlying updated to ${underlying}`);
+}
+
+function toggleView(viewType) {
+    const simpleBtn = document.querySelector('[onclick="toggleView(\'simple\')"]');
+    const advancedBtn = document.querySelector('[onclick="toggleView(\'advanced\')"]');
+    const proBtn = document.querySelector('[onclick="toggleView(\'pro\')"]');
+    
+    [simpleBtn, advancedBtn, proBtn].forEach(btn => {
+        if (btn) {
+            btn.classList.remove('active');
+            btn.classList.add('btn-outline-secondary');
+        }
+    });
+    
+    const activeBtn = document.querySelector(`[onclick="toggleView('${viewType}')"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.classList.remove('btn-outline-secondary');
+    }
+    
+    const advancedSettings = document.getElementById('advancedSettings');
+    const bsmInfo = document.querySelector('.card-header.bg-dark.text-white');
+    
+    switch(viewType) {
+        case 'simple':
+            if (advancedSettings) advancedSettings.style.display = 'none';
+            if (bsmInfo) bsmInfo.style.display = 'none';
+            break;
+        case 'advanced':
+            if (advancedSettings) advancedSettings.style.display = 'block';
+            if (bsmInfo) bsmInfo.style.display = 'block';
+            break;
+        case 'pro':
+            if (advancedSettings) advancedSettings.style.display = 'block';
+            if (bsmInfo) bsmInfo.style.display = 'block';
+            break;
+    }
+    
+    showNotification(`${viewType.charAt(0).toUpperCase() + viewType.slice(1)} view activated`);
+}
+
+function calculateAll() {
+    options.forEach(option => recalculateBSM(option.id));
+    updateAllCalculations();
+    calculatePL();
+    showNotification('All calculations completed');
+}
+
+function calculateSingleOption(id) {
+    const option = options.find(o => o.id === id);
+    if (!option) return;
+    recalculateBSM(id);
+    updateOptionsTable();
+    showNotification(`Option ${id} recalculated`);
+}
+
+function cloneOption(id) {
+    const originalOption = options.find(o => o.id === id);
+    if (!originalOption) return;
+    const clone = {
+        ...originalOption,
+        id: Math.max(...options.map(o => o.id)) + 1,
+        strike: originalOption.strike + (originalOption.type === 'CALL' ? 100 : -100)
+    };
+    options.push(clone);
+    updateOptionsTable();
+    updateAllCalculations();
+    showNotification(`Option ${id} cloned`);
+}
+
+function deleteOption(id) {
+    const optionIndex = options.findIndex(o => o.id === id);
+    if (optionIndex === -1) return;
+    if (confirm(`Delete ${options[optionIndex].type} option?`)) {
+        options.splice(optionIndex, 1);
+        updateOptionsTable();
+        updateAllCalculations();
+        showNotification(`Option ${id} deleted`);
+    }
+}
+
+function updateOptionField(id, field, value) {
+    const option = options.find(o => o.id === id);
+    if (!option) return;
+    
+    let convertedValue = value;
+    switch(field) {
+        case 'strike':
+        case 'premium':
+        case 'theta':
+        case 'delta':
+        case 'gamma':
+        case 'vega':
+        case 'rho':
+            convertedValue = parseFloat(value);
+            break;
+        case 'days':
+            convertedValue = parseInt(value);
+            break;
+    }
+    
+    option[field] = convertedValue;
+    
+    if (field === 'premium') {
+        const spot = parseFloat(document.getElementById('spotPrice').value);
+        const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
+        const T = option.days / 365;
+        if (T > 0) {
+            const iv = BlackScholesPricing.calculateImpliedVol(
+                option.type,
+                spot,
+                option.strike,
+                T,
+                r,
+                convertedValue
+            );
+            option.iv = iv * 100;
+        }
+    }
+}
+
+function toggleAutoCalculate() {
+    autoCalculate = !autoCalculate;
+    const autoCalcCheckbox = document.getElementById('autoCalculate');
+    const label = autoCalcCheckbox.nextElementSibling;
+    if (autoCalculate) {
+        label.innerHTML = '<i class="bi bi-lightning-charge"></i> Auto-calc <span class="badge bg-success">ON</span>';
+        showNotification('Auto-calculate: ON');
+    } else {
+        label.innerHTML = '<i class="bi bi-lightning-charge"></i> Auto-calc <span class="badge bg-secondary">OFF</span>';
+        showNotification('Auto-calculate: OFF');
+    }
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification alert alert-${type} alert-dismissible fade show`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    notification.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+    document.body.appendChild(notification);
+    setTimeout(() => {
+        if (notification.parentNode) notification.parentNode.removeChild(notification);
+    }, 3000);
+}
+
+// ============================================================================
+// CHART FUNCTIONS
+// ============================================================================
 function updateErosionChart() {
     const ctx = document.getElementById('erosionChart').getContext('2d');
-    const projectionDays = parseInt(document.getElementById('projectionDays').value);
+    const projectionDays = 30;
     const spot = parseFloat(document.getElementById('spotPrice').value);
     const iv = parseFloat(document.getElementById('impliedVol').value) / 100;
     const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
     
-    // Destroy existing chart if it exists
-    if (erosionChart) {
-        erosionChart.destroy();
-    }
+    if (erosionChart) erosionChart.destroy();
     
-    // Prepare data using BSM for each day
     const labels = [];
     const callData = [];
     const putData = [];
@@ -675,18 +1030,13 @@ function updateErosionChart() {
     
     for (let day = 0; day <= projectionDays; day++) {
         labels.push(`Day ${day}`);
-        
-        let callPremium = 0;
-        let putPremium = 0;
-        let callExtrinsicVal = 0;
-        let putExtrinsicVal = 0;
+        let callPremium = 0, putPremium = 0;
+        let callExtrinsicVal = 0, putExtrinsicVal = 0;
         
         options.forEach(option => {
             if (day <= option.days) {
                 const remainingDays = option.days - day;
                 const T = remainingDays / 365;
-                
-                // Use BSM to calculate premium at each point
                 if (T > 0) {
                     const greeks = BlackScholesPricing.calculateGreeks(
                         option.type,
@@ -696,7 +1046,6 @@ function updateErosionChart() {
                         r,
                         iv
                     );
-                    
                     if (option.type === 'CALL') {
                         callPremium += greeks.price;
                         callExtrinsicVal += greeks.extrinsic;
@@ -705,12 +1054,8 @@ function updateErosionChart() {
                         putExtrinsicVal += greeks.extrinsic;
                     }
                 } else {
-                    // At expiration
-                    if (option.type === 'CALL') {
-                        callPremium += Math.max(spot - option.strike, 0);
-                    } else {
-                        putPremium += Math.max(option.strike - spot, 0);
-                    }
+                    if (option.type === 'CALL') callPremium += Math.max(spot - option.strike, 0);
+                    else putPremium += Math.max(option.strike - spot, 0);
                 }
             }
         });
@@ -721,7 +1066,6 @@ function updateErosionChart() {
         putExtrinsic.push(putExtrinsicVal);
     }
     
-    // Create chart with BSM-calculated data
     erosionChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -744,24 +1088,6 @@ function updateErosionChart() {
                     borderWidth: 2,
                     tension: 0.4,
                     fill: true
-                },
-                {
-                    label: 'Call Extrinsic',
-                    data: callExtrinsic,
-                    borderColor: '#28a745',
-                    borderWidth: 1,
-                    borderDash: [5, 5],
-                    pointRadius: 0,
-                    fill: false
-                },
-                {
-                    label: 'Put Extrinsic',
-                    data: putExtrinsic,
-                    borderColor: '#dc3545',
-                    borderWidth: 1,
-                    borderDash: [5, 5],
-                    pointRadius: 0,
-                    fill: false
                 }
             ]
         },
@@ -769,9 +1095,7 @@ function updateErosionChart() {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    position: 'top',
-                },
+                legend: { position: 'top' },
                 tooltip: {
                     mode: 'index',
                     intersect: false,
@@ -783,25 +1107,16 @@ function updateErosionChart() {
                 }
             },
             scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Days to Expiry'
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Premium (₹)'
-                    },
-                    beginAtZero: true
-                }
+                x: { title: { display: true, text: 'Days to Expiry' } },
+                y: { title: { display: true, text: 'Premium (₹)' }, beginAtZero: true }
             }
         }
     });
 }
 
-// Add new functions for industry standard features
+// ============================================================================
+// BSM SPECIALIZED FUNCTIONS
+// ============================================================================
 function calculateImpliedVolatility() {
     const spot = parseFloat(document.getElementById('spotPrice').value);
     const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
@@ -818,7 +1133,6 @@ function calculateImpliedVolatility() {
                 option.premium
             );
             option.iv = iv * 100;
-            console.log(`${option.type} ${option.strike}: IV = ${(iv*100).toFixed(2)}%`);
         }
     });
     
@@ -830,8 +1144,6 @@ function validatePutCallParity() {
     const spot = parseFloat(document.getElementById('spotPrice').value);
     const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
     const days = parseInt(document.getElementById('daysToExpiry').value);
-    
-    // Find matching call/put pairs
     const pairs = [];
     
     options.forEach(call => {
@@ -839,7 +1151,6 @@ function validatePutCallParity() {
             const matchingPut = options.find(p => 
                 p.type === 'PUT' && p.strike === call.strike && p.days === call.days
             );
-            
             if (matchingPut) {
                 const parity = BlackScholesPricing.checkPutCallParity(
                     call.premium,
@@ -849,7 +1160,6 @@ function validatePutCallParity() {
                     days/365,
                     r
                 );
-                
                 pairs.push({
                     strike: call.strike,
                     callPrice: call.premium,
@@ -860,7 +1170,6 @@ function validatePutCallParity() {
         }
     });
     
-    // Display results
     let message = 'PUT-CALL PARITY ANALYSIS:\n\n';
     pairs.forEach(pair => {
         message += `Strike: ₹${pair.strike}\n`;
@@ -871,10 +1180,7 @@ function validatePutCallParity() {
         message += `Synthetic Put: ₹${pair.parity.syntheticPut.toFixed(2)}\n\n`;
     });
     
-    if (pairs.length === 0) {
-        message += 'No matching call/put pairs found for parity check.';
-    }
-    
+    if (pairs.length === 0) message += 'No matching call/put pairs found.';
     alert(message);
 }
 
@@ -885,7 +1191,6 @@ function updateVolatilitySurface() {
     
     volSurface.updateFromMarket(atmVol, skew, smile);
     
-    // Recalculate all options with updated volatility surface
     options.forEach(option => {
         const moneyness = (option.strike - parseFloat(document.getElementById('spotPrice').value)) / 
                          parseFloat(document.getElementById('spotPrice').value);
@@ -897,114 +1202,15 @@ function updateVolatilitySurface() {
     alert(`Volatility surface updated:\nATM: ${(atmVol*100).toFixed(2)}%\nSkew: ${skew}\nSmile: ${smile}`);
 }
 
-// Update HTML to add new BSM features
-function addBSMFeaturesToUI() {
-    // Add BSM status indicator to header
-    const header = document.querySelector('header h1');
-    if (header && !document.getElementById('bsmBadge')) {
-        const badge = document.createElement('span');
-        badge.id = 'bsmBadge';
-        badge.className = 'badge bg-info ms-2';
-        badge.textContent = 'BSM v4.0';
-        badge.title = 'Black-Scholes-Merton Industry Standard';
-        header.appendChild(badge);
-    }
-    
-    // Add BSM tools to quick action bar
-    const quickActions = document.querySelector('.d-flex.flex-wrap.gap-2.justify-content-center');
-    if (quickActions && !document.getElementById('bsmTools')) {
-        const bsmTools = document.createElement('div');
-        bsmTools.id = 'bsmTools';
-        bsmTools.className = 'btn-group btn-group-sm';
-        
-        bsmTools.innerHTML = `
-            <button class="btn btn-outline-info" onclick="calculateImpliedVolatility()" title="Calc IV">
-                <i class="bi bi-graph-up-arrow"></i> Calc IV
-            </button>
-            <button class="btn btn-outline-info" onclick="validatePutCallParity()" title="Check Parity">
-                <i class="bi bi-shuffle"></i> Parity
-            </button>
-            <button class="btn btn-outline-info" onclick="updateVolatilitySurface()" title="Vol Surface">
-                <i class="bi bi-cloud-arrow-up"></i> Vol Surface
-            </button>
-        `;
-        
-        quickActions.appendChild(bsmTools);
-    }
-    
-    // Add BSM metrics to real-time metrics
-    const metricsContainer = document.querySelector('.row.text-center');
-    if (metricsContainer && !document.getElementById('bsmMetrics')) {
-        const bsmMetrics = document.createElement('div');
-        bsmMetrics.id = 'bsmMetrics';
-        bsmMetrics.className = 'col-md-2 col-4';
-        
-        bsmMetrics.innerHTML = `
-            <div class="metric-box">
-                <small class="text-muted">Total Extrinsic</small>
-                <div class="h5 text-warning" id="totalExtrinsic">₹0.00</div>
-            </div>
-        `;
-        
-        metricsContainer.appendChild(bsmMetrics);
-        
-        // Add parity check metric
-        const parityMetric = document.createElement('div');
-        parityMetric.className = 'col-md-2 col-4';
-        parityMetric.innerHTML = `
-            <div class="metric-box">
-                <small class="text-muted">Put-Call Parity</small>
-                <div class="h6" id="putCallParity">
-                    <span class="badge bg-secondary">N/A</span>
-                </div>
-            </div>
-        `;
-        
-        metricsContainer.appendChild(parityMetric);
-    }
-}
-
-// Initialize BSM features on load
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-    
-    // Add BSM UI features
-    setTimeout(() => {
-        addBSMFeaturesToUI();
-        initializeDefaultOptions();
-    }, 100);
-    
-    // Set current date
-    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-IN', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
-    
-    // Add BSM info to console
-    console.log('%c⚡ Active Trader Pro v4.0 - Industry Standard BSM Model', 
-                'color: #28a745; font-weight: bold; font-size: 14px;');
-    console.log('%c✓ Complete Black-Scholes-Merton implementation', 'color: #6c757d;');
-    console.log('%c✓ CBOE/NSE industry standard calculations', 'color: #6c757d;');
-    console.log('%c✓ Professional options pricing engine', 'color: #6c757d;');
-});
-
-// Keep existing functions but enhance them
-// ... [Keep all existing functions like addCallOption, addPutOption, etc.] 
-// but modify them to use BSM calculations when appropriate
-
-// Update addCallOption to use BSM
+// ============================================================================
+// OPTION CREATION FUNCTIONS
+// ============================================================================
 function addCallOption() {
     const spot = parseFloat(document.getElementById('spotPrice').value);
     const days = parseInt(document.getElementById('daysToExpiry').value);
     const iv = parseFloat(document.getElementById('impliedVol').value) / 100;
     const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
     
-    // Calculate using BSM
     const greeks = BlackScholesPricing.calculateGreeks('CALL', spot, spot, days/365, r, iv);
     
     addOption({
@@ -1027,14 +1233,12 @@ function addCallOption() {
     if (autoCalculate) updateAllCalculations();
 }
 
-// Update addPutOption to use BSM
 function addPutOption() {
     const spot = parseFloat(document.getElementById('spotPrice').value);
     const days = parseInt(document.getElementById('daysToExpiry').value);
     const iv = parseFloat(document.getElementById('impliedVol').value) / 100;
     const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
     
-    // Calculate using BSM
     const greeks = BlackScholesPricing.calculateGreeks('PUT', spot, spot, days/365, r, iv);
     
     addOption({
@@ -1057,83 +1261,108 @@ function addPutOption() {
     if (autoCalculate) updateAllCalculations();
 }
 
-// Update keyboard shortcuts to include BSM features
-document.addEventListener('keydown', function(e) {
-    // Alt + Key shortcuts
-    if (e.altKey) {
-        e.preventDefault();
-        switch(e.key.toLowerCase()) {
-            case 'c':
-                calculateAll();
-                break;
-            case 'r':
-                resetAll();
-                break;
-            case 'e':
-                exportToCSV();
-                break;
-            case 'p':
-                calculatePL();
-                break;
-            case 'i': // New: Calculate IV
-                calculateImpliedVolatility();
-                break;
-            case 'v': // New: Validate parity
-                validatePutCallParity();
-                break;
-            case '1':
-                if (options.length > 0) recalculateBSM(options[0].id);
-                break;
-            case '2':
-                if (options.length > 1) recalculateBSM(options[1].id);
-                break;
+// ============================================================================
+// CALCULATION ENGINE
+// ============================================================================
+function updateAllCalculations() {
+    if (options.length === 0) return;
+    const spot = parseFloat(document.getElementById('spotPrice').value);
+    const iv = parseFloat(document.getElementById('impliedVol').value) / 100;
+    const days = parseInt(document.getElementById('daysToExpiry').value);
+    const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
+    
+    let totalTheta = 0, totalWeeklyErosion = 0, totalTimeValue = 0;
+    let totalVegaImpact = 0, totalDelta = 0, totalGamma = 0;
+    let totalRho = 0, totalExtrinsic = 0, totalIntrinsic = 0;
+    let atmCall = null, atmPut = null;
+    
+    options.forEach(option => {
+        totalTheta += option.theta;
+        totalWeeklyErosion += option.theta * 7;
+        totalTimeValue += option.premium;
+        totalVegaImpact += option.vega;
+        totalDelta += option.delta;
+        totalGamma += option.gamma;
+        totalRho += option.rho;
+        totalExtrinsic += option.extrinsic;
+        totalIntrinsic += option.intrinsic;
+        
+        if (option.moneyness === 'ATM' || option.moneyness === 'ATM') {
+            if (option.type === 'CALL') atmCall = option;
+            if (option.type === 'PUT') atmPut = option;
+        }
+    });
+    
+    if (document.getElementById('totalTheta')) 
+        document.getElementById('totalTheta').textContent = `-₹${Math.abs(totalTheta).toFixed(2)}`;
+    if (document.getElementById('totalWeeklyErosion')) 
+        document.getElementById('totalWeeklyErosion').textContent = `-₹${Math.abs(totalWeeklyErosion).toFixed(2)}`;
+    if (document.getElementById('totalExtrinsic')) 
+        document.getElementById('totalExtrinsic').textContent = `₹${totalExtrinsic.toFixed(2)}`;
+    if (document.getElementById('totalIntrinsic')) 
+        document.getElementById('totalIntrinsic').textContent = `₹${totalIntrinsic.toFixed(2)}`;
+    if (document.getElementById('totalDelta')) 
+        document.getElementById('totalDelta').textContent = totalDelta.toFixed(4);
+    
+    if (atmCall && atmPut) {
+        const parity = BlackScholesPricing.checkPutCallParity(
+            atmCall.premium,
+            atmPut.premium,
+            spot,
+            atmCall.strike,
+            days/365,
+            r
+        );
+        const parityElem = document.getElementById('putCallParity');
+        if (parityElem) {
+            parityElem.innerHTML = parity.valid ? 
+                `<span class="badge bg-success">Parity ✓</span>` :
+                `<span class="badge bg-warning">Parity ₹${parity.discrepancy}</span>`;
         }
     }
     
-    // Function keys
-    switch(e.key) {
-        case 'F1':
-            e.preventDefault();
-            loadPreset('nifty_atm');
-            break;
-        case 'F2':
-            e.preventDefault();
-            loadPreset('banknifty_weekly');
-            break;
-        case 'F3':
-            e.preventDefault();
-            toggleView('advanced');
-            break;
-        case 'F4':
-            e.preventDefault();
-            toggleView('pro');
-            break;
-        case 'F5': // New: BSM recalc all
-            e.preventDefault();
-            options.forEach(option => recalculateBSM(option.id));
-            updateAllCalculations();
-            break;
+    lastCalculationTime = new Date();
+    if (document.getElementById('lastUpdate')) {
+        document.getElementById('lastUpdate').textContent = 
+            `Last: ${lastCalculationTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
     }
     
-    // Number pad +/- for quick adjustments
-    if (e.target.tagName === 'INPUT' && (e.key === '+' || e.key === '-')) {
-        e.preventDefault();
-        const input = e.target;
-        const current = parseFloat(input.value) || 0;
-        const step = parseFloat(input.step) || 1;
-        
-        if (e.key === '+') {
-            input.value = current + step;
-        } else {
-            input.value = current - step;
-        }
-        
-        // Trigger change event
-        input.dispatchEvent(new Event('change'));
-    }
-});
+    updateErosionChart();
+}
 
-// Update showShortcuts to include BSM shortcuts
+// ============================================================================
+// EXPORT FUNCTION
+// ============================================================================
+function exportToCSV() {
+    let csv = 'Type,Strike,Premium,Theta,Delta,Gamma,Vega,Rho,Days,Moneyness,IV%,Intrinsic,Extrinsic,Theoretical,D1,D2,Model\n';
+    options.forEach(option => {
+        csv += `${option.type},${option.strike},${option.premium},${option.theta},${option.delta},${option.gamma},${option.vega},${option.rho},${option.days},${option.moneyness},${option.iv},${option.intrinsic},${option.extrinsic},${option.theoreticalPrice},${option.d1},${option.d2},${option.model}\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `options_calculator_bsm_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    alert('CSV exported with BSM model data!');
+}
+
+// ============================================================================
+// BSM UI ENHANCEMENTS
+// ============================================================================
+function addBSMFeaturesToUI() {
+    const header = document.querySelector('header h1');
+    if (header && !document.getElementById('bsmBadge')) {
+        const badge = document.createElement('span');
+        badge.id = 'bsmBadge';
+        badge.className = 'badge bg-info ms-2';
+        badge.textContent = 'BSM v4.0';
+        badge.title = 'Black-Scholes-Merton Industry Standard';
+        header.appendChild(badge);
+    }
+}
+
 function showShortcuts() {
     alert(`ACTIVE TRADER PRO v4.0 - BSM INDUSTRY STANDARD
 
@@ -1153,32 +1382,92 @@ Alt+1: Recalc option 1 (BSM)
 Alt+2: Recalc option 2 (BSM)
 
 +/- on number inputs: Quick adjust
-
-Tab: Next field
-Shift+Tab: Previous field
-Enter: Apply and calculate
+Up/Down Arrow: Adjust spot price
+Left/Right Arrow: Adjust days to expiry
 
 MODEL: Black-Scholes-Merton (Industry Standard)
 FEATURES: Complete Greeks, Parity Check, Vol Surface
 
-AUTO-CALCULATE is ON - changes update in real-time!`);
+AUTO-CALCULATE: ${autoCalculate ? 'ON' : 'OFF'}`);
 }
 
-// Enhanced CSV export with BSM data
-function exportToCSV() {
-    let csv = 'Type,Strike,Premium,Theta,Delta,Gamma,Vega,Rho,Days,Moneyness,IV%,Intrinsic,Extrinsic,Theoretical,D1,D2,Model\n';
+// ============================================================================
+// KEYBOARD SHORTCUTS
+// ============================================================================
+document.addEventListener('keydown', function(e) {
+    if (e.altKey) {
+        e.preventDefault();
+        switch(e.key.toLowerCase()) {
+            case 'c': calculateAll(); break;
+            case 'r': resetAll(); break;
+            case 'e': exportToCSV(); break;
+            case 'p': calculatePL(); break;
+            case 'i': calculateImpliedVolatility(); break;
+            case 'v': validatePutCallParity(); break;
+            case '1': if (options.length > 0) recalculateBSM(options[0].id); break;
+            case '2': if (options.length > 1) recalculateBSM(options[1].id); break;
+        }
+    }
     
-    options.forEach(option => {
-        csv += `${option.type},${option.strike},${option.premium},${option.theta},${option.delta},${option.gamma},${option.vega},${option.rho},${option.days},${option.moneyness},${option.iv},${option.intrinsic},${option.extrinsic},${option.theoreticalPrice},${option.d1},${option.d2},${option.model}\n`;
+    switch(e.key) {
+        case 'F1': e.preventDefault(); loadPreset('nifty_atm'); break;
+        case 'F2': e.preventDefault(); loadPreset('banknifty_weekly'); break;
+        case 'F3': e.preventDefault(); toggleView('advanced'); break;
+        case 'F4': e.preventDefault(); toggleView('pro'); break;
+        case 'F5': e.preventDefault(); options.forEach(o => recalculateBSM(o.id)); updateAllCalculations(); break;
+    }
+    
+    if (!e.altKey && !e.ctrlKey && !e.shiftKey) {
+        switch(e.key) {
+            case 'ArrowUp': e.preventDefault(); adjustSpot(10); break;
+            case 'ArrowDown': e.preventDefault(); adjustSpot(-10); break;
+            case 'ArrowRight': e.preventDefault(); adjustDays(1); break;
+            case 'ArrowLeft': e.preventDefault(); adjustDays(-1); break;
+        }
+    }
+    
+    if (e.target.tagName === 'INPUT' && (e.key === '+' || e.key === '-')) {
+        e.preventDefault();
+        const input = e.target;
+        const current = parseFloat(input.value) || 0;
+        const step = parseFloat(input.step) || 1;
+        input.value = e.key === '+' ? current + step : current - step;
+        input.dispatchEvent(new Event('change'));
+    }
+});
+
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+function initializeCharts() {
+    updateErosionChart();
+    updatePLChart();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
     });
     
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `options_calculator_bsm_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
+    setTimeout(() => {
+        addBSMFeaturesToUI();
+        initializeDefaultOptions();
+        initializeCharts();
+    }, 100);
     
-    // Show notification
-    alert('CSV exported with BSM model data!');
-}
+    const dateElement = document.getElementById('currentDate');
+    if (dateElement) {
+        dateElement.textContent = new Date().toLocaleDateString('en-IN', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    }
+    
+    setTimeout(() => {
+        console.log('%c⚡ BSM Options Calculator v4.0 Loaded', 
+            'color: #28a745; font-weight: bold; font-size: 16px;');
+        console.log('%cBlack-Scholes-Merton Model Active', 'color: #6c757d;');
+    }, 500);
+});
