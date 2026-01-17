@@ -16,7 +16,7 @@
     --current-price-color: #0d6efd;
     --break-even-color: #ffc107;
     
-    /* Light Theme Text & Background - Enhanced contrast */
+    /* Light Theme Text & Background */
     --bg-primary: #ffffff;
     --bg-secondary: #f8f9fa;
     --bg-tertiary: #e9ecef;
@@ -27,19 +27,15 @@
     --card-bg: #ffffff;
     --table-bg: #ffffff;
     --table-header-bg: #f8f9fa;
+    --table-header-text: #212529;
     --table-row-even: #f8f9fa;
     --table-row-odd: #ffffff;
     --input-bg: #ffffff;
     --input-border: #ced4da;
     --input-text: #212529;
-    
-    /* Shadow variables that work in both themes */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    
-    /* Ensure text is always visible */
-    --text-always-visible: #212529;
+    --alert-info-bg: #d1ecf1;
+    --alert-info-text: #0c5460;
+    --alert-info-border: #bee5eb;
 }
 
 [data-theme="dark"] {
@@ -57,30 +53,26 @@
     --current-price-color: #4dabf7;
     --break-even-color: #ffc107;
     
-    /* Dark Theme Text & Background - Enhanced for visibility */
+    /* Dark Theme Text & Background - IMPORTANT: Enhanced for visibility */
     --bg-primary: #121416;
     --bg-secondary: #1a1d20;
     --bg-tertiary: #24292e;
-    --text-primary: #ffffff; /* Changed from #e9ecef for better visibility */
-    --text-secondary: #dee2e6; /* Enhanced contrast */
+    --text-primary: #ffffff; /* White for maximum contrast */
+    --text-secondary: #dee2e6; /* Light gray */
     --text-muted: #adb5bd;
     --border-color: #495057;
     --card-bg: #1a1d20;
     --table-bg: #1a1d20;
-    --table-header-bg: #2d3748; /* Darker for better contrast */
+    --table-header-bg: #2d3748; /* Darker gray for headers */
+    --table-header-text: #ffffff; /* White text for headers */
     --table-row-even: #1a1d20;
-    --table-row-odd: #212529; /* Slight variation for rows */
+    --table-row-odd: #212529;
     --input-bg: #24292e;
     --input-border: #495057;
-    --input-text: #ffffff; /* Changed from #e9ecef */
-    
-    /* Adjust shadows for dark mode */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-    
-    /* Ensure text is always visible in dark mode */
-    --text-always-visible: #ffffff;
+    --input-text: #ffffff;
+    --alert-info-bg: rgba(13, 202, 240, 0.15);
+    --alert-info-text: #e9ecef;
+    --alert-info-border: rgba(13, 202, 240, 0.3);
 }
 
 /* Global Styles - Force theme consistency */
@@ -95,7 +87,7 @@ body {
 }
 
 /* Force all text elements to use theme colors */
-h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, textarea {
+h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, textarea, small {
     color: var(--text-primary) !important;
 }
 
@@ -114,13 +106,13 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
 }
 
 .theme-toggle:hover {
     transform: scale(1.1);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .theme-toggle i {
@@ -140,135 +132,218 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
     display: block;
 }
 
-/* BSM Trading Terminal */
-.card-terminal {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease;
+/* ===== CARD STYLING - CONSISTENT ACROSS ALL SECTIONS ===== */
+.card {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
 }
 
 .card-header {
     background-color: var(--table-header-bg) !important;
     border-bottom: 1px solid var(--border-color) !important;
+    color: var(--table-header-text) !important;
+}
+
+/* Remove ALL hardcoded Bootstrap color classes */
+.card-header.bg-dark,
+.card-header.bg-secondary,
+.card-header.bg-primary,
+.card-header.bg-success,
+.card-header.bg-info,
+.card-header.bg-warning,
+.card-header.bg-danger {
+    background-color: var(--table-header-bg) !important;
+    color: var(--table-header-text) !important;
+}
+
+/* Specifically fix .bg-warning.text-dark */
+.card-header.bg-warning.text-dark {
+    background-color: var(--table-header-bg) !important;
+    color: var(--table-header-text) !important;
+}
+
+/* Fix Bootstrap utility classes */
+[data-theme="dark"] .text-dark,
+[data-theme="dark"] .text-black {
     color: var(--text-primary) !important;
 }
 
-/* Comprehensive table fixes for dark mode */
-[data-theme="dark"] table {
-    --bs-table-bg: var(--table-bg) !important;
-    --bs-table-color: var(--text-primary) !important;
+[data-theme="dark"] .text-white {
+    color: var(--text-primary) !important;
+}
+
+/* ===== TABLE STYLING - CONSISTENT ACROSS ALL TABLES ===== */
+table {
+    background-color: var(--table-bg) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* All table headers */
+table thead th,
+.table-dark th,
+.table-light th,
+.table-dark thead th,
+.table-light thead th {
+    background-color: var(--table-header-bg) !important;
+    color: var(--table-header-text) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* All table cells */
+table td,
+.table-dark td,
+.table-light td {
+    background-color: var(--table-bg) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Fix specific table classes */
+.table-dark {
+    --bs-table-bg: var(--table-header-bg) !important;
+    --bs-table-color: var(--table-header-text) !important;
     --bs-table-border-color: var(--border-color) !important;
+}
+
+.table-light {
+    --bs-table-bg: var(--table-header-bg) !important;
+    --bs-table-color: var(--table-header-text) !important;
+    --bs-table-border-color: var(--border-color) !important;
+}
+
+/* Table hover effects */
+.table-hover tbody tr:hover {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* ===== SPECIFIC TABLE FIXES ===== */
+
+/* OPTION CHAIN table - Keep its good styling, ensure consistency */
+#optionsTable {
+    background-color: var(--table-bg) !important;
+}
+
+#optionsTable th {
+    background-color: var(--table-header-bg) !important;
+    color: var(--table-header-text) !important;
+}
+
+#optionsTable th .formula {
+    color: var(--text-muted) !important;
+}
+
+#optionsTable td {
     background-color: var(--table-bg) !important;
     color: var(--text-primary) !important;
 }
 
-[data-theme="dark"] table th,
-[data-theme="dark"] table td {
-    background-color: inherit !important;
+/* P&L AT KEY LEVELS table - Make it match OPTION CHAIN */
+#plDetailedTable {
+    background-color: var(--table-bg) !important;
     color: var(--text-primary) !important;
-    border-color: var(--border-color) !important;
 }
 
-/* Fix all Bootstrap table variants */
-[data-theme="dark"] .table-light {
-    --bs-table-bg: var(--table-header-bg) !important;
-    --bs-table-color: var(--text-primary) !important;
+#plDetailedTable th {
     background-color: var(--table-header-bg) !important;
-    color: var(--text-primary) !important;
-}
-
-[data-theme="dark"] .table-dark {
-    --bs-table-bg: var(--bg-tertiary) !important;
-    --bs-table-color: var(--text-primary) !important;
-    background-color: var(--bg-tertiary) !important;
-    color: var(--text-primary) !important;
-}
-
-/* Fix striped tables */
-[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) {
-    --bs-table-accent-bg: var(--table-row-odd) !important;
-    background-color: var(--table-row-odd) !important;
-    color: var(--text-primary) !important;
-}
-
-/* Fix hover effects */
-[data-theme="dark"] .table-hover tbody tr:hover {
-    --bs-table-accent-bg: var(--bg-tertiary) !important;
-    background-color: var(--bg-tertiary) !important;
-    color: var(--text-primary) !important;
-}
-
-/* Fix Bootstrap utility classes */
-[data-theme="dark"] .bg-light {
-    background-color: var(--bg-tertiary) !important;
-}
-
-[data-theme="dark"] .text-dark,
-[data-theme="dark"] .text-body {
-    color: var(--text-primary) !important;
-}
-
-[data-theme="dark"] .card-header.bg-warning,
-[data-theme="dark"] .bg-warning {
-    background-color: #664d03 !important;
-    color: var(--text-primary) !important;
-}
-
-/* Button fixes */
-[data-theme="dark"] .btn-outline-light {
+    color: var(--table-header-text) !important;
     border-color: var(--border-color) !important;
-    color: var(--text-primary) !important;
 }
 
-[data-theme="dark"] .btn-outline-light:hover {
-    background-color: var(--bg-tertiary) !important;
+#plDetailedTable td {
+    background-color: var(--table-bg) !important;
     color: var(--text-primary) !important;
-}
-
-[data-theme="dark"] .btn-light {
-    background-color: var(--bg-tertiary) !important;
     border-color: var(--border-color) !important;
+}
+
+/* ===== BSM P&L SIMULATOR SETTINGS ===== */
+/* Already covered by card and form control styles */
+
+/* ===== BLACK-SCHOLES-MERTON MODEL INFO SECTION ===== */
+.card:has(h6:contains("BLACK-SCHOLES-MERTON MODEL INFO")) .card-body,
+.card .card-body:has(ul li:contains("S = Spot Price")) {
+    background-color: var(--card-bg) !important;
     color: var(--text-primary) !important;
 }
 
-/* Form controls dark mode fixes */
-[data-theme="dark"] .form-control,
-[data-theme="dark"] .form-select {
+/* Model info lists */
+.card ul,
+.card ul li {
+    background-color: transparent !important;
+    color: var(--text-primary) !important;
+}
+
+/* Fix for all unordered lists in cards */
+.card ul:not(.dropdown-menu):not(.nav):not(.pagination):not(.list-group) {
+    background-color: transparent !important;
+}
+
+.card ul li:not(.dropdown-item):not(.nav-item):not(.page-item):not(.list-group-item) {
+    color: var(--text-primary) !important;
+    background-color: transparent !important;
+}
+
+/* Alert box in BSM model info */
+.alert-info {
+    background-color: var(--alert-info-bg) !important;
+    border-color: var(--alert-info-border) !important;
+    color: var(--alert-info-text) !important;
+}
+
+.alert-info * {
+    color: inherit !important;
+}
+
+/* ===== FORM CONTROLS - CONSISTENT STYLING ===== */
+.form-control,
+.form-select,
+.form-check-input,
+.input-group-text {
     background-color: var(--input-bg) !important;
     border-color: var(--input-border) !important;
     color: var(--input-text) !important;
 }
 
-[data-theme="dark"] .form-check-input {
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--bsm-color) !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25) !important;
+}
+
+/* Checkbox and radio buttons */
+.form-check-input {
     background-color: var(--input-bg);
     border-color: var(--input-border);
 }
 
-[data-theme="dark"] .form-check-input:checked {
+.form-check-input:checked {
     background-color: var(--bsm-color);
     border-color: var(--bsm-color);
 }
 
-[data-theme="dark"] .input-group-text {
+/* Input group */
+.input-group-text {
     background-color: var(--bg-tertiary) !important;
     color: var(--text-primary) !important;
-    border-color: var(--input-border) !important;
 }
 
-/* BSM Model Indicators */
-#bsmBadge {
-    font-family: 'Courier New', monospace;
-    font-size: 0.7rem;
-    animation: pulse-bsm 2s infinite;
-    background: linear-gradient(135deg, var(--bsm-color) 0%, #0aa2c0 100%) !important;
-    color: white !important;
+/* ===== BUTTONS - THEME AWARE ===== */
+.btn-outline-light {
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
 }
 
-@keyframes pulse-bsm {
-    0% { opacity: 1; }
-    50% { opacity: 0.7; }
-    100% { opacity: 1; }
+.btn-outline-light:hover {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+.btn-light {
+    background-color: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
 }
 
 /* BSM Tools */
@@ -284,50 +359,22 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
     color: white;
 }
 
-/* BSM Table Enhancements - CRITICAL FIXES */
-#optionsTable,
-#plDetailedTable {
-    background-color: var(--table-bg) !important;
-    color: var(--text-primary) !important;
-    border-color: var(--border-color) !important;
-}
-
-#optionsTable th,
-#plDetailedTable th {
-    position: relative;
-    background-color: var(--table-header-bg) !important;
-    border-bottom: 2px solid var(--border-color) !important;
-    color: var(--text-primary) !important;
-    font-weight: 600;
-}
-
-#optionsTable th .formula {
-    font-size: 0.6rem;
-    position: absolute;
-    bottom: 2px;
-    left: 0;
-    right: 0;
-    color: var(--text-muted) !important;
+/* ===== BSM MODEL INDICATORS ===== */
+#bsmBadge {
     font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    animation: pulse-bsm 2s infinite;
+    background: linear-gradient(135deg, var(--bsm-color) 0%, #0aa2c0 100%) !important;
+    color: white !important;
 }
 
-#optionsTable td,
-#plDetailedTable td {
-    border-color: var(--border-color) !important;
-    color: var(--text-primary) !important;
-    background-color: inherit !important;
+@keyframes pulse-bsm {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
 }
 
-/* Force table cell content visibility */
-#optionsTable td *,
-#plDetailedTable td *,
-#optionsTable th *,
-#plDetailedTable th * {
-    color: inherit !important;
-    background-color: transparent !important;
-}
-
-/* Greek symbols styling */
+/* ===== GREEK SYMBOLS ===== */
 .greek-symbol {
     font-family: 'Times New Roman', serif;
     font-style: italic;
@@ -340,7 +387,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
 .greek-vega { color: #20c997 !important; }
 .greek-rho { color: #e83e8c !important; }
 
-/* BSM Metric Boxes */
+/* ===== METRIC BOXES ===== */
 .metric-box.bsm {
     background: linear-gradient(135deg, var(--bsm-bg) 0%, rgba(255,255,255,0.1) 100%);
     border-left: 3px solid var(--bsm-color);
@@ -354,80 +401,21 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
     margin-top: 2px;
 }
 
-/* Form Controls */
-.form-control, .input-group-text {
-    background-color: var(--input-bg) !important;
-    border-color: var(--input-border) !important;
-    color: var(--input-text) !important;
-    transition: all 0.3s ease;
-}
-
-.form-control:focus {
-    border-color: var(--bsm-color) !important;
-    box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25) !important;
-}
-
-/* Volatility Surface Card */
+/* ===== VOLATILITY SURFACE CARD ===== */
 .card-vol-surface {
     border: 2px solid var(--bsm-color);
     background: linear-gradient(135deg, rgba(13, 202, 240, 0.05) 0%, rgba(255,255,255,0.02) 100%);
     color: var(--text-primary);
 }
 
-/* BSM Model Info Panel - CRITICAL FIX */
-.model-info {
-    font-family: 'Courier New', monospace;
-    background-color: var(--bg-tertiary) !important;
-    color: var(--text-primary) !important;
-    border-radius: 4px;
-    padding: 10px;
-    margin: 5px 0;
-    border-left: 3px solid var(--greeks-color);
-}
-
-/* Force all model-info content to be visible */
-.model-info,
-.model-info *:not(.btn):not(.form-control):not(.input-group-text) {
-    color: var(--text-primary) !important;
-    background-color: transparent !important;
-}
-
-.model-info ul {
-    margin-bottom: 0;
-    padding-left: 1.2rem;
-}
-
-.model-info li {
-    font-size: 0.8rem;
-    color: var(--text-secondary) !important;
-    margin-bottom: 2px;
-}
-
-/* Special fix for formulas in model info */
-.model-info .formula,
-.model-info code,
-.model-info pre {
-    font-family: 'Courier New', monospace;
-    color: var(--text-primary) !important;
-    background-color: rgba(0, 0, 0, 0.1) !important;
-    padding: 2px 4px;
-    border-radius: 3px;
-}
-
-[data-theme="dark"] .model-info .formula,
-[data-theme="dark"] .model-info code,
-[data-theme="dark"] .model-info pre {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* BSM Chart Enhancements */
+/* ===== BSM CHART ENHANCEMENTS ===== */
 .chart-container.bsm {
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
     border-radius: 4px;
     padding: 10px;
 }
 
-/* Price Difference Indicators */
+/* ===== PRICE DIFFERENCE INDICATORS ===== */
 .price-diff-positive {
     color: var(--call-color) !important;
     background-color: rgba(40, 167, 69, 0.1);
@@ -444,7 +432,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
     font-size: 0.7rem;
 }
 
-/* Put-Call Parity Status */
+/* ===== PUT-CALL PARITY STATUS ===== */
 #parityStatus.valid {
     background-color: var(--call-color);
 }
@@ -460,26 +448,9 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
     100% { opacity: 1; }
 }
 
-/* P&L TABLE ENHANCEMENTS - CRITICAL SECTION */
+/* ===== P&L TABLE ENHANCEMENTS ===== */
 #plDetailedTable {
     font-size: 0.85rem;
-    background-color: var(--table-bg) !important;
-    color: var(--text-primary) !important;
-}
-
-#plDetailedTable th {
-    background-color: var(--table-header-bg) !important;
-    border-bottom: 2px solid var(--border-color) !important;
-    font-weight: 600;
-    white-space: nowrap;
-    color: var(--text-primary) !important;
-}
-
-#plDetailedTable td {
-    padding: 0.5rem 0.75rem;
-    vertical-align: middle;
-    border-color: var(--border-color) !important;
-    color: var(--text-primary) !important;
 }
 
 /* Current Spot Price Row Highlight */
@@ -506,7 +477,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
     letter-spacing: 0.3px;
 }
 
-/* Profit Rows */
+/* Table row colors */
 .table-success {
     background-color: rgba(25, 135, 84, 0.08) !important;
 }
@@ -519,7 +490,6 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
     border-color: rgba(25, 135, 84, 0.2) !important;
 }
 
-/* Loss Rows */
 .table-danger {
     background-color: rgba(220, 53, 69, 0.08) !important;
 }
@@ -532,7 +502,6 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
     border-color: rgba(220, 53, 69, 0.2) !important;
 }
 
-/* Break-even Rows */
 .table-warning {
     background-color: rgba(255, 193, 7, 0.08) !important;
 }
@@ -561,7 +530,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
     font-weight: 500;
 }
 
-/* P&L Summary Cards */
+/* ===== P&L SUMMARY CARDS ===== */
 .pl-summary-card {
     border-radius: 6px;
     padding: 12px;
@@ -574,7 +543,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
 
 .pl-summary-card:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .pl-max-profit {
@@ -615,7 +584,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
     color: var(--break-even-color) !important;
 }
 
-/* P&L Legend */
+/* ===== P&L LEGEND ===== */
 .pl-legend {
     display: flex;
     flex-wrap: wrap;
@@ -647,7 +616,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
 .legend-breakeven { background-color: rgba(255, 193, 7, 0.3); }
 .legend-current { background-color: var(--current-price-color); }
 
-/* Buttons */
+/* ===== BUTTONS ===== */
 .btn-outline-primary, .btn-outline-secondary, .btn-outline-success, .btn-outline-danger, .btn-outline-warning {
     border-color: var(--border-color);
     color: var(--text-primary);
@@ -657,10 +626,10 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
 .btn-outline-primary:hover, .btn-outline-secondary:hover, .btn-outline-success:hover, 
 .btn-outline-danger:hover, .btn-outline-warning:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-/* Badges */
+/* ===== BADGES ===== */
 .badge {
     transition: all 0.3s ease;
 }
@@ -677,7 +646,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
     background-color: var(--bsm-color) !important;
 }
 
-/* Footer */
+/* ===== FOOTER ===== */
 footer {
     background-color: var(--bg-secondary) !important;
     border-top: 1px solid var(--border-color) !important;
@@ -691,18 +660,25 @@ footer .badge.bg-dark {
     background-color: var(--bsm-color) !important;
 }
 
-/* Emergency override for invisible text */
-body[data-theme="dark"] *:not(.btn):not(.form-control):not(.input-group-text) {
-    color: var(--text-primary) !important;
+/* ===== EMERGENCY OVERRIDES FOR DARK THEME ===== */
+[data-theme="dark"] {
+    /* Force all text to be visible */
+    *:not(.btn):not(.form-control):not(.form-select):not(.input-group-text):not(.form-check-input) {
+        color: var(--text-primary) !important;
+    }
+    
+    /* Force all backgrounds */
+    .card, .card-body, .card-header, .table, table, thead, tbody, tr, td, th {
+        background-color: var(--card-bg) !important;
+    }
+    
+    /* Force text in all elements */
+    h1, h2, h3, h4, h5, h6, p, span, div, a, li, label, small, strong, em {
+        color: var(--text-primary) !important;
+    }
 }
 
-body[data-theme="dark"] table,
-body[data-theme="dark"] table * {
-    color: var(--text-primary) !important;
-    background-color: var(--table-bg) !important;
-}
-
-/* Mobile Responsive for BSM */
+/* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 768px) {
     .theme-toggle {
         top: 10px;
@@ -790,7 +766,7 @@ body[data-theme="dark"] table * {
     }
 }
 
-/* Print styles for BSM */
+/* ===== PRINT STYLES ===== */
 @media print {
     .theme-toggle {
         display: none !important;
@@ -847,7 +823,7 @@ body[data-theme="dark"] table * {
     }
 }
 
-/* Animation for status changes */
+/* ===== ANIMATIONS ===== */
 @keyframes fadeInStatus {
     from {
         opacity: 0;
@@ -868,7 +844,7 @@ body[data-theme="dark"] table * {
     transition: all 0.3s ease;
 }
 
-/* Scrollbar styling */
+/* ===== SCROLLBAR STYLING ===== */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
