@@ -1010,6 +1010,7 @@ function updatePLTable(plData) {
     tbody.innerHTML = '';
     
     const spot = parseFloat(document.getElementById('spotPrice').value);
+    const includePremium = document.getElementById('plIncludePremium').checked;
     const keyPercentages = [0, -0.05, -0.10, -0.15, -0.20, 0.05, 0.10, 0.15, 0.20];
     
     keyPercentages.forEach(percent => {
@@ -1019,23 +1020,37 @@ function updatePLTable(plData) {
         });
         
         let status = '', statusClass = '';
-        if (percent === 0) {
-            status = '<span class="badge bg-info">Current</span>';
-        } else if (closestData.netPL > 0) {
-            status = '<span class="badge bg-success">Profit</span>';
-            statusClass = 'table-success';
-        } else if (closestData.netPL < 0) {
-            status = '<span class="badge bg-danger">Loss</span>';
-            statusClass = 'table-danger';
-        } else {
+        const tolerance = 0.01; // Small tolerance for rounding
+        
+        // Always check P&L, even at current price
+        if (Math.abs(closestData.netPL) <= tolerance) {
             status = '<span class="badge bg-warning">B/E</span>';
             statusClass = 'table-warning';
+        } else if (closestData.netPL > 0) {
+            if (percent === 0) {
+                status = '<span class="badge bg-success">Current Profit</span>';
+            } else {
+                status = '<span class="badge bg-success">Profit</span>';
+            }
+            statusClass = 'table-success';
+        } else if (closestData.netPL < 0) {
+            if (percent === 0) {
+                status = '<span class="badge bg-danger">Current Loss</span>';
+            } else {
+                status = '<span class="badge bg-danger">Loss</span>';
+            }
+            statusClass = 'table-danger';
+        }
+        
+        // Add indicator for current spot price row
+        if (percent === 0) {
+            statusClass += ' current-spot-row';
         }
         
         const row = document.createElement('tr');
         row.className = statusClass;
         row.innerHTML = `
-            <td>₹${closestData.price.toFixed(2)}</td>
+            <td>₹${closestData.price.toFixed(2)} ${percent === 0 ? '<i class="bi bi-geo-alt"></i>' : ''}</td>
             <td>₹${closestData.callPL.toFixed(2)}</td>
             <td>₹${closestData.putPL.toFixed(2)}</td>
             <td>₹${closestData.netPL.toFixed(2)}</td>

@@ -12,6 +12,8 @@
     --bsm-color: #0dcaf0;
     --bsm-bg: rgba(13, 202, 240, 0.1);
     --greeks-color: #6f42c1;
+    --current-price-color: #0d6efd;
+    --break-even-color: #ffc107;
 }
 
 /* BSM Model Indicators */
@@ -156,6 +158,235 @@
     100% { opacity: 1; }
 }
 
+/* P&L TABLE ENHANCEMENTS */
+#plDetailedTable {
+    font-size: 0.85rem;
+}
+
+#plDetailedTable th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+#plDetailedTable td {
+    padding: 0.5rem 0.75rem;
+    vertical-align: middle;
+}
+
+/* Current Spot Price Row Highlight */
+.current-spot-row {
+    border-left: 4px solid var(--current-price-color) !important;
+    font-weight: 600;
+    position: relative;
+}
+
+.current-spot-row::before {
+    content: "📍";
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--current-price-color);
+}
+
+/* P&L Status Badges */
+#plDetailedTable .badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+/* Profit Rows */
+.table-success {
+    background-color: rgba(25, 135, 84, 0.08) !important;
+}
+
+.table-success:hover {
+    background-color: rgba(25, 135, 84, 0.12) !important;
+}
+
+.table-success td {
+    border-color: rgba(25, 135, 84, 0.2) !important;
+}
+
+/* Loss Rows */
+.table-danger {
+    background-color: rgba(220, 53, 69, 0.08) !important;
+}
+
+.table-danger:hover {
+    background-color: rgba(220, 53, 69, 0.12) !important;
+}
+
+.table-danger td {
+    border-color: rgba(220, 53, 69, 0.2) !important;
+}
+
+/* Break-even Rows */
+.table-warning {
+    background-color: rgba(255, 193, 7, 0.08) !important;
+}
+
+.table-warning:hover {
+    background-color: rgba(255, 193, 7, 0.12) !important;
+}
+
+.table-warning td {
+    border-color: rgba(255, 193, 7, 0.2) !important;
+}
+
+/* Special styling for the first column (Price) */
+#plDetailedTable td:first-child {
+    font-weight: 600;
+    color: #212529;
+}
+
+/* Extrinsic Value Column */
+#plDetailedTable td:nth-child(5) {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+/* P&L Value Coloring */
+#plDetailedTable .positive-pl {
+    color: var(--profit-color);
+    font-weight: 600;
+}
+
+#plDetailedTable .negative-pl {
+    color: var(--loss-color);
+    font-weight: 600;
+}
+
+#plDetailedTable .zero-pl {
+    color: var(--neutral-color);
+    font-weight: 500;
+}
+
+/* P&L Summary Cards */
+.pl-summary-card {
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+}
+
+.pl-summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.pl-max-profit {
+    border: 1px solid rgba(25, 135, 84, 0.3);
+    background: linear-gradient(135deg, rgba(25, 135, 84, 0.05) 0%, rgba(25, 135, 84, 0.02) 100%);
+}
+
+.pl-max-loss {
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.05) 0%, rgba(220, 53, 69, 0.02) 100%);
+}
+
+.pl-breakeven {
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 193, 7, 0.02) 100%);
+}
+
+.pl-summary-card h6 {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pl-summary-card .pl-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+}
+
+.pl-max-profit .pl-value {
+    color: var(--profit-color);
+}
+
+.pl-max-loss .pl-value {
+    color: var(--loss-color);
+}
+
+.pl-breakeven .pl-value {
+    color: var(--break-even-color);
+}
+
+/* P&L Table Tooltip */
+.pl-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.pl-tooltip .pl-tooltip-text {
+    visibility: hidden;
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.75rem;
+    font-weight: normal;
+}
+
+.pl-tooltip:hover .pl-tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* P&L Legend */
+.pl-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 10px 0;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    color: #495057;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.legend-profit { background-color: rgba(25, 135, 84, 0.3); }
+.legend-loss { background-color: rgba(220, 53, 69, 0.3); }
+.legend-breakeven { background-color: rgba(255, 193, 7, 0.3); }
+.legend-current { background-color: var(--current-price-color); }
+
+/* P&L Status Icons */
+.status-icon {
+    margin-right: 4px;
+    font-size: 0.8rem;
+}
+
 /* BSM Footer */
 footer .badge.bg-dark {
     font-family: 'Courier New', monospace;
@@ -193,6 +424,20 @@ footer .badge.bg-dark {
     .metric-box small {
         font-size: 0.65rem;
     }
+    
+    /* P&L Table responsive */
+    #plDetailedTable {
+        font-size: 0.75rem;
+    }
+    
+    #plDetailedTable th,
+    #plDetailedTable td {
+        padding: 0.35rem 0.5rem;
+    }
+    
+    .pl-legend {
+        font-size: 0.7rem;
+    }
 }
 
 @media (max-width: 576px) {
@@ -212,6 +457,21 @@ footer .badge.bg-dark {
     
     .model-info li {
         font-size: 0.7rem;
+    }
+    
+    /* P&L Table adjustments for small screens */
+    #plDetailedTable {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .pl-summary-card {
+        padding: 8px;
+    }
+    
+    .pl-summary-card .pl-value {
+        font-size: 0.9rem;
     }
 }
 
@@ -236,6 +496,35 @@ footer .badge.bg-dark {
     
     .btn, .form-control, .input-group {
         display: none !important;
+    }
+    
+    /* P&L Table print styles */
+    #plDetailedTable {
+        border: 1px solid #000;
+    }
+    
+    #plDetailedTable th {
+        background-color: #f0f0f0 !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
+    
+    .table-success td {
+        background-color: rgba(25, 135, 84, 0.1) !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
+    
+    .table-danger td {
+        background-color: rgba(220, 53, 69, 0.1) !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
+    
+    .table-warning td {
+        background-color: rgba(255, 193, 7, 0.1) !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
     }
 }
 
@@ -265,4 +554,59 @@ footer .badge.bg-dark {
     .chart-container.bsm {
         background: linear-gradient(135deg, #2b2b2b 0%, #343a40 100%);
     }
+    
+    /* P&L Table dark mode */
+    #plDetailedTable {
+        color: #e0e0e0;
+    }
+    
+    #plDetailedTable th {
+        background-color: #343a40;
+        border-bottom-color: #495057;
+    }
+    
+    #plDetailedTable td {
+        border-color: #495057;
+    }
+    
+    .table-success {
+        background-color: rgba(25, 135, 84, 0.15) !important;
+    }
+    
+    .table-danger {
+        background-color: rgba(220, 53, 69, 0.15) !important;
+    }
+    
+    .table-warning {
+        background-color: rgba(255, 193, 7, 0.15) !important;
+    }
+    
+    .current-spot-row {
+        border-left-color: #66b0ff !important;
+    }
+    
+    .pl-legend {
+        background-color: #343a40;
+        border-color: #495057;
+    }
+    
+    .legend-item {
+        color: #adb5bd;
+    }
+}
+
+/* Animation for status changes */
+@keyframes fadeInStatus {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#plDetailedTable tr {
+    animation: fadeInStatus 0.3s ease-out;
 }
