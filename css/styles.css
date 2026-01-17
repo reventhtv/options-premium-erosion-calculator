@@ -646,12 +646,13 @@ table td,
     background-color: var(--bsm-color) !important;
 }
 
-.bg-secondary {
+/* Specific rule for bg-secondary badges - FIX FOR VISIBILITY */
+.badge.bg-secondary {
     background-color: var(--neutral-color) !important;
     color: white !important;
 }
 
-[data-theme="dark"] .bg-secondary {
+[data-theme="dark"] .badge.bg-secondary {
     background-color: var(--neutral-color) !important;
     color: var(--text-primary) !important;
 }
