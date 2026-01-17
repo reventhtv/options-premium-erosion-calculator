@@ -765,59 +765,6 @@
             // Load initial options with BSM
             setTimeout(initializeDefaultOptions, 100);
             
-            // Set current date
-            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-IN', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-            
-            // ===== THEME TOGGLE FUNCTIONALITY =====
-            function initializeTheme() {
-                const savedTheme = localStorage.getItem('theme');
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                
-                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-                    document.documentElement.setAttribute('data-theme', 'dark');
-                } else {
-                    document.documentElement.setAttribute('data-theme', 'light');
-                }
-            }
-            
-            function toggleTheme() {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                
-                document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                
-                // Log theme change
-                console.log(`%c⚡ Theme changed to: ${newTheme} mode`, 
-                    `color: ${newTheme === 'dark' ? '#0dcaf0' : '#ffc107'}; font-weight: bold;`);
-            }
-            
-            // Add keyboard shortcut for theme toggle (Alt+T)
-            document.addEventListener('keydown', function(e) {
-                if (e.altKey && e.key === 't') {
-                    toggleTheme();
-                    e.preventDefault();
-                }
-            });
-            
-            // Initialize theme
-            initializeTheme();
-            
-            // Add event listener to theme toggle button
-            const themeToggleBtn = document.getElementById('themeToggle');
-            if (themeToggleBtn) {
-                themeToggleBtn.addEventListener('click', toggleTheme);
-                
-                // Add tooltip to theme toggle button
-                new bootstrap.Tooltip(themeToggleBtn, {
-                    placement: 'left'
-                });
-            }
-            
             // Show BSM welcome
             setTimeout(() => {
                 console.log('%c⚡ BSM Options Calculator v4.0 Loaded', 

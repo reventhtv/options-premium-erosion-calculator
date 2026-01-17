@@ -24,23 +24,27 @@ const BSM_MODEL = {
 };
 
 // ============================================================================
-// THEME MANAGEMENT (UPDATED FOR HTML BUTTON STRUCTURE)
+// UNIFIED THEME MANAGEMENT (FIXED - SINGLE SOURCE OF TRUTH)
 // ============================================================================
 
 function initializeTheme() {
     // Check for saved theme preference or respect OS preference
-    const savedTheme = localStorage.getItem('bsm-theme');
+    const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        updateThemeIcon(true);
-    } else {
-        document.documentElement.setAttribute('data-theme', 'light');
-        updateThemeIcon(false);
+    // Default to dark if no preference and OS prefers dark, otherwise light
+    let theme = 'light';
+    if (savedTheme) {
+        theme = savedTheme;
+    } else if (prefersDark) {
+        theme = 'dark';
     }
     
-    // Update chart colors when theme changes
+    // Apply the theme
+    document.documentElement.setAttribute('data-theme', theme);
+    updateThemeIcon(theme === 'dark');
+    
+    // Update chart colors after a short delay to ensure DOM is ready
     setTimeout(updateChartColorsForCurrentTheme, 100);
 }
 
@@ -48,13 +52,15 @@ function updateThemeIcon(isDark) {
     const themeToggle = document.getElementById('themeToggle');
     if (!themeToggle) return;
     
-    const icon = themeToggle.querySelector('i');
-    if (icon) {
-        if (isDark) {
-            icon.className = 'bi bi-sun-fill';
-        } else {
-            icon.className = 'bi bi-moon-fill';
-        }
+    const sunIcon = themeToggle.querySelector('.bi-sun-fill');
+    const moonIcon = themeToggle.querySelector('.bi-moon-fill');
+    
+    if (isDark) {
+        if (sunIcon) sunIcon.style.display = 'none';
+        if (moonIcon) moonIcon.style.display = 'block';
+    } else {
+        if (sunIcon) sunIcon.style.display = 'block';
+        if (moonIcon) moonIcon.style.display = 'none';
     }
 }
 
@@ -62,70 +68,66 @@ function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     
+    // Apply new theme
     document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('bsm-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
     
-    // Update icon
+    // Update icon immediately
     updateThemeIcon(newTheme === 'dark');
     
-    // Trigger chart redraw if they exist
-    if (erosionChart) {
-        erosionChart.destroy();
-        setTimeout(() => updateErosionChart(), 50);
-    }
-    if (plChart) {
-        plChart.destroy();
-        setTimeout(() => updatePLChart(), 50);
-    } else {
-        // If charts don't exist yet, still update colors for future charts
-        updateChartColorsForCurrentTheme();
-    }
-    
-    showNotification(`Theme switched to ${newTheme === 'dark' ? 'Dark' : 'Light'} mode`);
+    // Log theme change
     console.log(`%c⚡ Theme changed to: ${newTheme} mode`, 
         `color: ${newTheme === 'dark' ? '#0dcaf0' : '#ffc107'}; font-weight: bold;`);
+    
+    // Update chart colors for new theme
+    updateChartColorsForCurrentTheme();
+    
+    // Show notification
+    showNotification(`Theme switched to ${newTheme === 'dark' ? 'Dark' : 'Light'} mode`);
 }
 
 function updateChartColorsForCurrentTheme() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     
-    if (window.erosionChart) {
-        updateChartColorsForTheme(window.erosionChart, isDark);
+    // Update existing charts if they exist
+    if (erosionChart) {
+        updateChartColorsForTheme(erosionChart, isDark);
+        erosionChart.update();
     }
     
-    if (window.plChart) {
-        updateChartColorsForTheme(window.plChart, isDark);
+    if (plChart) {
+        updateChartColorsForTheme(plChart, isDark);
+        plChart.update();
     }
 }
 
 function updateChartColorsForTheme(chart, isDark) {
-    if (!chart) return;
+    if (!chart || !chart.options) return;
     
     const gridColor = isDark ? 'rgba(52, 58, 64, 0.3)' : 'rgba(233, 236, 239, 0.8)';
     const textColor = isDark ? '#adb5bd' : '#495057';
     
-    if (chart.options && chart.options.scales) {
-        if (chart.options.scales.x) {
-            chart.options.scales.x.grid.color = gridColor;
-            chart.options.scales.x.ticks.color = textColor;
-            if (chart.options.scales.x.title) {
-                chart.options.scales.x.title.color = textColor;
-            }
-        }
-        if (chart.options.scales.y) {
-            chart.options.scales.y.grid.color = gridColor;
-            chart.options.scales.y.ticks.color = textColor;
-            if (chart.options.scales.y.title) {
-                chart.options.scales.y.title.color = textColor;
-            }
-        }
+    // Update scales
+    if (chart.options.scales) {
+        Object.keys(chart.options.scales).forEach(scaleKey => {
+            const scale = chart.options.scales[scaleKey];
+            if (scale.grid) scale.grid.color = gridColor;
+            if (scale.ticks) scale.ticks.color = textColor;
+            if (scale.title) scale.title.color = textColor;
+        });
     }
     
-    if (chart.options && chart.options.plugins && chart.options.plugins.legend) {
+    // Update legend
+    if (chart.options.plugins && chart.options.plugins.legend && chart.options.plugins.legend.labels) {
         chart.options.plugins.legend.labels.color = textColor;
     }
     
-    chart.update('none');
+    // Update tooltip
+    if (chart.options.plugins && chart.options.plugins.tooltip) {
+        chart.options.plugins.tooltip.backgroundColor = isDark ? 'rgba(26, 29, 32, 0.9)' : 'rgba(255, 255, 255, 0.9)';
+        chart.options.plugins.tooltip.titleColor = textColor;
+        chart.options.plugins.tooltip.bodyColor = textColor;
+    }
 }
 
 // ============================================================================
@@ -1094,6 +1096,9 @@ function updatePLChart(priceLevels = null, plData = null) {
                     }
                 },
                 tooltip: {
+                    backgroundColor: isDark ? 'rgba(26, 29, 32, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                    titleColor: textColor,
+                    bodyColor: textColor,
                     callbacks: {
                         label: function(context) {
                             return `${context.dataset.label || ''}: ₹${context.parsed.y.toFixed(2)}`;
@@ -1485,6 +1490,9 @@ function updateErosionChart() {
                 tooltip: {
                     mode: 'index',
                     intersect: false,
+                    backgroundColor: isDark ? 'rgba(26, 29, 32, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                    titleColor: textColor,
+                    bodyColor: textColor,
                     callbacks: {
                         label: function(context) {
                             return `${context.dataset.label}: ₹${context.raw.toFixed(2)}`;
@@ -1904,6 +1912,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('%c⚡ BSM Options Calculator v4.0 Loaded', 
             'color: #28a745; font-weight: bold; font-size: 16px;');
         console.log('%cBlack-Scholes-Merton Model Active', 'color: #6c757d;');
-        console.log('%cDark/Light Theme Support Enabled', 'color: #0dcaf0;');
+        console.log('%cUnified Dark/Light Theme System Active', 'color: #0dcaf0;');
     }, 500);
 });

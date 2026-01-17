@@ -124,6 +124,62 @@ body {
     color: var(--text-primary) !important;
 }
 
+/* Fix for Bootstrap utility classes in dark mode */
+[data-theme="dark"] .table-light {
+    --bs-table-bg: var(--table-header-bg) !important;
+    --bs-table-color: var(--text-primary) !important;
+    --bs-table-border-color: var(--border-color) !important;
+    background-color: var(--table-header-bg) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .table-light th,
+[data-theme="dark"] .table-light td {
+    background-color: var(--table-header-bg) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .card-header.bg-warning.text-dark {
+    background-color: #664d03 !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .bg-light {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .text-dark {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .btn-outline-light {
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-outline-light:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+/* Form controls dark mode fixes */
+[data-theme="dark"] .form-check-input {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+}
+
+[data-theme="dark"] .form-check-input:checked {
+    background-color: var(--bsm-color);
+    border-color: var(--bsm-color);
+}
+
+[data-theme="dark"] .input-group-text {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
 /* BSM Model Indicators */
 #bsmBadge {
     font-family: 'Courier New', monospace;
@@ -218,11 +274,6 @@ body {
 .form-control:focus {
     border-color: var(--bsm-color) !important;
     box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25) !important;
-}
-
-.input-group-text {
-    background-color: var(--bg-tertiary) !important;
-    color: var(--text-secondary) !important;
 }
 
 /* Volatility Surface Card */
