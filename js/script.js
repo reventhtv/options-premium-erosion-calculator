@@ -24,6 +24,114 @@ const BSM_MODEL = {
 };
 
 // ============================================================================
+// THEME MANAGEMENT
+// ============================================================================
+
+function initializeTheme() {
+    // Check for saved theme preference or respect OS preference
+    const savedTheme = localStorage.getItem('bsm-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        enableDarkTheme();
+    } else {
+        enableLightTheme();
+    }
+    
+    // Add theme toggle button to the page
+    addThemeToggleButton();
+}
+
+function addThemeToggleButton() {
+    // Remove existing toggle if any
+    const existingToggle = document.querySelector('.theme-toggle');
+    if (existingToggle) existingToggle.remove();
+    
+    // Create theme toggle button
+    const themeToggle = document.createElement('div');
+    themeToggle.className = 'theme-toggle';
+    themeToggle.innerHTML = `
+        <i class="bi bi-sun-fill"></i>
+        <i class="bi bi-moon-fill"></i>
+    `;
+    themeToggle.title = 'Toggle Dark/Light Theme';
+    themeToggle.onclick = toggleTheme;
+    
+    // Add to page
+    document.body.appendChild(themeToggle);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    
+    if (currentTheme === 'dark') {
+        enableLightTheme();
+    } else {
+        enableDarkTheme();
+    }
+    
+    // Trigger chart redraw if they exist
+    if (erosionChart) {
+        erosionChart.destroy();
+        setTimeout(() => updateErosionChart(), 50);
+    }
+    if (plChart) {
+        plChart.destroy();
+        setTimeout(() => updatePLChart(), 50);
+    }
+    
+    showNotification(`Theme switched to ${currentTheme === 'dark' ? 'Light' : 'Dark'} mode`);
+}
+
+function enableDarkTheme() {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('bsm-theme', 'dark');
+    
+    // Update chart colors if they exist
+    if (erosionChart) updateChartColorsForTheme(erosionChart, true);
+    if (plChart) updateChartColorsForTheme(plChart, true);
+}
+
+function enableLightTheme() {
+    document.documentElement.setAttribute('data-theme', 'light');
+    localStorage.setItem('bsm-theme', 'light');
+    
+    // Update chart colors if they exist
+    if (erosionChart) updateChartColorsForTheme(erosionChart, false);
+    if (plChart) updateChartColorsForTheme(plChart, false);
+}
+
+function updateChartColorsForTheme(chart, isDark) {
+    if (!chart) return;
+    
+    const gridColor = isDark ? 'rgba(52, 58, 64, 0.3)' : 'rgba(233, 236, 239, 0.8)';
+    const textColor = isDark ? '#adb5bd' : '#495057';
+    
+    if (chart.options && chart.options.scales) {
+        if (chart.options.scales.x) {
+            chart.options.scales.x.grid.color = gridColor;
+            chart.options.scales.x.ticks.color = textColor;
+            if (chart.options.scales.x.title) {
+                chart.options.scales.x.title.color = textColor;
+            }
+        }
+        if (chart.options.scales.y) {
+            chart.options.scales.y.grid.color = gridColor;
+            chart.options.scales.y.ticks.color = textColor;
+            if (chart.options.scales.y.title) {
+                chart.options.scales.y.title.color = textColor;
+            }
+        }
+    }
+    
+    if (chart.options && chart.options.plugins && chart.options.plugins.legend) {
+        chart.options.plugins.legend.labels.color = textColor;
+    }
+    
+    chart.update('none');
+}
+
+// ============================================================================
 // MATH UTILITIES AND BSM ENGINE
 // ============================================================================
 const MathUtils = {
@@ -743,7 +851,7 @@ function updateOptionField(id, field, value) {
 }
 
 // ============================================================================
-// REST OF THE FUNCTIONS (UNCHANGED EXCEPT FOR MINOR UPDATES)
+// REST OF THE FUNCTIONS
 // ============================================================================
 
 function loadPreset(presetName) {
@@ -909,6 +1017,10 @@ function calculatePL() {
 
 function updatePLChart(priceLevels = null, plData = null) {
     const ctx = document.getElementById('plChart').getContext('2d');
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    
+    const gridColor = isDark ? 'rgba(52, 58, 64, 0.3)' : 'rgba(233, 236, 239, 0.8)';
+    const textColor = isDark ? '#adb5bd' : '#495057';
     
     if (!priceLevels || !plData) {
         priceLevels = Array.from({length: 20}, (_, i) => 17000 + i * 50);
@@ -978,7 +1090,12 @@ function updatePLChart(priceLevels = null, plData = null) {
             maintainAspectRatio: false,
             interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: { position: 'top' },
+                legend: { 
+                    position: 'top',
+                    labels: {
+                        color: textColor
+                    }
+                },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
@@ -989,15 +1106,35 @@ function updatePLChart(priceLevels = null, plData = null) {
             },
             scales: {
                 x: {
-                    title: { display: true, text: 'Underlying Price (₹)' },
-                    grid: { drawBorder: false }
+                    title: { 
+                        display: true, 
+                        text: 'Underlying Price (₹)',
+                        color: textColor
+                    },
+                    grid: { 
+                        drawBorder: false,
+                        color: gridColor
+                    },
+                    ticks: {
+                        color: textColor
+                    }
                 },
                 y: {
                     type: 'linear',
                     display: true,
                     position: 'left',
-                    title: { display: true, text: 'P&L (₹)' },
-                    grid: { drawBorder: false }
+                    title: { 
+                        display: true, 
+                        text: 'P&L (₹)',
+                        color: textColor
+                    },
+                    grid: { 
+                        drawBorder: false,
+                        color: gridColor
+                    },
+                    ticks: {
+                        color: textColor
+                    }
                 }
             }
         }
@@ -1254,6 +1391,11 @@ function showNotification(message, type = 'info') {
 // ============================================================================
 function updateErosionChart() {
     const ctx = document.getElementById('erosionChart').getContext('2d');
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    
+    const gridColor = isDark ? 'rgba(52, 58, 64, 0.3)' : 'rgba(233, 236, 239, 0.8)';
+    const textColor = isDark ? '#adb5bd' : '#495057';
+    
     const projectionDays = 30;
     const spot = parseFloat(document.getElementById('spotPrice').value);
     const iv = parseFloat(document.getElementById('impliedVol').value) / 100;
@@ -1334,7 +1476,12 @@ function updateErosionChart() {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { position: 'top' },
+                legend: { 
+                    position: 'top',
+                    labels: {
+                        color: textColor
+                    }
+                },
                 tooltip: {
                     mode: 'index',
                     intersect: false,
@@ -1346,8 +1493,33 @@ function updateErosionChart() {
                 }
             },
             scales: {
-                x: { title: { display: true, text: 'Days to Expiry' } },
-                y: { title: { display: true, text: 'Premium (₹)' }, beginAtZero: true }
+                x: { 
+                    title: { 
+                        display: true, 
+                        text: 'Days to Expiry',
+                        color: textColor
+                    },
+                    grid: {
+                        color: gridColor
+                    },
+                    ticks: {
+                        color: textColor
+                    }
+                },
+                y: { 
+                    title: { 
+                        display: true, 
+                        text: 'Premium (₹)',
+                        color: textColor
+                    }, 
+                    beginAtZero: true,
+                    grid: {
+                        color: gridColor
+                    },
+                    ticks: {
+                        color: textColor
+                    }
+                }
             }
         }
     });
@@ -1627,7 +1799,9 @@ Left/Right Arrow: Adjust days to expiry
 MODEL: Black-Scholes-Merton (Industry Standard)
 FEATURES: Complete Greeks, Parity Check, Vol Surface
 
-AUTO-CALCULATE: ${autoCalculate ? 'ON' : 'OFF'}`);
+AUTO-CALCULATE: ${autoCalculate ? 'ON' : 'OFF'}
+
+Theme Toggle: Click the sun/moon icon in top-right`);
 }
 
 // ============================================================================
@@ -1645,6 +1819,7 @@ document.addEventListener('keydown', function(e) {
             case 'v': validatePutCallParity(); break;
             case '1': if (options.length > 0) recalculateBSM(options[0].id); break;
             case '2': if (options.length > 1) recalculateBSM(options[1].id); break;
+            case 't': toggleTheme(); break; // Add theme toggle shortcut
         }
     }
     
@@ -1689,6 +1864,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
     
+    // Initialize theme first
+    initializeTheme();
+    
     setTimeout(() => {
         addBSMFeaturesToUI();
         initializeDefaultOptions();
@@ -1708,5 +1886,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('%c⚡ BSM Options Calculator v4.0 Loaded', 
             'color: #28a745; font-weight: bold; font-size: 16px;');
         console.log('%cBlack-Scholes-Merton Model Active', 'color: #6c757d;');
+        console.log('%cDark/Light Theme Support Enabled', 'color: #0dcaf0;');
     }, 500);
 });

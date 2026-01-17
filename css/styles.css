@@ -1,19 +1,127 @@
 /* Active Trader Options Calculator - BSM Edition */
-/* Enhanced for Black-Scholes-Merton display */
+/* Enhanced for Black-Scholes-Merton display with Dark Theme */
 
 :root {
+    /* Light Theme Variables */
     --call-color: #28a745;
     --put-color: #dc3545;
     --profit-color: #198754;
     --loss-color: #dc3545;
     --neutral-color: #6c757d;
-    --terminal-bg: #1a1d20;
-    --terminal-border: #343a40;
+    --terminal-bg: #f8f9fa;
+    --terminal-border: #dee2e6;
     --bsm-color: #0dcaf0;
     --bsm-bg: rgba(13, 202, 240, 0.1);
     --greeks-color: #6f42c1;
     --current-price-color: #0d6efd;
     --break-even-color: #ffc107;
+    
+    /* Light Theme Text & Background */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+    --text-primary: #212529;
+    --text-secondary: #495057;
+    --text-muted: #6c757d;
+    --border-color: #dee2e6;
+    --card-bg: #ffffff;
+    --table-bg: #ffffff;
+    --table-header-bg: #f8f9fa;
+    --input-bg: #ffffff;
+    --input-border: #ced4da;
+    --input-text: #212529;
+}
+
+[data-theme="dark"] {
+    /* Dark Theme Variables */
+    --call-color: #20c997;
+    --put-color: #ff6b6b;
+    --profit-color: #20c997;
+    --loss-color: #ff6b6b;
+    --neutral-color: #adb5bd;
+    --terminal-bg: #1a1d20;
+    --terminal-border: #343a40;
+    --bsm-color: #0dcaf0;
+    --bsm-bg: rgba(13, 202, 240, 0.15);
+    --greeks-color: #9774d8;
+    --current-price-color: #4dabf7;
+    --break-even-color: #ffc107;
+    
+    /* Dark Theme Text & Background */
+    --bg-primary: #121416;
+    --bg-secondary: #1a1d20;
+    --bg-tertiary: #24292e;
+    --text-primary: #e9ecef;
+    --text-secondary: #adb5bd;
+    --text-muted: #868e96;
+    --border-color: #343a40;
+    --card-bg: #1a1d20;
+    --table-bg: #1a1d20;
+    --table-header-bg: #24292e;
+    --input-bg: #24292e;
+    --input-border: #495057;
+    --input-text: #e9ecef;
+}
+
+/* Global Styles */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: var(--bsm-bg);
+    border: 1px solid var(--bsm-color);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.theme-toggle i {
+    font-size: 1.2rem;
+    color: var(--bsm-color);
+}
+
+.theme-toggle .bi-moon-fill {
+    display: none;
+}
+
+[data-theme="dark"] .theme-toggle .bi-sun-fill {
+    display: none;
+}
+
+[data-theme="dark"] .theme-toggle .bi-moon-fill {
+    display: block;
+}
+
+/* BSM Trading Terminal */
+.card-terminal {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.card-header {
+    background-color: var(--table-header-bg) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
 }
 
 /* BSM Model Indicators */
@@ -21,6 +129,8 @@
     font-family: 'Courier New', monospace;
     font-size: 0.7rem;
     animation: pulse-bsm 2s infinite;
+    background: linear-gradient(135deg, var(--bsm-color) 0%, #0aa2c0 100%) !important;
+    color: white !important;
 }
 
 @keyframes pulse-bsm {
@@ -33,6 +143,7 @@
 #bsmTools .btn-outline-info {
     border-color: var(--bsm-color);
     color: var(--bsm-color);
+    background-color: transparent;
 }
 
 #bsmTools .btn-outline-info:hover {
@@ -42,8 +153,16 @@
 }
 
 /* BSM Table Enhancements */
+#optionsTable {
+    background-color: var(--table-bg);
+    color: var(--text-primary);
+}
+
 #optionsTable th {
     position: relative;
+    background-color: var(--table-header-bg);
+    border-bottom: 2px solid var(--border-color);
+    color: var(--text-primary);
 }
 
 #optionsTable th .formula {
@@ -52,8 +171,13 @@
     bottom: 2px;
     left: 0;
     right: 0;
-    color: #6c757d;
+    color: var(--text-muted);
     font-family: 'Courier New', monospace;
+}
+
+#optionsTable td {
+    border-color: var(--border-color);
+    color: var(--text-primary);
 }
 
 /* Greek symbols styling */
@@ -73,25 +197,46 @@
 .metric-box.bsm {
     background: linear-gradient(135deg, var(--bsm-bg) 0%, rgba(255,255,255,0.1) 100%);
     border-left: 3px solid var(--bsm-color);
+    color: var(--text-primary);
 }
 
 .metric-box .formula {
     font-size: 0.65rem;
     font-family: 'Courier New', monospace;
-    color: #6c757d;
+    color: var(--text-muted);
     margin-top: 2px;
+}
+
+/* Form Controls */
+.form-control, .input-group-text {
+    background-color: var(--input-bg) !important;
+    border-color: var(--input-border) !important;
+    color: var(--input-text) !important;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--bsm-color) !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25) !important;
+}
+
+.input-group-text {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-secondary) !important;
 }
 
 /* Volatility Surface Card */
 .card-vol-surface {
     border: 2px solid var(--bsm-color);
     background: linear-gradient(135deg, rgba(13, 202, 240, 0.05) 0%, rgba(255,255,255,0.02) 100%);
+    color: var(--text-primary);
 }
 
 /* BSM Model Info Panel */
 .model-info {
     font-family: 'Courier New', monospace;
-    background-color: #f8f9fa;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
     border-radius: 4px;
     padding: 10px;
     margin: 5px 0;
@@ -105,13 +250,13 @@
 
 .model-info li {
     font-size: 0.8rem;
-    color: #495057;
+    color: var(--text-secondary);
     margin-bottom: 2px;
 }
 
 /* BSM Chart Enhancements */
 .chart-container.bsm {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
     border-radius: 4px;
     padding: 10px;
 }
@@ -133,15 +278,6 @@
     font-size: 0.7rem;
 }
 
-/* BSM Advanced Settings */
-#advancedSettings .form-check-label {
-    font-size: 0.75rem;
-}
-
-#advancedSettings .form-control-sm {
-    font-size: 0.75rem;
-}
-
 /* Put-Call Parity Status */
 #parityStatus.valid {
     background-color: var(--call-color);
@@ -161,18 +297,23 @@
 /* P&L TABLE ENHANCEMENTS */
 #plDetailedTable {
     font-size: 0.85rem;
+    background-color: var(--table-bg);
+    color: var(--text-primary);
 }
 
 #plDetailedTable th {
-    background-color: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
+    background-color: var(--table-header-bg);
+    border-bottom: 2px solid var(--border-color);
     font-weight: 600;
     white-space: nowrap;
+    color: var(--text-primary);
 }
 
 #plDetailedTable td {
     padding: 0.5rem 0.75rem;
     vertical-align: middle;
+    border-color: var(--border-color);
+    color: var(--text-primary);
 }
 
 /* Current Spot Price Row Highlight */
@@ -238,18 +379,6 @@
     border-color: rgba(255, 193, 7, 0.2) !important;
 }
 
-/* Special styling for the first column (Price) */
-#plDetailedTable td:first-child {
-    font-weight: 600;
-    color: #212529;
-}
-
-/* Extrinsic Value Column */
-#plDetailedTable td:nth-child(5) {
-    color: #6c757d;
-    font-size: 0.8rem;
-}
-
 /* P&L Value Coloring */
 #plDetailedTable .positive-pl {
     color: var(--profit-color);
@@ -272,31 +401,31 @@
     padding: 12px;
     margin-bottom: 10px;
     transition: all 0.2s ease;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
 }
 
 .pl-summary-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .pl-max-profit {
-    border: 1px solid rgba(25, 135, 84, 0.3);
-    background: linear-gradient(135deg, rgba(25, 135, 84, 0.05) 0%, rgba(25, 135, 84, 0.02) 100%);
+    border-color: rgba(25, 135, 84, 0.3) !important;
 }
 
 .pl-max-loss {
-    border: 1px solid rgba(220, 53, 69, 0.3);
-    background: linear-gradient(135deg, rgba(220, 53, 69, 0.05) 0%, rgba(220, 53, 69, 0.02) 100%);
+    border-color: rgba(220, 53, 69, 0.3) !important;
 }
 
 .pl-breakeven {
-    border: 1px solid rgba(255, 193, 7, 0.3);
-    background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 193, 7, 0.02) 100%);
+    border-color: rgba(255, 193, 7, 0.3) !important;
 }
 
 .pl-summary-card h6 {
     font-size: 0.75rem;
-    color: #6c757d;
+    color: var(--text-muted);
     margin-bottom: 4px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -320,36 +449,6 @@
     color: var(--break-even-color);
 }
 
-/* P&L Table Tooltip */
-.pl-tooltip {
-    position: relative;
-    display: inline-block;
-}
-
-.pl-tooltip .pl-tooltip-text {
-    visibility: hidden;
-    width: 200px;
-    background-color: #333;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px;
-    position: absolute;
-    z-index: 1;
-    bottom: 125%;
-    left: 50%;
-    margin-left: -100px;
-    opacity: 0;
-    transition: opacity 0.3s;
-    font-size: 0.75rem;
-    font-weight: normal;
-}
-
-.pl-tooltip:hover .pl-tooltip-text {
-    visibility: visible;
-    opacity: 1;
-}
-
 /* P&L Legend */
 .pl-legend {
     display: flex;
@@ -357,9 +456,10 @@
     gap: 10px;
     margin: 10px 0;
     padding: 8px;
-    background-color: #f8f9fa;
+    background-color: var(--bg-secondary);
     border-radius: 4px;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
 }
 
 .legend-item {
@@ -367,7 +467,7 @@
     align-items: center;
     gap: 5px;
     font-size: 0.75rem;
-    color: #495057;
+    color: var(--text-secondary);
 }
 
 .legend-color {
@@ -381,21 +481,59 @@
 .legend-breakeven { background-color: rgba(255, 193, 7, 0.3); }
 .legend-current { background-color: var(--current-price-color); }
 
-/* P&L Status Icons */
-.status-icon {
-    margin-right: 4px;
-    font-size: 0.8rem;
+/* Buttons */
+.btn-outline-primary, .btn-outline-secondary, .btn-outline-success, .btn-outline-danger, .btn-outline-warning {
+    border-color: var(--border-color);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
 }
 
-/* BSM Footer */
+.btn-outline-primary:hover, .btn-outline-secondary:hover, .btn-outline-success:hover, 
+.btn-outline-danger:hover, .btn-outline-warning:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Badges */
+.badge {
+    transition: all 0.3s ease;
+}
+
+.bg-success {
+    background-color: var(--call-color) !important;
+}
+
+.bg-danger {
+    background-color: var(--put-color) !important;
+}
+
+.bg-info {
+    background-color: var(--bsm-color) !important;
+}
+
+/* Footer */
+footer {
+    background-color: var(--bg-secondary) !important;
+    border-top: 1px solid var(--border-color) !important;
+    color: var(--text-muted) !important;
+}
+
 footer .badge.bg-dark {
     font-family: 'Courier New', monospace;
     font-size: 0.7rem;
     padding: 0.2rem 0.4rem;
+    background-color: var(--bsm-color) !important;
 }
 
 /* Mobile Responsive for BSM */
 @media (max-width: 768px) {
+    .theme-toggle {
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+    }
+    
     #bsmTools {
         order: -1;
         width: 100%;
@@ -477,6 +615,10 @@ footer .badge.bg-dark {
 
 /* Print styles for BSM */
 @media print {
+    .theme-toggle {
+        display: none !important;
+    }
+    
     .card-terminal {
         border: 2px solid #000;
         background-color: white !important;
@@ -528,73 +670,6 @@ footer .badge.bg-dark {
     }
 }
 
-/* Dark mode enhancements for BSM */
-@media (prefers-color-scheme: dark) {
-    .model-info {
-        background-color: #2b2b2b;
-        border-left-color: var(--bsm-color);
-    }
-    
-    .model-info li {
-        color: #e0e0e0;
-    }
-    
-    .metric-box.bsm {
-        background: linear-gradient(135deg, rgba(13, 202, 240, 0.1) 0%, rgba(43, 43, 43, 0.1) 100%);
-    }
-    
-    .price-diff-positive {
-        background-color: rgba(40, 167, 69, 0.2);
-    }
-    
-    .price-diff-negative {
-        background-color: rgba(220, 53, 69, 0.2);
-    }
-    
-    .chart-container.bsm {
-        background: linear-gradient(135deg, #2b2b2b 0%, #343a40 100%);
-    }
-    
-    /* P&L Table dark mode */
-    #plDetailedTable {
-        color: #e0e0e0;
-    }
-    
-    #plDetailedTable th {
-        background-color: #343a40;
-        border-bottom-color: #495057;
-    }
-    
-    #plDetailedTable td {
-        border-color: #495057;
-    }
-    
-    .table-success {
-        background-color: rgba(25, 135, 84, 0.15) !important;
-    }
-    
-    .table-danger {
-        background-color: rgba(220, 53, 69, 0.15) !important;
-    }
-    
-    .table-warning {
-        background-color: rgba(255, 193, 7, 0.15) !important;
-    }
-    
-    .current-spot-row {
-        border-left-color: #66b0ff !important;
-    }
-    
-    .pl-legend {
-        background-color: #343a40;
-        border-color: #495057;
-    }
-    
-    .legend-item {
-        color: #adb5bd;
-    }
-}
-
 /* Animation for status changes */
 @keyframes fadeInStatus {
     from {
@@ -609,4 +684,28 @@ footer .badge.bg-dark {
 
 #plDetailedTable tr {
     animation: fadeInStatus 0.3s ease-out;
+}
+
+/* Smooth transitions */
+.card, .form-control, .btn, .badge, .table, .metric-box {
+    transition: all 0.3s ease;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bsm-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #0aa2c0;
 }
