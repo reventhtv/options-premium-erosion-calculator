@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Options Premium Erosion Calculator | Active Trader Pro</title>
-    <meta name="description" content="Professional Indian options calculator for active traders. Calculate theta decay, premium erosion, and P&L with real-time updates, keyboard shortcuts, and multi-scenario analysis.">
-    <meta name="keywords" content="options calculator india, premium erosion, theta decay, active trader, nse options, bse options, options Greeks, p&l simulator">
-    <meta name="author" content="Options Premium Erosion Calculator">
+    <title>Options Premium Erosion Calculator | Active Trader Pro v4.0</title>
+    <meta name="description" content="Professional Indian options calculator with Black-Scholes-Merton pricing. Calculate theta decay, premium erosion, and P&L with industry-standard BSM model.">
+    <meta name="keywords" content="options calculator india, black scholes, premium erosion, theta decay, active trader, nse options, bse options, options Greeks, p&l simulator">
+    <meta name="author" content="Options Premium Erosion Calculator - BSM Edition">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="css/styles.css">
     
     <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
     
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="Active Trader Options Calculator">
-    <meta property="og:description" content="Professional options calculator with real-time updates and keyboard shortcuts">
+    <meta property="og:title" content="Active Trader Options Calculator - BSM v4.0">
+    <meta property="og:description" content="Professional options calculator with Black-Scholes-Merton pricing, real-time updates and keyboard shortcuts">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://reventhtv.github.io/options-premium-erosion-calculator/">
 </head>
@@ -33,8 +33,8 @@
     <div class="container-fluid py-3">
         <!-- Header -->
         <header class="text-center mb-3">
-            <h1 class="h3 fw-bold mb-1">📊 OPTIONS PREMIUM EROSION CALCULATOR</h1>
-            <p class="text-muted small mb-2">Professional tool for active Indian options traders | Real-time updates | Keyboard shortcuts</p>
+            <h1 class="h3 fw-bold mb-1">⚡ OPTIONS PREMIUM EROSION CALCULATOR</h1>
+            <p class="text-muted small mb-2">Professional tool for active Indian options traders | Black-Scholes-Merton v4.0 | Industry Standard</p>
             
             <!-- Quick Action Bar -->
             <div class="d-flex flex-wrap gap-2 justify-content-center mb-3">
@@ -49,6 +49,19 @@
                     <i class="bi bi-arrows-angle-contract"></i> Straddle
                 </button>
                 
+                <!-- BSM Tools -->
+                <div class="btn-group btn-group-sm" id="bsmTools">
+                    <button class="btn btn-outline-info" onclick="calculateImpliedVolatility()" title="Alt+I - Calculate Implied Volatility">
+                        <i class="bi bi-graph-up-arrow"></i> Calc IV
+                    </button>
+                    <button class="btn btn-outline-info" onclick="validatePutCallParity()" title="Alt+V - Validate Put-Call Parity">
+                        <i class="bi bi-shuffle"></i> Parity
+                    </button>
+                    <button class="btn btn-outline-info" onclick="updateVolatilitySurface()" title="Update Volatility Surface">
+                        <i class="bi bi-cloud-arrow-up"></i> Vol Surface
+                    </button>
+                </div>
+                
                 <!-- Quick Days -->
                 <div class="btn-group btn-group-sm">
                     <button class="btn btn-outline-secondary" onclick="setDaysToExpiry(1)" title="1 Day">T+1</button>
@@ -56,12 +69,19 @@
                     <button class="btn btn-outline-secondary" onclick="setDaysToExpiry(30)" title="1 Month">T+30</button>
                 </div>
                 
+                <!-- BSM Quick Actions -->
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-warning" onclick="options.forEach(o => recalculateBSM(o.id)); updateAllCalculations();" title="F5 - Recalc All BSM">
+                        <i class="bi bi-calculator-fill"></i> Recalc BSM
+                    </button>
+                </div>
+                
                 <!-- Action Buttons -->
                 <button class="btn btn-sm btn-success" onclick="calculateAll()" title="Alt+C">
                     <i class="bi bi-calculator"></i> Calculate All
                 </button>
                 <button class="btn btn-sm btn-warning" onclick="exportToCSV()" title="Alt+E">
-                    <i class="bi bi-download"></i> Export
+                    <i class="bi bi-download"></i> Export BSM
                 </button>
                 <button class="btn btn-sm btn-outline-danger" onclick="resetAll()" title="Alt+R">
                     <i class="bi bi-arrow-clockwise"></i> Reset
@@ -85,6 +105,13 @@
                     <i class="bi bi-keyboard"></i>
                 </button>
             </div>
+            
+            <!-- BSM Status Badge -->
+            <div class="mb-2">
+                <span class="badge bg-dark me-2">Model: Black-Scholes-Merton v4.0</span>
+                <span class="badge bg-success me-2">Industry Standard</span>
+                <span class="badge bg-info" id="bsmStatus">BSM Active</span>
+            </div>
         </header>
 
         <!-- Trading Terminal Header -->
@@ -94,11 +121,12 @@
                     <div class="card-header bg-dark text-white py-2">
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="fw-bold">
-                                <i class="bi bi-graph-up"></i> TRADING TERMINAL
+                                <i class="bi bi-calculator-fill"></i> BSM TRADING TERMINAL
                                 <span class="badge bg-warning ms-2" id="liveStatus">LIVE</span>
+                                <span class="badge bg-info ms-1" id="bsmBadge">BSM v4.0</span>
                             </span>
                             <div>
-                                <small class="me-2">Quick:</small>
+                                <small class="me-2">Moneyness:</small>
                                 <button class="btn btn-sm btn-outline-light" onclick="setATM()" title="At The Money">
                                     <i class="bi bi-bullseye"></i> ATM
                                 </button>
@@ -107,6 +135,9 @@
                                 </button>
                                 <button class="btn btn-sm btn-outline-light ms-1" onclick="setOTM()" title="Out of Money">
                                     <i class="bi bi-arrow-down-right"></i> OTM
+                                </button>
+                                <button class="btn btn-sm btn-outline-info ms-1" onclick="calculateImpliedVolatility()" title="Calculate Implied Vol">
+                                    <i class="bi bi-graph-up-arrow"></i> IV
                                 </button>
                             </div>
                         </div>
@@ -146,7 +177,7 @@
                             
                             <!-- IV Input -->
                             <div class="col-md-2 col-6">
-                                <label class="small mb-1">Implied Vol</label>
+                                <label class="small mb-1">Implied Vol (σ)</label>
                                 <div class="input-group input-group-sm">
                                     <input type="number" class="form-control" id="impliedVol" value="15" 
                                            onchange="updateAllCalculations()">
@@ -156,7 +187,7 @@
                             
                             <!-- Days to Expiry -->
                             <div class="col-md-2 col-6">
-                                <label class="small mb-1">Days to Expiry</label>
+                                <label class="small mb-1">Days to Expiry (T)</label>
                                 <div class="input-group input-group-sm">
                                     <input type="number" class="form-control" id="daysToExpiry" value="30" 
                                            onchange="updateAllCalculations()">
@@ -171,7 +202,7 @@
                             
                             <!-- Risk-Free Rate -->
                             <div class="col-md-2 col-6">
-                                <label class="small mb-1">Risk-Free Rate</label>
+                                <label class="small mb-1">Risk-Free Rate (r)</label>
                                 <div class="input-group input-group-sm">
                                     <input type="number" class="form-control" id="riskFreeRate" value="6.5" 
                                            onchange="updateAllCalculations()">
@@ -179,18 +210,86 @@
                                 </div>
                             </div>
                             
-                            <!-- Auto-calc Toggle -->
+                            <!-- Dividend Yield -->
                             <div class="col-md-2 col-6">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="autoCalculate" checked 
-                                           onchange="toggleAutoCalculate()">
-                                    <label class="form-check-label small" for="autoCalculate">
-                                        Auto-calc <span class="badge bg-success">ON</span>
-                                    </label>
+                                <label class="small mb-1">Dividend Yield (q)</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" class="form-control" id="dividendYield" value="0" 
+                                           onchange="updateAllCalculations()">
+                                    <span class="input-group-text">%</span>
                                 </div>
-                                <div class="mt-1">
-                                    <small class="text-muted">Updates in real-time</small>
+                            </div>
+                            
+                            <!-- Auto-calc Toggle -->
+                            <div class="col-md-12 mt-2">
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="autoCalculate" checked 
+                                                   onchange="toggleAutoCalculate()">
+                                            <label class="form-check-label small" for="autoCalculate">
+                                                <i class="bi bi-lightning-charge"></i> Auto-calc <span class="badge bg-success">ON</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="showBSMValues" checked>
+                                            <label class="form-check-label small" for="showBSMValues">
+                                                Show BSM Values
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <small class="text-muted">
+                                            <i class="bi bi-info-circle"></i> BSM Model Active
+                                        </small>
+                                    </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Volatility Surface Settings -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white py-2">
+                        <h6 class="mb-0">
+                            <i class="bi bi-cloud-arrow-up me-2"></i>VOLATILITY SURFACE SETTINGS
+                        </h6>
+                    </div>
+                    <div class="card-body py-2">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-3 col-6">
+                                <label class="small mb-1">Volatility Skew</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" class="form-control" id="volatilitySkew" value="-0.002" step="0.0001">
+                                    <span class="input-group-text">/100Δ</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <label class="small mb-1">Volatility Smile</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" class="form-control" id="volatilitySmile" value="0.0001" step="0.00001">
+                                    <span class="input-group-text">curvature</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <label class="small mb-1">Term Structure</label>
+                                <select class="form-select form-select-sm" id="termStructure">
+                                    <option value="flat">Flat</option>
+                                    <option value="normal" selected>Normal (↑ near)</option>
+                                    <option value="inverted">Inverted (↑ far)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <button class="btn btn-sm btn-info w-100" onclick="updateVolatilitySurface()">
+                                    <i class="bi bi-cloud-arrow-up"></i> Update Surface
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -204,10 +303,17 @@
                 <div class="card">
                     <div class="card-header bg-secondary text-white py-2">
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-bold">OPTION CHAIN</span>
+                            <span class="fw-bold">OPTION CHAIN - BSM PRICING</span>
                             <div>
-                                <button class="btn btn-sm btn-light" onclick="addOptionRow()">
-                                    <i class="bi bi-plus-circle"></i> Add Option
+                                <span class="badge bg-info me-2" id="parityStatus">Parity: N/A</span>
+                                <button class="btn btn-sm btn-light" onclick="addCallOption()">
+                                    <i class="bi bi-plus-circle"></i> Add Call
+                                </button>
+                                <button class="btn btn-sm btn-outline-light ms-1" onclick="addPutOption()">
+                                    <i class="bi bi-plus-circle"></i> Add Put
+                                </button>
+                                <button class="btn btn-sm btn-outline-light ms-1" onclick="addPair()">
+                                    <i class="bi bi-arrows-angle-contract"></i> Straddle
                                 </button>
                                 <button class="btn btn-sm btn-outline-light ms-1" onclick="clearAllOptions()">
                                     <i class="bi bi-trash"></i> Clear All
@@ -221,15 +327,17 @@
                                 <thead class="table-dark">
                                     <tr>
                                         <th width="3%">#</th>
-                                        <th width="8%">Type</th>
-                                        <th width="12%">Strike</th>
+                                        <th width="7%">Type</th>
+                                        <th width="10%">Strike (K)</th>
                                         <th width="12%">Premium</th>
-                                        <th width="10%">Theta</th>
-                                        <th width="10%">Delta</th>
-                                        <th width="10%">Gamma</th>
-                                        <th width="10%">Vega</th>
-                                        <th width="8%">Days</th>
-                                        <th width="17%">Actions</th>
+                                        <th width="9%">Theta (θ)</th>
+                                        <th width="8%">Delta (Δ)</th>
+                                        <th width="8%">Gamma (Γ)</th>
+                                        <th width="8%">Vega (ν)</th>
+                                        <th width="8%">Rho (ρ)</th>
+                                        <th width="8%">IV%</th>
+                                        <th width="8%">Days (T)</th>
+                                        <th width="11%">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="optionsTableBody">
@@ -237,15 +345,21 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="10" class="text-center py-2">
+                                        <td colspan="12" class="text-center py-2">
                                             <button class="btn btn-sm btn-outline-primary" onclick="addCallOption()">
-                                                <i class="bi bi-plus-circle"></i> Add Call
+                                                <i class="bi bi-plus-circle"></i> Add Call (BSM)
                                             </button>
                                             <button class="btn btn-sm btn-outline-danger ms-2" onclick="addPutOption()">
-                                                <i class="bi bi-plus-circle"></i> Add Put
+                                                <i class="bi bi-plus-circle"></i> Add Put (BSM)
                                             </button>
                                             <button class="btn btn-sm btn-outline-warning ms-2" onclick="addPair()">
-                                                <i class="bi bi-arrows-angle-contract"></i> Add Call+Put
+                                                <i class="bi bi-arrows-angle-contract"></i> Add Straddle
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info ms-2" onclick="calculateImpliedVolatility()">
+                                                <i class="bi bi-graph-up-arrow"></i> Calculate IV
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info ms-2" onclick="validatePutCallParity()">
+                                                <i class="bi bi-shuffle"></i> Check Parity
                                             </button>
                                         </td>
                                     </tr>
@@ -257,13 +371,13 @@
             </div>
         </div>
 
-        <!-- Real-time Results Panel -->
+        <!-- Real-time BSM Metrics -->
         <div class="row mb-3">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header bg-info text-white py-2">
+                    <div class="card-header bg-success text-white py-2">
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-bold">REAL-TIME METRICS</span>
+                            <span class="fw-bold">BSM REAL-TIME METRICS</span>
                             <span class="badge bg-warning" id="lastUpdate">Last: Just now</span>
                         </div>
                     </div>
@@ -283,26 +397,28 @@
                             </div>
                             <div class="col-md-2 col-4">
                                 <div class="metric-box">
-                                    <small class="text-muted">Daily Carry Cost</small>
-                                    <div class="h5" id="dailyCarryCost">₹0.00</div>
+                                    <small class="text-muted">Total Extrinsic</small>
+                                    <div class="h5 text-info" id="totalExtrinsic">₹0.00</div>
                                 </div>
                             </div>
                             <div class="col-md-2 col-4">
                                 <div class="metric-box">
-                                    <small class="text-muted">Time Value</small>
-                                    <div class="h5" id="totalTimeValue">₹0.00</div>
+                                    <small class="text-muted">Total Intrinsic</small>
+                                    <div class="h5" id="totalIntrinsic">₹0.00</div>
                                 </div>
                             </div>
                             <div class="col-md-2 col-4">
                                 <div class="metric-box">
-                                    <small class="text-muted">IV Impact</small>
-                                    <div class="h5 text-info" id="totalVegaImpact">₹0.00</div>
+                                    <small class="text-muted">Net Delta</small>
+                                    <div class="h5" id="totalDelta">0.0000</div>
                                 </div>
                             </div>
                             <div class="col-md-2 col-4">
                                 <div class="metric-box">
-                                    <small class="text-muted">Prob ITM</small>
-                                    <div class="h5" id="avgProbITM">0%</div>
+                                    <small class="text-muted">Put-Call Parity</small>
+                                    <div class="h6" id="putCallParity">
+                                        <span class="badge bg-secondary">N/A</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -318,7 +434,7 @@
                 <div class="card h-100">
                     <div class="card-header bg-primary text-white py-2">
                         <h6 class="mb-0">
-                            <i class="bi bi-graph-down-arrow me-2"></i>PREMIUM EROSION TIMELINE
+                            <i class="bi bi-graph-down-arrow me-2"></i>BSM PREMIUM EROSION TIMELINE
                         </h6>
                     </div>
                     <div class="card-body">
@@ -334,7 +450,7 @@
                 <div class="card h-100">
                     <div class="card-header bg-success text-white py-2">
                         <h6 class="mb-0">
-                            <i class="bi bi-currency-exchange me-2"></i>P&L AT EXPIRY
+                            <i class="bi bi-currency-exchange me-2"></i>P&L AT EXPIRY (BSM)
                         </h6>
                     </div>
                     <div class="card-body">
@@ -352,7 +468,7 @@
                 <div class="card">
                     <div class="card-header bg-dark text-white py-2">
                         <h6 class="mb-0">
-                            <i class="bi bi-sliders me-2"></i>P&L SIMULATOR SETTINGS
+                            <i class="bi bi-sliders me-2"></i>BSM P&L SIMULATOR SETTINGS
                         </h6>
                     </div>
                     <div class="card-body py-2">
@@ -375,6 +491,12 @@
                                         Include Premium
                                     </label>
                                 </div>
+                                <div class="form-check mt-1">
+                                    <input class="form-check-input" type="checkbox" id="plBSMpricing" checked>
+                                    <label class="form-check-label small" for="plBSMpricing">
+                                        Use BSM Pricing
+                                    </label>
+                                </div>
                             </div>
                             <div class="col-md-3 col-6">
                                 <button class="btn btn-sm btn-success w-100" onclick="calculatePL()" title="Alt+P">
@@ -393,7 +515,7 @@
                 <div class="card">
                     <div class="card-header bg-warning text-dark py-2">
                         <h6 class="mb-0">
-                            <i class="bi bi-table me-2"></i>P&L AT KEY LEVELS
+                            <i class="bi bi-table me-2"></i>P&L AT KEY LEVELS (BSM)
                         </h6>
                     </div>
                     <div class="card-body p-0">
@@ -401,10 +523,11 @@
                             <table class="table table-sm mb-0" id="plDetailedTable">
                                 <thead class="table-light">
                                     <tr>
-                                        <th width="20%">Price</th>
-                                        <th width="20%">Call P&L</th>
-                                        <th width="20%">Put P&L</th>
-                                        <th width="20%">Net P&L</th>
+                                        <th width="20%">Price (S)</th>
+                                        <th width="15%">Call P&L</th>
+                                        <th width="15%">Put P&L</th>
+                                        <th width="15%">Net P&L</th>
+                                        <th width="15%">Extrinsic</th>
                                         <th width="20%">Status</th>
                                     </tr>
                                 </thead>
@@ -454,50 +577,110 @@
             </div>
         </div>
 
+        <!-- BSM Model Information -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-dark text-white py-2">
+                        <h6 class="mb-0">
+                            <i class="bi bi-info-circle me-2"></i>BLACK-SCHOLES-MERTON MODEL INFO
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="small fw-bold">Model Parameters:</h6>
+                                <ul class="small mb-0">
+                                    <li>S = Spot Price (₹)</li>
+                                    <li>K = Strike Price (₹)</li>
+                                    <li>T = Time to Expiry (years)</li>
+                                    <li>r = Risk-free Rate (%)</li>
+                                    <li>σ = Implied Volatility (%)</li>
+                                    <li>q = Dividend Yield (%)</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="small fw-bold">Key Formulas:</h6>
+                                <ul class="small mb-0">
+                                    <li>d₁ = [ln(S/K) + (r - q + σ²/2)T] / (σ√T)</li>
+                                    <li>d₂ = d₁ - σ√T</li>
+                                    <li>Call = S⋅e⁻ᵠᵀ⋅N(d₁) - K⋅e⁻ʳᵀ⋅N(d₂)</li>
+                                    <li>Put = K⋅e⁻ʳᵀ⋅N(-d₂) - S⋅e⁻ᵠᵀ⋅N(-d₁)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="alert alert-info small mb-0">
+                                    <i class="bi bi-lightbulb me-2"></i>
+                                    <strong>Industry Standard:</strong> This calculator uses the complete Black-Scholes-Merton model 
+                                    following CBOE/NSE standards. All Greeks are calculated using exact partial derivatives of the BSM formula.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Advanced Settings (Collapsible) -->
         <div class="row mb-3">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header py-2">
                         <button class="btn btn-sm btn-outline-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#advancedSettings">
-                            <i class="bi bi-gear me-2"></i> ADVANCED SETTINGS
+                            <i class="bi bi-gear me-2"></i> BSM ADVANCED SETTINGS
                         </button>
                     </div>
                     <div class="collapse" id="advancedSettings">
                         <div class="card-body">
                             <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="small mb-1">Theta Acceleration</label>
-                                    <input type="number" class="form-control form-control-sm" id="thetaAcceleration" value="1.2" min="0.5" max="3" step="0.1">
+                                <div class="col-md-3">
+                                    <label class="small mb-1">IV Calculation Precision</label>
+                                    <input type="number" class="form-control form-control-sm" id="ivPrecision" value="0.0001" min="0.000001" max="0.01" step="0.000001">
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="small mb-1">Volatility Change</label>
+                                <div class="col-md-3">
+                                    <label class="small mb-1">Max IV Iterations</label>
+                                    <input type="number" class="form-control form-control-sm" id="maxIViterations" value="100" min="10" max="1000">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="small mb-1">Parity Tolerance</label>
                                     <div class="input-group input-group-sm">
-                                        <input type="number" class="form-control" id="volatilityChange" value="0" min="-50" max="50">
-                                        <span class="input-group-text">%</span>
+                                        <input type="number" class="form-control" id="parityTolerance" value="0.01" min="0.001" max="1" step="0.001">
+                                        <span class="input-group-text">₹</span>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="small mb-1">Days to Project</label>
-                                    <input type="number" class="form-control form-control-sm" id="projectionDays" value="30" min="1" max="365">
+                                <div class="col-md-3">
+                                    <label class="small mb-1">Dividend Frequency</label>
+                                    <select class="form-select form-select-sm" id="dividendFrequency">
+                                        <option value="continuous">Continuous</option>
+                                        <option value="quarterly">Quarterly</option>
+                                        <option value="annual">Annual</option>
+                                    </select>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" id="includeWeekends" checked>
-                                        <label class="form-check-label small" for="includeWeekends">
-                                            Include weekend decay
+                                        <input class="form-check-input" type="checkbox" id="includeDividends" checked>
+                                        <label class="form-check-label small" for="includeDividends">
+                                            Include dividend yield
                                         </label>
                                     </div>
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" id="nonLinearTheta" checked>
-                                        <label class="form-check-label small" for="nonLinearTheta">
-                                            Non-linear theta
+                                        <input class="form-check-input" type="checkbox" id="showD1D2" checked>
+                                        <label class="form-check-label small" for="showD1D2">
+                                            Show d1/d2 values
                                         </label>
                                     </div>
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" id="showGreeks" checked>
-                                        <label class="form-check-label small" for="showGreeks">
-                                            Show Greeks
+                                        <input class="form-check-input" type="checkbox" id="autoIVcalculation" checked>
+                                        <label class="form-check-label small" for="autoIVcalculation">
+                                            Auto-calc IV on change
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="validateParityAuto" checked>
+                                        <label class="form-check-label small" for="validateParityAuto">
+                                            Auto-validate parity
                                         </label>
                                     </div>
                                 </div>
@@ -512,23 +695,35 @@
         <footer class="mt-3 pt-3 border-top">
             <div class="row">
                 <div class="col-md-8">
-                    <h6 class="small fw-bold">Active Trader Options Calculator</h6>
+                    <h6 class="small fw-bold">Active Trader Pro - BSM Edition v4.0</h6>
                     <p class="text-muted small mb-2">
-                        Professional tool for Indian options traders. Real-time updates, keyboard shortcuts, multi-scenario analysis.
-                        <br>Built for speed and accuracy. <span class="text-info">Press F1 for NIFTY ATM preset.</span>
+                        Professional Black-Scholes-Merton options calculator for Indian markets. Industry standard pricing, 
+                        real-time Greeks calculation, volatility surface modeling. 
+                        <br><span class="text-info">Press F1 for NIFTY ATM preset. Press Alt+I for IV calculation.</span>
                     </p>
+                    <div class="small">
+                        <span class="badge bg-dark me-1">S = Spot</span>
+                        <span class="badge bg-dark me-1">K = Strike</span>
+                        <span class="badge bg-dark me-1">T = Time</span>
+                        <span class="badge bg-dark me-1">r = Rate</span>
+                        <span class="badge bg-dark me-1">σ = Volatility</span>
+                        <span class="badge bg-dark">q = Dividend</span>
+                    </div>
                 </div>
                 <div class="col-md-4 text-md-end">
-                    <h6 class="small fw-bold">Quick Actions</h6>
+                    <h6 class="small fw-bold">BSM Quick Actions</h6>
                     <div class="d-flex flex-column gap-1">
-                        <button class="btn btn-sm btn-outline-primary" onclick="calculateAll()">
-                            <i class="bi bi-calculator"></i> Calc All (Alt+C)
+                        <button class="btn btn-sm btn-outline-info" onclick="calculateImpliedVolatility()">
+                            <i class="bi bi-graph-up-arrow"></i> Calc IV (Alt+I)
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" onclick="validatePutCallParity()">
+                            <i class="bi bi-shuffle"></i> Check Parity (Alt+V)
+                        </button>
+                        <button class="btn btn-sm btn-outline-warning" onclick="options.forEach(o => recalculateBSM(o.id)); updateAllCalculations();">
+                            <i class="bi bi-calculator-fill"></i> Recalc BSM (F5)
                         </button>
                         <button class="btn btn-sm btn-outline-success" onclick="exportToCSV()">
-                            <i class="bi bi-download"></i> Export (Alt+E)
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="resetAll()">
-                            <i class="bi bi-arrow-clockwise"></i> Reset (Alt+R)
+                            <i class="bi bi-download"></i> Export BSM (Alt+E)
                         </button>
                     </div>
                 </div>
@@ -536,9 +731,10 @@
             <div class="row mt-2">
                 <div class="col-12 text-center">
                     <p class="text-muted small">
-                        <i class="bi bi-code-slash"></i> Active Trader Pro v3.0 |
-                        <i class="bi bi-currency-rupee"></i> Indian Markets |
-                        <i class="bi bi-shield-check"></i> Client-side only
+                        <i class="bi bi-calculator-fill"></i> Black-Scholes-Merton v4.0 |
+                        <i class="bi bi-currency-rupee"></i> Indian Markets (NSE/BSE) |
+                        <i class="bi bi-shield-check"></i> Industry Standard |
+                        <i class="bi bi-cpu"></i> Client-side BSM Engine
                     </p>
                 </div>
             </div>
@@ -560,7 +756,7 @@
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
             
-            // Load initial options
+            // Load initial options with BSM
             setTimeout(initializeDefaultOptions, 100);
             
             // Set current date
@@ -569,6 +765,13 @@
                 month: 'short',
                 day: 'numeric'
             });
+            
+            // Show BSM welcome
+            setTimeout(() => {
+                console.log('%c⚡ BSM Options Calculator v4.0 Loaded', 
+                    'color: #28a745; font-weight: bold; font-size: 16px;');
+                console.log('%cBlack-Scholes-Merton Model Active', 'color: #6c757d;');
+            }, 500);
         });
     </script>
 </body>
