@@ -16,7 +16,7 @@
     --current-price-color: #0d6efd;
     --break-even-color: #ffc107;
     
-    /* Light Theme Text & Background */
+    /* Light Theme Text & Background - Enhanced contrast */
     --bg-primary: #ffffff;
     --bg-secondary: #f8f9fa;
     --bg-tertiary: #e9ecef;
@@ -27,9 +27,19 @@
     --card-bg: #ffffff;
     --table-bg: #ffffff;
     --table-header-bg: #f8f9fa;
+    --table-row-even: #f8f9fa;
+    --table-row-odd: #ffffff;
     --input-bg: #ffffff;
     --input-border: #ced4da;
     --input-text: #212529;
+    
+    /* Shadow variables that work in both themes */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    
+    /* Ensure text is always visible */
+    --text-always-visible: #212529;
 }
 
 [data-theme="dark"] {
@@ -47,27 +57,46 @@
     --current-price-color: #4dabf7;
     --break-even-color: #ffc107;
     
-    /* Dark Theme Text & Background */
+    /* Dark Theme Text & Background - Enhanced for visibility */
     --bg-primary: #121416;
     --bg-secondary: #1a1d20;
     --bg-tertiary: #24292e;
-    --text-primary: #e9ecef;
-    --text-secondary: #adb5bd;
-    --text-muted: #868e96;
-    --border-color: #343a40;
+    --text-primary: #ffffff; /* Changed from #e9ecef for better visibility */
+    --text-secondary: #dee2e6; /* Enhanced contrast */
+    --text-muted: #adb5bd;
+    --border-color: #495057;
     --card-bg: #1a1d20;
     --table-bg: #1a1d20;
-    --table-header-bg: #24292e;
+    --table-header-bg: #2d3748; /* Darker for better contrast */
+    --table-row-even: #1a1d20;
+    --table-row-odd: #212529; /* Slight variation for rows */
     --input-bg: #24292e;
     --input-border: #495057;
-    --input-text: #e9ecef;
+    --input-text: #ffffff; /* Changed from #e9ecef */
+    
+    /* Adjust shadows for dark mode */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    
+    /* Ensure text is always visible in dark mode */
+    --text-always-visible: #ffffff;
 }
 
-/* Global Styles */
+/* Global Styles - Force theme consistency */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
 body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Force all text elements to use theme colors */
+h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, textarea {
+    color: var(--text-primary) !important;
 }
 
 /* Theme Toggle Button */
@@ -85,13 +114,13 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-md);
     transition: all 0.3s ease;
 }
 
 .theme-toggle:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-lg);
 }
 
 .theme-toggle i {
@@ -115,6 +144,7 @@ body {
 .card-terminal {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
     transition: all 0.3s ease;
 }
 
@@ -124,47 +154,92 @@ body {
     color: var(--text-primary) !important;
 }
 
-/* Fix for Bootstrap utility classes in dark mode */
-[data-theme="dark"] .table-light {
-    --bs-table-bg: var(--table-header-bg) !important;
+/* Comprehensive table fixes for dark mode */
+[data-theme="dark"] table {
+    --bs-table-bg: var(--table-bg) !important;
     --bs-table-color: var(--text-primary) !important;
     --bs-table-border-color: var(--border-color) !important;
-    background-color: var(--table-header-bg) !important;
+    background-color: var(--table-bg) !important;
     color: var(--text-primary) !important;
 }
 
-[data-theme="dark"] .table-light th,
-[data-theme="dark"] .table-light td {
-    background-color: var(--table-header-bg) !important;
+[data-theme="dark"] table th,
+[data-theme="dark"] table td {
+    background-color: inherit !important;
     color: var(--text-primary) !important;
     border-color: var(--border-color) !important;
 }
 
-[data-theme="dark"] .card-header.bg-warning.text-dark {
-    background-color: #664d03 !important;
+/* Fix all Bootstrap table variants */
+[data-theme="dark"] .table-light {
+    --bs-table-bg: var(--table-header-bg) !important;
+    --bs-table-color: var(--text-primary) !important;
+    background-color: var(--table-header-bg) !important;
     color: var(--text-primary) !important;
 }
 
-[data-theme="dark"] .bg-light {
+[data-theme="dark"] .table-dark {
+    --bs-table-bg: var(--bg-tertiary) !important;
+    --bs-table-color: var(--text-primary) !important;
     background-color: var(--bg-tertiary) !important;
     color: var(--text-primary) !important;
 }
 
-[data-theme="dark"] .text-dark {
+/* Fix striped tables */
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) {
+    --bs-table-accent-bg: var(--table-row-odd) !important;
+    background-color: var(--table-row-odd) !important;
     color: var(--text-primary) !important;
 }
 
+/* Fix hover effects */
+[data-theme="dark"] .table-hover tbody tr:hover {
+    --bs-table-accent-bg: var(--bg-tertiary) !important;
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Fix Bootstrap utility classes */
+[data-theme="dark"] .bg-light {
+    background-color: var(--bg-tertiary) !important;
+}
+
+[data-theme="dark"] .text-dark,
+[data-theme="dark"] .text-body {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .card-header.bg-warning,
+[data-theme="dark"] .bg-warning {
+    background-color: #664d03 !important;
+    color: var(--text-primary) !important;
+}
+
+/* Button fixes */
 [data-theme="dark"] .btn-outline-light {
-    border-color: var(--border-color);
-    color: var(--text-primary);
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
 }
 
 [data-theme="dark"] .btn-outline-light:hover {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .btn-light {
+    background-color: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
 }
 
 /* Form controls dark mode fixes */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+    background-color: var(--input-bg) !important;
+    border-color: var(--input-border) !important;
+    color: var(--input-text) !important;
+}
+
 [data-theme="dark"] .form-check-input {
     background-color: var(--input-bg);
     border-color: var(--input-border);
@@ -178,6 +253,7 @@ body {
 [data-theme="dark"] .input-group-text {
     background-color: var(--bg-tertiary) !important;
     color: var(--text-primary) !important;
+    border-color: var(--input-border) !important;
 }
 
 /* BSM Model Indicators */
@@ -208,17 +284,21 @@ body {
     color: white;
 }
 
-/* BSM Table Enhancements */
-#optionsTable {
-    background-color: var(--table-bg);
-    color: var(--text-primary);
+/* BSM Table Enhancements - CRITICAL FIXES */
+#optionsTable,
+#plDetailedTable {
+    background-color: var(--table-bg) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
 }
 
-#optionsTable th {
+#optionsTable th,
+#plDetailedTable th {
     position: relative;
-    background-color: var(--table-header-bg);
-    border-bottom: 2px solid var(--border-color);
-    color: var(--text-primary);
+    background-color: var(--table-header-bg) !important;
+    border-bottom: 2px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+    font-weight: 600;
 }
 
 #optionsTable th .formula {
@@ -227,13 +307,24 @@ body {
     bottom: 2px;
     left: 0;
     right: 0;
-    color: var(--text-muted);
+    color: var(--text-muted) !important;
     font-family: 'Courier New', monospace;
 }
 
-#optionsTable td {
-    border-color: var(--border-color);
-    color: var(--text-primary);
+#optionsTable td,
+#plDetailedTable td {
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+    background-color: inherit !important;
+}
+
+/* Force table cell content visibility */
+#optionsTable td *,
+#plDetailedTable td *,
+#optionsTable th *,
+#plDetailedTable th * {
+    color: inherit !important;
+    background-color: transparent !important;
 }
 
 /* Greek symbols styling */
@@ -243,11 +334,11 @@ body {
     font-weight: bold;
 }
 
-.greek-delta { color: #007bff; }
-.greek-gamma { color: #6f42c1; }
-.greek-theta { color: #fd7e14; }
-.greek-vega { color: #20c997; }
-.greek-rho { color: #e83e8c; }
+.greek-delta { color: #007bff !important; }
+.greek-gamma { color: #6f42c1 !important; }
+.greek-theta { color: #fd7e14 !important; }
+.greek-vega { color: #20c997 !important; }
+.greek-rho { color: #e83e8c !important; }
 
 /* BSM Metric Boxes */
 .metric-box.bsm {
@@ -259,7 +350,7 @@ body {
 .metric-box .formula {
     font-size: 0.65rem;
     font-family: 'Courier New', monospace;
-    color: var(--text-muted);
+    color: var(--text-muted) !important;
     margin-top: 2px;
 }
 
@@ -283,15 +374,22 @@ body {
     color: var(--text-primary);
 }
 
-/* BSM Model Info Panel */
+/* BSM Model Info Panel - CRITICAL FIX */
 .model-info {
     font-family: 'Courier New', monospace;
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
     border-radius: 4px;
     padding: 10px;
     margin: 5px 0;
     border-left: 3px solid var(--greeks-color);
+}
+
+/* Force all model-info content to be visible */
+.model-info,
+.model-info *:not(.btn):not(.form-control):not(.input-group-text) {
+    color: var(--text-primary) !important;
+    background-color: transparent !important;
 }
 
 .model-info ul {
@@ -301,8 +399,25 @@ body {
 
 .model-info li {
     font-size: 0.8rem;
-    color: var(--text-secondary);
+    color: var(--text-secondary) !important;
     margin-bottom: 2px;
+}
+
+/* Special fix for formulas in model info */
+.model-info .formula,
+.model-info code,
+.model-info pre {
+    font-family: 'Courier New', monospace;
+    color: var(--text-primary) !important;
+    background-color: rgba(0, 0, 0, 0.1) !important;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+[data-theme="dark"] .model-info .formula,
+[data-theme="dark"] .model-info code,
+[data-theme="dark"] .model-info pre {
+    background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 /* BSM Chart Enhancements */
@@ -314,7 +429,7 @@ body {
 
 /* Price Difference Indicators */
 .price-diff-positive {
-    color: var(--call-color);
+    color: var(--call-color) !important;
     background-color: rgba(40, 167, 69, 0.1);
     padding: 0 4px;
     border-radius: 2px;
@@ -322,7 +437,7 @@ body {
 }
 
 .price-diff-negative {
-    color: var(--put-color);
+    color: var(--put-color) !important;
     background-color: rgba(220, 53, 69, 0.1);
     padding: 0 4px;
     border-radius: 2px;
@@ -345,26 +460,26 @@ body {
     100% { opacity: 1; }
 }
 
-/* P&L TABLE ENHANCEMENTS */
+/* P&L TABLE ENHANCEMENTS - CRITICAL SECTION */
 #plDetailedTable {
     font-size: 0.85rem;
-    background-color: var(--table-bg);
-    color: var(--text-primary);
+    background-color: var(--table-bg) !important;
+    color: var(--text-primary) !important;
 }
 
 #plDetailedTable th {
-    background-color: var(--table-header-bg);
-    border-bottom: 2px solid var(--border-color);
+    background-color: var(--table-header-bg) !important;
+    border-bottom: 2px solid var(--border-color) !important;
     font-weight: 600;
     white-space: nowrap;
-    color: var(--text-primary);
+    color: var(--text-primary) !important;
 }
 
 #plDetailedTable td {
     padding: 0.5rem 0.75rem;
     vertical-align: middle;
-    border-color: var(--border-color);
-    color: var(--text-primary);
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
 }
 
 /* Current Spot Price Row Highlight */
@@ -432,17 +547,17 @@ body {
 
 /* P&L Value Coloring */
 #plDetailedTable .positive-pl {
-    color: var(--profit-color);
+    color: var(--profit-color) !important;
     font-weight: 600;
 }
 
 #plDetailedTable .negative-pl {
-    color: var(--loss-color);
+    color: var(--loss-color) !important;
     font-weight: 600;
 }
 
 #plDetailedTable .zero-pl {
-    color: var(--neutral-color);
+    color: var(--neutral-color) !important;
     font-weight: 500;
 }
 
@@ -459,7 +574,7 @@ body {
 
 .pl-summary-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-md);
 }
 
 .pl-max-profit {
@@ -476,7 +591,7 @@ body {
 
 .pl-summary-card h6 {
     font-size: 0.75rem;
-    color: var(--text-muted);
+    color: var(--text-muted) !important;
     margin-bottom: 4px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -489,15 +604,15 @@ body {
 }
 
 .pl-max-profit .pl-value {
-    color: var(--profit-color);
+    color: var(--profit-color) !important;
 }
 
 .pl-max-loss .pl-value {
-    color: var(--loss-color);
+    color: var(--loss-color) !important;
 }
 
 .pl-breakeven .pl-value {
-    color: var(--break-even-color);
+    color: var(--break-even-color) !important;
 }
 
 /* P&L Legend */
@@ -518,7 +633,7 @@ body {
     align-items: center;
     gap: 5px;
     font-size: 0.75rem;
-    color: var(--text-secondary);
+    color: var(--text-secondary) !important;
 }
 
 .legend-color {
@@ -542,7 +657,7 @@ body {
 .btn-outline-primary:hover, .btn-outline-secondary:hover, .btn-outline-success:hover, 
 .btn-outline-danger:hover, .btn-outline-warning:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 /* Badges */
@@ -574,6 +689,17 @@ footer .badge.bg-dark {
     font-size: 0.7rem;
     padding: 0.2rem 0.4rem;
     background-color: var(--bsm-color) !important;
+}
+
+/* Emergency override for invisible text */
+body[data-theme="dark"] *:not(.btn):not(.form-control):not(.input-group-text) {
+    color: var(--text-primary) !important;
+}
+
+body[data-theme="dark"] table,
+body[data-theme="dark"] table * {
+    color: var(--text-primary) !important;
+    background-color: var(--table-bg) !important;
 }
 
 /* Mobile Responsive for BSM */
