@@ -312,7 +312,7 @@ function addOption(optionData) {
 }
 
 // ============================================================================
-// UPDATED FUNCTIONS - FIX FOR INPUT FIELD FOCUS
+// UPDATED FUNCTIONS - MAKING ALL FIELDS EDITABLE
 // ============================================================================
 
 function updateOptionsTable() {
@@ -400,7 +400,14 @@ function updateOptionsTable() {
                        data-id="${option.id}" data-field="rho" 
                        value="${option.rho.toFixed(2)}" step="0.01">
             </td>
-            <td>${option.iv.toFixed(2)}%</td>
+            <td>
+                <div class="input-group input-group-sm">
+                    <input type="number" class="form-control option-input iv-input" 
+                           data-id="${option.id}" data-field="iv" 
+                           value="${option.iv.toFixed(2)}" step="0.01">
+                    <span class="input-group-text">%</span>
+                </div>
+            </td>
             <td>
                 <input type="number" class="form-control form-control-sm option-input days-input" 
                        data-id="${option.id}" data-field="days" 
@@ -480,14 +487,7 @@ function handleOptionInputBlur(e) {
         // Restore original value
         const option = options.find(o => o.id === id);
         if (option) {
-            input.value = field === 'strike' ? option.strike :
-                         field === 'premium' ? option.premium.toFixed(2) :
-                         field === 'theta' ? option.theta.toFixed(2) :
-                         field === 'delta' ? option.delta.toFixed(4) :
-                         field === 'gamma' ? option.gamma.toFixed(6) :
-                         field === 'vega' ? option.vega.toFixed(2) :
-                         field === 'rho' ? option.rho.toFixed(2) :
-                         field === 'days' ? option.days : value;
+            input.value = getFormattedOptionValue(option, field);
         }
         return;
     }
@@ -495,8 +495,9 @@ function handleOptionInputBlur(e) {
     // Update the option field
     updateOptionField(id, field, value);
     
-    // Update IV if premium changed
+    // Special handling for certain fields
     if (field === 'premium') {
+        // When premium changes, recalculate IV
         const spot = parseFloat(document.getElementById('spotPrice').value);
         const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
         const option = options.find(o => o.id === id);
@@ -514,18 +515,52 @@ function handleOptionInputBlur(e) {
             option.iv = iv * 100;
             
             // Update IV display
-            const row = input.closest('tr');
-            if (row && row.cells[9]) {
-                row.cells[9].textContent = `${option.iv.toFixed(2)}%`;
+            const ivInput = document.querySelector(`.iv-input[data-id="${id}"]`);
+            if (ivInput) {
+                ivInput.value = option.iv.toFixed(2);
             }
         }
+    } else if (field === 'iv') {
+        // When IV changes, recalculate Greeks and theoretical price
+        const spot = parseFloat(document.getElementById('spotPrice').value);
+        const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
+        const option = options.find(o => o.id === id);
+        
+        if (option && option.days > 0) {
+            const T = option.days / 365;
+            const iv = parseFloat(value) / 100;
+            
+            // Recalculate Greeks with new IV
+            const greeks = BlackScholesPricing.calculateGreeks(
+                option.type,
+                spot,
+                option.strike,
+                T,
+                r,
+                iv
+            );
+            
+            // Update option with recalculated Greeks
+            option.theta = greeks.theta;
+            option.delta = greeks.delta;
+            option.gamma = greeks.gamma;
+            option.vega = greeks.vega;
+            option.rho = greeks.rho;
+            option.theoreticalPrice = greeks.price;
+            
+            // Update all input fields with new values
+            updateOptionInputs(id);
+        }
+    } else if (field === 'theta' || field === 'gamma' || field === 'vega' || field === 'rho') {
+        // For other Greeks, just update the field and recalculate price difference
+        updatePriceDifference(id);
     }
     
     // Update price difference display
     updatePriceDifference(id);
     
     // If auto-calculate is on and this is a key field, trigger BSM recalculation
-    if (autoCalculate && (field === 'strike' || field === 'premium' || field === 'days')) {
+    if (autoCalculate && (field === 'strike' || field === 'premium' || field === 'days' || field === 'iv')) {
         setTimeout(() => {
             recalculateBSM(id);
             updateAllCalculations();
@@ -539,6 +574,21 @@ function handleOptionInputChange(e) {
     
     // Trigger blur handler (same logic)
     handleOptionInputBlur(e);
+}
+
+function getFormattedOptionValue(option, field) {
+    switch(field) {
+        case 'strike': return option.strike;
+        case 'premium': return option.premium.toFixed(2);
+        case 'theta': return option.theta.toFixed(2);
+        case 'delta': return option.delta.toFixed(4);
+        case 'gamma': return option.gamma.toFixed(6);
+        case 'vega': return option.vega.toFixed(2);
+        case 'rho': return option.rho.toFixed(2);
+        case 'iv': return option.iv.toFixed(2);
+        case 'days': return option.days;
+        default: return '';
+    }
 }
 
 function updatePriceDifference(id) {
@@ -566,7 +616,7 @@ function recalculateBSM(id) {
     if (!option) return;
     
     const spot = parseFloat(document.getElementById('spotPrice').value);
-    const iv = parseFloat(document.getElementById('impliedVol').value) / 100;
+    const iv = (option.iv || parseFloat(document.getElementById('impliedVol').value)) / 100;
     const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
     const q = 0;
     const T = option.days / 365;
@@ -618,33 +668,29 @@ function updateOptionInputs(id) {
     const option = options.find(o => o.id === id);
     if (!option) return;
     
-    // Get all inputs for this option
-    const strikeInput = document.querySelector(`.strike-input[data-id="${id}"]`);
-    const premiumInput = document.querySelector(`.premium-input[data-id="${id}"]`);
-    const thetaInput = document.querySelector(`.theta-input[data-id="${id}"]`);
-    const deltaInput = document.querySelector(`.delta-input[data-id="${id}"]`);
-    const gammaInput = document.querySelector(`.gamma-input[data-id="${id}"]`);
-    const vegaInput = document.querySelector(`.vega-input[data-id="${id}"]`);
-    const rhoInput = document.querySelector(`.rho-input[data-id="${id}"]`);
-    const daysInput = document.querySelector(`.days-input[data-id="${id}"]`);
+    // Update all inputs for this option
+    const inputs = {
+        'strike': option.strike,
+        'premium': option.premium.toFixed(2),
+        'theta': option.theta.toFixed(2),
+        'delta': option.delta.toFixed(4),
+        'gamma': option.gamma.toFixed(6),
+        'vega': option.vega.toFixed(2),
+        'rho': option.rho.toFixed(2),
+        'iv': option.iv.toFixed(2),
+        'days': option.days
+    };
     
-    // Update values if inputs exist
-    if (strikeInput) strikeInput.value = option.strike;
-    if (premiumInput) premiumInput.value = option.premium.toFixed(2);
-    if (thetaInput) thetaInput.value = option.theta.toFixed(2);
-    if (deltaInput) deltaInput.value = option.delta.toFixed(4);
-    if (gammaInput) gammaInput.value = option.gamma.toFixed(6);
-    if (vegaInput) vegaInput.value = option.vega.toFixed(2);
-    if (rhoInput) rhoInput.value = option.rho.toFixed(2);
-    if (daysInput) daysInput.value = option.days;
-    
-    // Update IV display
-    const row = strikeInput ? strikeInput.closest('tr') : null;
-    if (row && row.cells[9]) {
-        row.cells[9].textContent = `${option.iv.toFixed(2)}%`;
-    }
+    // Update each input field
+    Object.keys(inputs).forEach(field => {
+        const input = document.querySelector(`.${field}-input[data-id="${id}"]`);
+        if (input && input.value !== inputs[field]) {
+            input.value = inputs[field];
+        }
+    });
     
     // Update moneyness display
+    const row = document.querySelector(`.strike-input[data-id="${id}"]`)?.closest('tr');
     if (row) {
         const moneynessElement = row.querySelector('small.text-muted');
         if (moneynessElement) {
@@ -660,43 +706,23 @@ function updateSingleOption(id) {
     const option = options.find(o => o.id === id);
     if (!option) return;
     
-    // Get current values from inputs
-    const strikeInput = document.querySelector(`.strike-input[data-id="${id}"]`);
-    const premiumInput = document.querySelector(`.premium-input[data-id="${id}"]`);
-    const thetaInput = document.querySelector(`.theta-input[data-id="${id}"]`);
-    const deltaInput = document.querySelector(`.delta-input[data-id="${id}"]`);
-    const gammaInput = document.querySelector(`.gamma-input[data-id="${id}"]`);
-    const vegaInput = document.querySelector(`.vega-input[data-id="${id}"]`);
-    const rhoInput = document.querySelector(`.rho-input[data-id="${id}"]`);
-    const daysInput = document.querySelector(`.days-input[data-id="${id}"]`);
+    // Get current values from all input fields
+    const fields = ['strike', 'premium', 'theta', 'delta', 'gamma', 'vega', 'rho', 'iv', 'days'];
     
-    // Update option object from inputs
-    if (strikeInput && !isNaN(parseFloat(strikeInput.value))) {
-        option.strike = parseFloat(strikeInput.value);
-    }
-    if (premiumInput && !isNaN(parseFloat(premiumInput.value))) {
-        option.premium = parseFloat(premiumInput.value);
-    }
-    if (thetaInput && !isNaN(parseFloat(thetaInput.value))) {
-        option.theta = parseFloat(thetaInput.value);
-    }
-    if (deltaInput && !isNaN(parseFloat(deltaInput.value))) {
-        option.delta = parseFloat(deltaInput.value);
-    }
-    if (gammaInput && !isNaN(parseFloat(gammaInput.value))) {
-        option.gamma = parseFloat(gammaInput.value);
-    }
-    if (vegaInput && !isNaN(parseFloat(vegaInput.value))) {
-        option.vega = parseFloat(vegaInput.value);
-    }
-    if (rhoInput && !isNaN(parseFloat(rhoInput.value))) {
-        option.rho = parseFloat(rhoInput.value);
-    }
-    if (daysInput && !isNaN(parseInt(daysInput.value))) {
-        option.days = parseInt(daysInput.value);
-    }
+    fields.forEach(field => {
+        const input = document.querySelector(`.${field}-input[data-id="${id}"]`);
+        if (input && !isNaN(parseFloat(input.value))) {
+            if (field === 'days') {
+                option[field] = parseInt(input.value);
+            } else if (field === 'iv') {
+                option[field] = parseFloat(input.value);
+            } else {
+                option[field] = parseFloat(input.value);
+            }
+        }
+    });
     
-    // Recalculate BSM
+    // Recalculate BSM with updated values
     recalculateBSM(id);
     updateAllCalculations();
     showNotification(`Option ${id} updated`);
@@ -706,17 +732,18 @@ function updateOptionField(id, field, value) {
     const option = options.find(o => o.id === id);
     if (!option) return;
     
-    // Simple update - no validation here, let the calling function handle it
+    // Update the specific field
     if (field === 'days') {
         option[field] = parseInt(value) || option[field];
-    } else if (field === 'strike' || field === 'premium' || field === 'theta' || 
-               field === 'delta' || field === 'gamma' || field === 'vega' || field === 'rho') {
+    } else if (field === 'iv') {
+        option[field] = parseFloat(value) || option[field];
+    } else if (['strike', 'premium', 'theta', 'delta', 'gamma', 'vega', 'rho'].includes(field)) {
         option[field] = parseFloat(value) || option[field];
     }
 }
 
 // ============================================================================
-// REST OF THE FUNCTIONS (UNCHANGED)
+// REST OF THE FUNCTIONS (UNCHANGED EXCEPT FOR MINOR UPDATES)
 // ============================================================================
 
 function loadPreset(presetName) {
