@@ -313,6 +313,19 @@ function addOption(optionData) {
 
 function updateOptionsTable() {
     const tbody = document.getElementById('optionsTableBody');
+    if (!tbody) return;
+    
+    // Save which input is currently focused
+    const focusedElement = document.activeElement;
+    let focusedId = null;
+    let focusedField = null;
+    
+    if (focusedElement && focusedElement.classList.contains('option-input')) {
+        focusedId = focusedElement.dataset.id;
+        focusedField = focusedElement.dataset.field;
+    }
+    
+    // Clear and rebuild table
     tbody.innerHTML = '';
     
     options.forEach((option, index) => {
@@ -338,7 +351,8 @@ function updateOptionsTable() {
                     <span class="input-group-text">₹</span>
                     <input type="number" class="form-control option-input" 
                            data-id="${option.id}" data-field="strike" 
-                           value="${option.strike}" step="1">
+                           value="${option.strike}" step="1"
+                           id="input-${option.id}-strike">
                 </div>
             </td>
             <td>
@@ -346,7 +360,8 @@ function updateOptionsTable() {
                     <span class="input-group-text">₹</span>
                     <input type="number" class="form-control option-input" 
                            data-id="${option.id}" data-field="premium" 
-                           value="${option.premium.toFixed(2)}" step="0.01">
+                           value="${option.premium.toFixed(2)}" step="0.01"
+                           id="input-${option.id}-premium">
                 </div>
                 <small class="${priceDiffClass}">
                     <i class="bi ${priceDiffIcon}"></i> 
@@ -357,37 +372,42 @@ function updateOptionsTable() {
                 <div class="input-group input-group-sm">
                     <input type="number" class="form-control option-input" 
                            data-id="${option.id}" data-field="theta" 
-                           value="${option.theta.toFixed(2)}" step="0.01">
+                           value="${option.theta.toFixed(2)}" step="0.01"
+                           id="input-${option.id}-theta">
                     <span class="input-group-text">₹</span>
                 </div>
-                <small class="text-muted">BSM: ${option.theta.toFixed(2)}</small>
             </td>
             <td>
                 <input type="number" class="form-control form-control-sm option-input" 
                        data-id="${option.id}" data-field="delta" 
-                       value="${option.delta.toFixed(4)}" step="0.0001">
-                <small class="text-muted">Δ=${option.delta.toFixed(4)}</small>
+                       value="${option.delta.toFixed(4)}" step="0.0001"
+                       id="input-${option.id}-delta">
             </td>
             <td>
                 <input type="number" class="form-control form-control-sm option-input" 
                        data-id="${option.id}" data-field="gamma" 
-                       value="${option.gamma.toFixed(6)}" step="0.000001">
-                <small class="text-muted">Γ=${option.gamma.toFixed(6)}</small>
+                       value="${option.gamma.toFixed(6)}" step="0.000001"
+                       id="input-${option.id}-gamma">
             </td>
             <td>
                 <input type="number" class="form-control form-control-sm option-input" 
                        data-id="${option.id}" data-field="vega" 
-                       value="${option.vega.toFixed(2)}" step="0.01">
-                <small class="text-muted">ν=${option.vega.toFixed(2)}</small>
+                       value="${option.vega.toFixed(2)}" step="0.01"
+                       id="input-${option.id}-vega">
             </td>
             <td>
                 <input type="number" class="form-control form-control-sm option-input" 
                        data-id="${option.id}" data-field="rho" 
-                       value="${option.rho.toFixed(2)}" step="0.01">
-                <small class="text-muted">ρ=${option.rho.toFixed(2)}</small>
+                       value="${option.rho.toFixed(2)}" step="0.01"
+                       id="input-${option.id}-rho">
             </td>
             <td>${option.iv.toFixed(2)}%</td>
-            <td>${option.days}</td>
+            <td>
+                <input type="number" class="form-control form-control-sm option-input" 
+                       data-id="${option.id}" data-field="days" 
+                       value="${option.days}" min="1" max="365"
+                       id="input-${option.id}-days">
+            </td>
             <td>
                 <div class="btn-group btn-group-sm">
                     <button class="btn btn-outline-primary" onclick="recalculateBSM(${option.id})" title="Recalc BSM">
@@ -408,19 +428,149 @@ function updateOptionsTable() {
         tbody.appendChild(row);
     });
     
+    // Add event listeners with debouncing
     document.querySelectorAll('.option-input').forEach(input => {
-        input.addEventListener('input', function() {
+        input.addEventListener('input', function(e) {
             const id = parseInt(this.dataset.id);
             const field = this.dataset.field;
             const value = this.value;
-            updateOptionField(id, field, value);
+            
+            // Don't update if value is empty
+            if (value === '' || value === null || value === undefined) return;
+            
+            // Update the option field without triggering a full table refresh
+            updateOptionFieldWithoutRefresh(id, field, value);
+        });
+        
+        // Also update on blur (when user leaves the field)
+        input.addEventListener('blur', function(e) {
+            const id = parseInt(this.dataset.id);
+            const field = this.dataset.field;
+            const value = this.value;
+            
+            if (value === '' || value === null || value === undefined) return;
+            
+            updateOptionFieldWithoutRefresh(id, field, value);
+            
+            // Only recalculate after blur
             if (autoCalculate) {
                 recalculateBSM(id);
                 updateAllCalculations();
             }
         });
+        
+        // Handle Enter key
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const id = parseInt(this.dataset.id);
+                const field = this.dataset.field;
+                const value = this.value;
+                
+                if (value === '' || value === null || value === undefined) return;
+                
+                updateOptionFieldWithoutRefresh(id, field, value);
+                
+                if (autoCalculate) {
+                    recalculateBSM(id);
+                    updateAllCalculations();
+                }
+            }
+        });
     });
+    
+    // Restore focus if there was a focused element
+    if (focusedId && focusedField) {
+        const elementToFocus = document.getElementById(`input-${focusedId}-${focusedField}`);
+        if (elementToFocus) {
+            setTimeout(() => {
+                elementToFocus.focus();
+                // Move cursor to end of input
+                elementToFocus.setSelectionRange(
+                    elementToFocus.value.length,
+                    elementToFocus.value.length
+                );
+            }, 10);
+        }
+    }
 }
+
+function updateOptionFieldWithoutRefresh(id, field, value) {
+    const option = options.find(o => o.id === id);
+    if (!option) return;
+    
+    // Convert value based on field type
+    let convertedValue = value;
+    switch(field) {
+        case 'strike':
+        case 'premium':
+        case 'theta':
+        case 'delta':
+        case 'gamma':
+        case 'vega':
+        case 'rho':
+            convertedValue = parseFloat(value);
+            if (isNaN(convertedValue)) return;
+            break;
+        case 'days':
+            convertedValue = parseInt(value);
+            if (isNaN(convertedValue)) return;
+            break;
+    }
+    
+    // Update the option
+    option[field] = convertedValue;
+    
+    // For premium field, update IV
+    if (field === 'premium') {
+        const spot = parseFloat(document.getElementById('spotPrice').value);
+        const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
+        const T = option.days / 365;
+        
+        if (T > 0 && !isNaN(spot) && !isNaN(r)) {
+            const iv = BlackScholesPricing.calculateImpliedVol(
+                option.type,
+                spot,
+                option.strike,
+                T,
+                r,
+                convertedValue
+            );
+            option.iv = iv * 100;
+            
+            // Update the IV display in the table without full refresh
+            const ivCell = document.querySelector(`#input-${id}-premium`).closest('tr').cells[9];
+            if (ivCell) {
+                ivCell.textContent = `${option.iv.toFixed(2)}%`;
+            }
+        }
+    }
+    
+    // Update the displayed values without full table refresh
+    updateDisplayValues(id);
+}
+
+function updateDisplayValues(id) {
+    const option = options.find(o => o.id === id);
+    if (!option) return;
+    
+    // Update price difference display
+    const priceDiff = option.premium - option.theoreticalPrice;
+    const priceDiffClass = Math.abs(priceDiff) > 0.5 ? 
+        (priceDiff > 0 ? 'text-danger' : 'text-success') : 'text-muted';
+    const priceDiffIcon = priceDiff > 0 ? 'bi-arrow-up' : 
+                        priceDiff < 0 ? 'bi-arrow-down' : 'bi-dash';
+    
+    const premiumInput = document.getElementById(`input-${id}-premium`);
+    if (premiumInput) {
+        const smallElement = premiumInput.parentElement.nextElementSibling;
+        if (smallElement) {
+            smallElement.className = priceDiffClass;
+            smallElement.innerHTML = `<i class="bi ${priceDiffIcon}"></i> ${priceDiff > 0 ? '+' : ''}${priceDiff.toFixed(2)}`;
+        }
+    }
+}
+
 
 function recalculateBSM(id) {
     const option = options.find(o => o.id === id);
@@ -432,6 +582,7 @@ function recalculateBSM(id) {
     const q = 0;
     const T = option.days / 365;
     
+    // Recalculate using BSM
     const greeks = BlackScholesPricing.calculateGreeks(
         option.type,
         spot,
@@ -442,6 +593,7 @@ function recalculateBSM(id) {
         q
     );
     
+    // Update option with BSM values
     option.theta = greeks.theta;
     option.delta = greeks.delta;
     option.gamma = greeks.gamma;
@@ -454,6 +606,7 @@ function recalculateBSM(id) {
     option.d2 = greeks.d2;
     option.iv = iv * 100;
     
+    // Update moneyness
     if (option.type === 'CALL') {
         if (option.strike < spot * 0.98) option.moneyness = 'Deep ITM';
         else if (option.strike < spot * 0.995) option.moneyness = 'ITM';
@@ -468,7 +621,42 @@ function recalculateBSM(id) {
         else option.moneyness = 'Deep OTM';
     }
     
-    updateOptionsTable();
+    // Update only the changed values in the table, not the entire table
+    updateRowDisplay(id);
+}
+
+function updateRowDisplay(id) {
+    const option = options.find(o => o.id === id);
+    if (!option) return;
+    
+    // Update input values without triggering events
+    const fields = ['strike', 'premium', 'theta', 'delta', 'gamma', 'vega', 'rho', 'days'];
+    fields.forEach(field => {
+        const input = document.getElementById(`input-${id}-${field}`);
+        if (input) {
+            // Set the value without triggering events
+            input.value = option[field].toFixed(
+                field === 'gamma' ? 6 : 
+                field === 'delta' ? 4 : 
+                field === 'strike' ? 0 : 2
+            );
+        }
+    });
+    
+    // Update IV display
+    const row = document.querySelector(`#input-${id}-strike`).closest('tr');
+    if (row && row.cells[9]) {
+        row.cells[9].textContent = `${option.iv.toFixed(2)}%`;
+    }
+    
+    // Update moneyness display
+    const moneynessElement = row.querySelector('small.text-muted');
+    if (moneynessElement) {
+        moneynessElement.textContent = option.moneyness;
+    }
+    
+    // Update price difference
+    updateDisplayValues(id);
 }
 
 // ============================================================================
@@ -952,30 +1140,15 @@ function updateOptionField(id, field, value) {
         case 'vega':
         case 'rho':
             convertedValue = parseFloat(value);
+            if (isNaN(convertedValue)) return;
             break;
         case 'days':
             convertedValue = parseInt(value);
+            if (isNaN(convertedValue)) return;
             break;
     }
     
     option[field] = convertedValue;
-    
-    if (field === 'premium') {
-        const spot = parseFloat(document.getElementById('spotPrice').value);
-        const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
-        const T = option.days / 365;
-        if (T > 0) {
-            const iv = BlackScholesPricing.calculateImpliedVol(
-                option.type,
-                spot,
-                option.strike,
-                T,
-                r,
-                convertedValue
-            );
-            option.iv = iv * 100;
-        }
-    }
 }
 
 function toggleAutoCalculate() {
