@@ -850,6 +850,89 @@ function updateOptionField(id, field, value) {
 }
 
 // ============================================================================
+// COLLAPSIBLE SECTION MANAGEMENT
+// ============================================================================
+
+function toggleCollapsibleSection(sectionId, buttonId) {
+    const section = document.getElementById(sectionId);
+    const button = document.getElementById(buttonId);
+    
+    if (section && button) {
+        const isExpanded = section.classList.contains('show');
+        
+        if (isExpanded) {
+            // Collapse the section
+            section.classList.remove('show');
+            button.setAttribute('aria-expanded', 'false');
+            
+            // Update button icon
+            const chevron = button.querySelector('.bi-chevron-up');
+            if (chevron) {
+                chevron.classList.remove('bi-chevron-up');
+                chevron.classList.add('bi-chevron-down');
+            }
+        } else {
+            // Expand the section
+            section.classList.add('show');
+            button.setAttribute('aria-expanded', 'true');
+            
+            // Update button icon
+            const chevron = button.querySelector('.bi-chevron-down');
+            if (chevron) {
+                chevron.classList.remove('bi-chevron-down');
+                chevron.classList.add('bi-chevron-up');
+            }
+        }
+    }
+}
+
+function initializeCollapsibleSections() {
+    // Set up event listeners for collapsible sections
+    const volSurfaceBtn = document.querySelector('[data-bs-target="#volSurfaceCollapse"]');
+    const bsmInfoBtn = document.querySelector('[data-bs-target="#bsmInfoCollapse"]');
+    
+    if (volSurfaceBtn) {
+        volSurfaceBtn.addEventListener('click', function() {
+            setTimeout(() => {
+                const section = document.getElementById('volSurfaceCollapse');
+                const chevron = this.querySelector('.bi-chevron-down, .bi-chevron-up');
+                if (section.classList.contains('show')) {
+                    if (chevron) {
+                        chevron.classList.remove('bi-chevron-down');
+                        chevron.classList.add('bi-chevron-up');
+                    }
+                } else {
+                    if (chevron) {
+                        chevron.classList.remove('bi-chevron-up');
+                        chevron.classList.add('bi-chevron-down');
+                    }
+                }
+            }, 10);
+        });
+    }
+    
+    if (bsmInfoBtn) {
+        bsmInfoBtn.addEventListener('click', function() {
+            setTimeout(() => {
+                const section = document.getElementById('bsmInfoCollapse');
+                const chevron = this.querySelector('.bi-chevron-down, .bi-chevron-up');
+                if (section.classList.contains('show')) {
+                    if (chevron) {
+                        chevron.classList.remove('bi-chevron-down');
+                        chevron.classList.add('bi-chevron-up');
+                    }
+                } else {
+                    if (chevron) {
+                        chevron.classList.remove('bi-chevron-up');
+                        chevron.classList.add('bi-chevron-down');
+                    }
+                }
+            }, 10);
+        });
+    }
+}
+
+// ============================================================================
 // REST OF THE FUNCTIONS
 // ============================================================================
 
@@ -1800,8 +1883,6 @@ Alt+E: Export CSV
 Alt+P: Calculate P&L
 Alt+I: Calculate Implied Volatility
 Alt+V: Validate Put-Call Parity
-Alt+1: Recalc option 1 (BSM)
-Alt+2: Recalc option 2 (BSM)
 Alt+T: Toggle Dark/Light Theme
 
 +/- on number inputs: Quick adjust
@@ -1893,6 +1974,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Initialize collapsible sections
+    initializeCollapsibleSections();
+    
     setTimeout(() => {
         addBSMFeaturesToUI();
         initializeDefaultOptions();
@@ -1913,5 +1997,6 @@ document.addEventListener('DOMContentLoaded', function() {
             'color: #28a745; font-weight: bold; font-size: 16px;');
         console.log('%cBlack-Scholes-Merton Model Active', 'color: #6c757d;');
         console.log('%cUnified Dark/Light Theme System Active', 'color: #0dcaf0;');
+        console.log('%cCollapsible Sections Initialized', 'color: #20c997;');
     }, 500);
 });

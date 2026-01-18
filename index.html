@@ -259,49 +259,61 @@
             </div>
         </div>
 
-        <!-- Volatility Surface Settings -->
-        <div class="row mb-3">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header py-2">
-                        <h6 class="mb-0">
-                            <i class="bi bi-cloud-arrow-up me-2"></i>VOLATILITY SURFACE SETTINGS
-                        </h6>
-                    </div>
-                    <div class="card-body py-2">
-                        <div class="row g-2 align-items-center">
-                            <div class="col-md-3 col-6">
-                                <label class="small mb-1">Volatility Skew</label>
-                                <div class="input-group input-group-sm">
-                                    <input type="number" class="form-control" id="volatilitySkew" value="-0.002" step="0.0001">
-                                    <span class="input-group-text">/100Δ</span>
-                                </div>
+        <!-- Volatility Surface Settings - Collapsible -->
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header py-2">
+                <button class="btn btn-sm btn-outline-info w-100 text-start" 
+                        type="button" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#volSurfaceCollapse"
+                        aria-expanded="false" 
+                        aria-controls="volSurfaceCollapse"
+                        onclick="toggleVolSurfaceIcon()">
+                    <i class="bi bi-cloud-arrow-up me-2" id="volSurfaceIcon"></i>
+                    <span class="fw-bold">VOLATILITY SURFACE SETTINGS</span>
+                    <span class="float-end">
+                        <i class="bi bi-chevron-down" id="volSurfaceChevron"></i>
+                    </span>
+                </button>
+            </div>
+            <div class="collapse" id="volSurfaceCollapse">
+                <div class="card-body py-2">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-3 col-6">
+                            <label class="small mb-1">Volatility Skew</label>
+                            <div class="input-group input-group-sm">
+                                <input type="number" class="form-control" id="volatilitySkew" value="-0.002" step="0.0001">
+                                <span class="input-group-text">/100Δ</span>
                             </div>
-                            <div class="col-md-3 col-6">
-                                <label class="small mb-1">Volatility Smile</label>
-                                <div class="input-group input-group-sm">
-                                    <input type="number" class="form-control" id="volatilitySmile" value="0.0001" step="0.00001">
-                                    <span class="input-group-text">curvature</span>
-                                </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <label class="small mb-1">Volatility Smile</label>
+                            <div class="input-group input-group-sm">
+                                <input type="number" class="form-control" id="volatilitySmile" value="0.0001" step="0.00001">
+                                <span class="input-group-text">curvature</span>
                             </div>
-                            <div class="col-md-3 col-6">
-                                <label class="small mb-1">Term Structure</label>
-                                <select class="form-select form-select-sm" id="termStructure">
-                                    <option value="flat">Flat</option>
-                                    <option value="normal" selected>Normal (↑ near)</option>
-                                    <option value="inverted">Inverted (↑ far)</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3 col-6">
-                                <button class="btn btn-sm btn-info w-100" onclick="updateVolatilitySurface()">
-                                    <i class="bi bi-cloud-arrow-up"></i> Update Surface
-                                </button>
-                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <label class="small mb-1">Term Structure</label>
+                            <select class="form-select form-select-sm" id="termStructure">
+                                <option value="flat">Flat</option>
+                                <option value="normal" selected>Normal (↑ near)</option>
+                                <option value="inverted">Inverted (↑ far)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <button class="btn btn-sm btn-info w-100" onclick="updateVolatilitySurface()">
+                                <i class="bi bi-cloud-arrow-up"></i> Update Surface
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
         <!-- Options Chain Table -->
         <div class="row mb-3">
@@ -583,51 +595,63 @@
             </div>
         </div>
 
-        <!-- BSM Model Information -->
-        <div class="row mb-3">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header py-2">
-                        <h6 class="mb-0">
-                            <i class="bi bi-info-circle me-2"></i>BLACK-SCHOLES-MERTON MODEL INFO
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6 class="small fw-bold">Model Parameters:</h6>
-                                <ul class="small mb-0">
-                                    <li>S = Spot Price (₹)</li>
-                                    <li>K = Strike Price (₹)</li>
-                                    <li>T = Time to Expiry (years)</li>
-                                    <li>r = Risk-free Rate (%)</li>
-                                    <li>σ = Implied Volatility (%)</li>
-                                    <li>q = Dividend Yield (%)</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <h6 class="small fw-bold">Key Formulas:</h6>
-                                <ul class="small mb-0">
-                                    <li>d₁ = [ln(S/K) + (r - q + σ²/2)T] / (σ√T)</li>
-                                    <li>d₂ = d₁ - σ√T</li>
-                                    <li>Call = S⋅e⁻ᵠᵀ⋅N(d₁) - K⋅e⁻ʳᵀ⋅N(d₂)</li>
-                                    <li>Put = K⋅e⁻ʳᵀ⋅N(-d₂) - S⋅e⁻ᵠᵀ⋅N(-d₁)</li>
-                                </ul>
-                            </div>
+        <!-- BSM Model Information - Collapsible -->
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header py-2">
+                <button class="btn btn-sm btn-outline-secondary w-100 text-start" 
+                        type="button" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#bsmInfoCollapse"
+                        aria-expanded="false" 
+                        aria-controls="bsmInfoCollapse"
+                        onclick="toggleBSMInfoIcon()">
+                    <i class="bi bi-info-circle me-2" id="bsmInfoIcon"></i>
+                    <span class="fw-bold">BLACK-SCHOLES-MERTON MODEL INFO</span>
+                    <span class="float-end">
+                        <i class="bi bi-chevron-down" id="bsmInfoChevron"></i>
+                    </span>
+                </button>
+            </div>
+            <div class="collapse" id="bsmInfoCollapse">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="small fw-bold">Model Parameters:</h6>
+                            <ul class="small mb-0">
+                                <li>S = Spot Price (₹)</li>
+                                <li>K = Strike Price (₹)</li>
+                                <li>T = Time to Expiry (years)</li>
+                                <li>r = Risk-free Rate (%)</li>
+                                <li>σ = Implied Volatility (%)</li>
+                                <li>q = Dividend Yield (%)</li>
+                            </ul>
                         </div>
-                        <div class="row mt-3">
-                            <div class="col-12">
-                                <div class="alert alert-info small mb-0">
-                                    <i class="bi bi-lightbulb me-2"></i>
-                                    <strong>Industry Standard:</strong> This calculator uses the complete Black-Scholes-Merton model 
-                                    following CBOE/NSE standards. All Greeks are calculated using exact partial derivatives of the BSM formula.
-                                </div>
+                        <div class="col-md-6">
+                            <h6 class="small fw-bold">Key Formulas:</h6>
+                            <ul class="small mb-0">
+                                <li>d₁ = [ln(S/K) + (r - q + σ²/2)T] / (σ√T)</li>
+                                <li>d₂ = d₁ - σ√T</li>
+                                <li>Call = S⋅e⁻ᵠᵀ⋅N(d₁) - K⋅e⁻ʳᵀ⋅N(d₂)</li>
+                                <li>Put = K⋅e⁻ʳᵀ⋅N(-d₂) - S⋅e⁻ᵠᵀ⋅N(-d₁)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="alert alert-info small mb-0">
+                                <i class="bi bi-lightbulb me-2"></i>
+                                <strong>Industry Standard:</strong> This calculator uses the complete Black-Scholes-Merton model 
+                                following CBOE/NSE standards. All Greeks are calculated using exact partial derivatives of the BSM formula.
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
         <!-- Advanced Settings (Collapsible) -->
         <div class="row mb-3">

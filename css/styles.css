@@ -132,6 +132,83 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
     display: block;
 }
 
+/* ===== COLLAPSIBLE SECTION STYLES ===== */
+
+/* Button styling for collapsible headers */
+.card-header .btn[data-bs-toggle="collapse"] {
+    color: var(--text-primary);
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+}
+
+.card-header .btn[data-bs-toggle="collapse"]:hover {
+    background-color: var(--bg-tertiary);
+    border-color: var(--bsm-color);
+}
+
+.card-header .btn[data-bs-toggle="collapse"]:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
+    outline: none;
+}
+
+/* Collapse animation */
+.collapse {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Chevron animation */
+.bi-chevron-down, .bi-chevron-up {
+    transition: transform 0.3s ease;
+    margin-left: 0.5rem;
+}
+
+/* Active state for buttons when expanded */
+.card-header .btn[data-bs-toggle="collapse"][aria-expanded="true"] {
+    background-color: var(--bsm-bg);
+    border-color: var(--bsm-color);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* Make the header buttons more compact on mobile */
+@media (max-width: 768px) {
+    .card-header .btn[data-bs-toggle="collapse"] {
+        font-size: 0.85rem;
+        padding: 0.2rem 0.4rem;
+    }
+    
+    .card-header .btn[data-bs-toggle="collapse"] .fw-bold {
+        font-size: 0.9rem;
+    }
+}
+
+/* Ensure the collapse content has proper spacing */
+.collapse.show .card-body {
+    animation: fadeIn 0.3s ease-out;
+    border-top: 1px solid var(--border-color);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hover effect for the entire card when collapsed */
+.card:has(.collapse:not(.show)):hover {
+    border-color: var(--bsm-color);
+    box-shadow: 0 0 0 1px var(--bsm-color);
+}
+
 /* ===== CARD STYLING - CONSISTENT ACROSS ALL SECTIONS ===== */
 .card {
     background-color: var(--card-bg) !important;
@@ -143,6 +220,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, input, select, texta
     background-color: var(--table-header-bg) !important;
     border-bottom: 1px solid var(--border-color) !important;
     color: var(--table-header-text) !important;
+    padding: 0.5rem 1rem !important;
 }
 
 /* Remove ALL hardcoded Bootstrap color classes */
