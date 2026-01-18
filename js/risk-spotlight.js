@@ -125,6 +125,12 @@ class RiskSpotlight {
         console.log('- Gamma: ≤10 days + ATM ±1% + instrument-specific thresholds');
         console.log('- Delta: |Net Delta| ≥ 0.25');
         
+        // Check if required elements exist
+        if (!this.elements.container) {
+            console.error('🔦 Risk Spotlight: Container element not found!');
+            return;
+        }
+        
         // Show the container
         this.elements.container.style.display = 'block';
         this.elements.container.style.visibility = 'visible';
@@ -137,17 +143,23 @@ class RiskSpotlight {
         this.startAutoUpdate();
         
         this.isInitialized = true;
+        console.log('🔦 Risk Spotlight: Initialization complete');
     }
     
     // ============================================================================
-    // RISK DETECTION LOGIC (CORE)
+    // RISK DETECTION LOGIC (CORE) - WITH DEBUG LOGS
     // ============================================================================
     
     /**
      * Calculate all risk scores and return the dominant risk
      */
     calculateDominantRisk() {
+        console.log('🔦 Risk Spotlight Debug: Checking window.options...');
+        console.log('window.options:', window.options);
+        console.log('window.options length:', window.options ? window.options.length : 'undefined');
+
         if (!window.options || window.options.length === 0) {
+            console.log('🔦 Risk Spotlight: No options detected');
             return {
                 type: 'NEUTRAL',
                 message: 'No options detected for risk analysis',
@@ -155,44 +167,56 @@ class RiskSpotlight {
                 data: {}
             };
         }
+
+        console.log('🔦 Risk Spotlight: Found', window.options.length, 'options');
         
         const spot = parseFloat(document.getElementById('spotPrice')?.value) || 0;
         const days = parseInt(document.getElementById('daysToExpiry')?.value) || 0;
         const iv = parseFloat(document.getElementById('impliedVol')?.value) || 15;
         const underlying = document.getElementById('underlyingSelect')?.value || 'NIFTY';
         
+        console.log('🔦 Risk Spotlight: Parameters - Spot:', spot, 'Days:', days, 'IV:', iv, 'Underlying:', underlying);
+        
         // Calculate portfolio metrics
         const portfolioMetrics = this.calculatePortfolioMetrics();
+        console.log('🔦 Risk Spotlight: Portfolio Metrics:', portfolioMetrics);
         
         // Calculate individual risk scores
         const risks = [];
         
         // 1. Theta Risk (Highest Priority)
         const thetaRisk = this.evaluateThetaRisk(portfolioMetrics, days);
+        console.log('🔦 Risk Spotlight: Theta Risk Score:', thetaRisk.score);
         if (thetaRisk.score > 0) {
             risks.push(thetaRisk);
         }
         
         // 2. IV Risk/Opportunity (Second Priority)
         const ivRisk = this.evaluateIVRisk(iv, underlying);
+        console.log('🔦 Risk Spotlight: IV Risk Score:', ivRisk.score);
         if (ivRisk.score > 0) {
             risks.push(ivRisk);
         }
         
         // 3. Gamma Risk (Third Priority)
         const gammaRisk = this.evaluateGammaRisk(portfolioMetrics, days, spot, underlying);
+        console.log('🔦 Risk Spotlight: Gamma Risk Score:', gammaRisk.score);
         if (gammaRisk.score > 0) {
             risks.push(gammaRisk);
         }
         
         // 4. Delta Exposure (Fourth Priority)
         const deltaRisk = this.evaluateDeltaRisk(portfolioMetrics);
+        console.log('🔦 Risk Spotlight: Delta Risk Score:', deltaRisk.score);
         if (deltaRisk.score > 0) {
             risks.push(deltaRisk);
         }
+
+        console.log('🔦 Risk Spotlight: Total risks detected:', risks.length);
         
         // 5. If no risks detected, return NEUTRAL
         if (risks.length === 0) {
+            console.log('🔦 Risk Spotlight: No risks detected, returning NEUTRAL');
             return {
                 type: 'NEUTRAL',
                 message: 'No dominant risk driver detected',
@@ -205,15 +229,17 @@ class RiskSpotlight {
         // Sort by priority (lower number = higher priority)
         risks.sort((a, b) => {
             // First by priority order
-            const priorityOrder = { 'THETA': 1, 'IV': 2, 'GAMMA': 3, 'DELTA': 4 };
-            const aPriority = priorityOrder[a.type.split('_')[0]] || 5;
-            const bPriority = priorityOrder[b.type.split('_')[0]] || 5;
+            const priorityOrder = { 'THETA': 1, 'IV_HIGH': 2, 'IV_LOW': 2, 'GAMMA': 3, 'DELTA': 4 };
+            const aPriority = priorityOrder[a.type] || 5;
+            const bPriority = priorityOrder[b.type] || 5;
             
             if (aPriority !== bPriority) return aPriority - bPriority;
             
             // Then by score (higher score wins within same priority)
             return b.score - a.score;
         });
+
+        console.log('🔦 Risk Spotlight: Dominant risk:', risks[0]);
         
         // Return the highest priority risk
         return risks[0];
@@ -223,7 +249,10 @@ class RiskSpotlight {
      * Calculate portfolio-wide metrics
      */
     calculatePortfolioMetrics() {
+        console.log('🔦 Risk Spotlight: Calculating portfolio metrics from', window.options?.length || 0, 'options');
+        
         if (!window.options || window.options.length === 0) {
+            console.log('🔦 Risk Spotlight: No options for portfolio metrics');
             return {
                 totalTheta: 0,
                 totalPremium: 0,
@@ -242,22 +271,42 @@ class RiskSpotlight {
         let atmOptions = [];
         const spot = parseFloat(document.getElementById('spotPrice')?.value) || 0;
         
-        window.options.forEach(option => {
+        // FIXED: Added index parameter to prevent ReferenceError
+        window.options.forEach((option, index) => {
+            console.log(`🔦 Risk Spotlight: Processing option ${index + 1}:`, option);
+            
+            // Use absolute value for theta (theta is negative, but we care about magnitude)
             totalTheta += Math.abs(option.theta || 0);
             totalPremium += option.premium || 0;
             netDelta += option.delta || 0;
             totalGamma += option.gamma || 0;
             
-            // Check if option is ATM (±1%)
-            const strikeDiff = Math.abs(option.strike - spot) / spot;
-            if (strikeDiff <= 0.01) {
-                atmOptions.push({
-                    strike: option.strike,
-                    gamma: option.gamma,
-                    type: option.type,
-                    days: option.days
-                });
+            // Check if option is ATM (±1%) - only if spot > 0
+            if (spot > 0) {
+                const strikeDiff = Math.abs(option.strike - spot) / spot;
+                if (strikeDiff <= 0.01) {
+                    atmOptions.push({
+                        strike: option.strike,
+                        gamma: option.gamma,
+                        type: option.type,
+                        days: option.days
+                    });
+                }
             }
+        });
+
+        const avgGamma = window.options.length > 0 ? totalGamma / window.options.length : 0;
+        const totalDays = window.options.length > 0 ? 
+            window.options.reduce((sum, opt) => sum + (opt.days || 0), 0) / window.options.length : 0;
+        
+        console.log('🔦 Risk Spotlight: Calculated Metrics -', {
+            totalTheta,
+            totalPremium,
+            netDelta,
+            totalGamma,
+            avgGamma,
+            atmOptionsCount: atmOptions.length,
+            totalDays
         });
         
         return {
@@ -265,10 +314,9 @@ class RiskSpotlight {
             totalPremium,
             netDelta,
             totalGamma,
-            avgGamma: window.options.length > 0 ? totalGamma / window.options.length : 0,
+            avgGamma,
             atmOptions,
-            totalDays: window.options.length > 0 ? 
-                window.options.reduce((sum, opt) => sum + (opt.days || 0), 0) / window.options.length : 0
+            totalDays
         };
     }
     
@@ -279,24 +327,33 @@ class RiskSpotlight {
         let score = 0;
         let message = '';
         let description = '';
+
+        console.log('🔦 Risk Spotlight: Evaluating Theta Risk - Days:', days, 
+                   'Total Theta:', portfolio.totalTheta, 
+                   'Total Premium:', portfolio.totalPremium);
         
         // Condition A: Time-based (≤ 7 days)
         if (days <= RiskConfig.THETA.DAYS_TO_EXPIRY_MAX) {
             score += 80;
             message = 'Weekly expiry approaching';
+            console.log('🔦 Risk Spotlight: Theta Time Condition Met - Days <= 7');
         }
         
         // Condition B: Value-based (≥ 1.2% daily decay)
         if (portfolio.totalPremium > 0) {
             const dailyDecayPercent = (portfolio.totalTheta / portfolio.totalPremium) * 100;
+            console.log('🔦 Risk Spotlight: Daily Decay Percent:', dailyDecayPercent.toFixed(2), '%');
+            
             if (dailyDecayPercent >= RiskConfig.THETA.DAILY_DECAY_PERCENT_MIN) {
                 score += 70;
-                message = 'High daily theta decay detected';
+                message = message ? message + ' with high decay' : 'High daily theta decay detected';
                 description = `₹${portfolio.totalTheta.toFixed(2)}/day decay (${dailyDecayPercent.toFixed(1)}% of premium)`;
+                console.log('🔦 Risk Spotlight: Theta Value Condition Met - Decay >= 1.2%');            
             }
         }
         
         if (score > 0) {
+            console.log('🔦 Risk Spotlight: Theta Risk Score:', score);
             return {
                 type: 'THETA',
                 score,
@@ -311,6 +368,7 @@ class RiskSpotlight {
             };
         }
         
+        console.log('🔦 Risk Spotlight: No Theta Risk');
         return { type: 'THETA', score: 0, message: '', data: {} };
     }
     
@@ -320,10 +378,12 @@ class RiskSpotlight {
      */
     evaluateIVRisk(currentIV, underlying) {
         // Simplified IV percentile calculation for v1
-        // In production, this would use historical IV data
         const ivPercentile = this.calculateIVPercentile(currentIV, underlying);
+        console.log('🔦 Risk Spotlight: IV Percentile Calculation - Current IV:', currentIV, 
+                   'Underlying:', underlying, 'Percentile:', ivPercentile);
         
         if (ivPercentile >= RiskConfig.IV.HIGH_PERCENTILE) {
+            console.log('🔦 Risk Spotlight: IV High condition met');
             return {
                 type: 'IV_HIGH',
                 score: 65,
@@ -338,6 +398,7 @@ class RiskSpotlight {
         }
         
         if (ivPercentile <= RiskConfig.IV.LOW_PERCENTILE) {
+            console.log('🔦 Risk Spotlight: IV Low condition met');
             return {
                 type: 'IV_LOW',
                 score: 55,
@@ -351,6 +412,7 @@ class RiskSpotlight {
             };
         }
         
+        console.log('🔦 Risk Spotlight: IV in normal range');
         return { type: 'IV', score: 0, message: '', data: {} };
     }
     
@@ -380,13 +442,19 @@ class RiskSpotlight {
      * Evaluate Gamma Risk
      */
     evaluateGammaRisk(portfolio, days, spot, underlying) {
+        console.log('🔦 Risk Spotlight: Evaluating Gamma Risk - Days:', days, 
+                   'Spot:', spot, 'Underlying:', underlying,
+                   'ATM Options:', portfolio.atmOptions.length);
+        
         // Check time condition (≤ 10 days)
         if (days > RiskConfig.GAMMA.DAYS_TO_EXPIRY_MAX) {
+            console.log('🔦 Risk Spotlight: Gamma - Days > 10, no risk');
             return { type: 'GAMMA', score: 0, message: '', data: {} };
         }
         
         // Check if we have ATM options
         if (portfolio.atmOptions.length === 0) {
+            console.log('🔦 Risk Spotlight: Gamma - No ATM options');
             return { type: 'GAMMA', score: 0, message: '', data: {} };
         }
         
@@ -394,10 +462,13 @@ class RiskSpotlight {
         const gammaThreshold = RiskConfig.GAMMA.INSTRUMENT_THRESHOLDS[underlying] || 
                               RiskConfig.GAMMA.INSTRUMENT_THRESHOLDS.DEFAULT;
         
+        console.log('🔦 Risk Spotlight: Gamma Threshold for', underlying, ':', gammaThreshold);
+        
         // Check if any ATM option exceeds gamma threshold
         const highGammaOptions = portfolio.atmOptions.filter(opt => opt.gamma >= gammaThreshold);
         
         if (highGammaOptions.length > 0) {
+            console.log('🔦 Risk Spotlight: Gamma Risk Detected - High Gamma Options:', highGammaOptions.length);
             return {
                 type: 'GAMMA',
                 score: 60,
@@ -412,6 +483,7 @@ class RiskSpotlight {
             };
         }
         
+        console.log('🔦 Risk Spotlight: No Gamma Risk');
         return { type: 'GAMMA', score: 0, message: '', data: {} };
     }
     
@@ -420,9 +492,12 @@ class RiskSpotlight {
      */
     evaluateDeltaRisk(portfolio) {
         const netDeltaAbs = Math.abs(portfolio.netDelta);
+        console.log('🔦 Risk Spotlight: Evaluating Delta Risk - Net Delta:', portfolio.netDelta, 
+                   'Absolute:', netDeltaAbs, 'Threshold:', RiskConfig.DELTA.NET_DELTA_THRESHOLD);
         
         if (netDeltaAbs >= RiskConfig.DELTA.NET_DELTA_THRESHOLD) {
             const direction = portfolio.netDelta > 0 ? '+' : '-';
+            console.log('🔦 Risk Spotlight: Delta Risk Detected');
             
             return {
                 type: 'DELTA',
@@ -438,6 +513,7 @@ class RiskSpotlight {
             };
         }
         
+        console.log('🔦 Risk Spotlight: No Delta Risk');
         return { type: 'DELTA', score: 0, message: '', data: {} };
     }
     
@@ -452,9 +528,17 @@ class RiskSpotlight {
         const template = this.riskTemplates[riskType] || this.riskTemplates.NEUTRAL;
         const riskData = this.currentRisk?.data || {};
         
+        // Check if elements exist before updating
+        if (!this.elements.container || !this.elements.icon) {
+            console.error('🔦 Risk Spotlight: UI elements not found!');
+            return;
+        }
+        
         // Update CSS classes
         const card = this.elements.container.querySelector('.risk-spotlight-card');
-        card.className = 'card risk-spotlight-card ' + template.className;
+        if (card) {
+            card.className = 'card risk-spotlight-card ' + template.className;
+        }
         
         // Update content
         this.elements.icon.textContent = template.icon;
@@ -492,14 +576,18 @@ class RiskSpotlight {
         this.updateRiskDetails(riskType, riskData);
         
         // Add animation for state change
-        card.classList.add('risk-state-change');
-        setTimeout(() => {
-            card.classList.remove('risk-state-change');
-        }, 500);
+        if (card) {
+            card.classList.add('risk-state-change');
+            setTimeout(() => {
+                card.classList.remove('risk-state-change');
+            }, 500);
+        }
         
         // Update timestamp
         this.lastUpdate = new Date();
-        this.elements.riskLastUpdate.textContent = this.formatTime(this.lastUpdate);
+        if (this.elements.riskLastUpdate) {
+            this.elements.riskLastUpdate.textContent = this.formatTime(this.lastUpdate);
+        }
         
         // Store in history (limit to last 10)
         this.riskHistory.unshift({
@@ -522,15 +610,21 @@ class RiskSpotlight {
         const template = this.riskTemplates[riskType] || this.riskTemplates.NEUTRAL;
         
         // Update current state badge
-        this.elements.currentStateBadge.textContent = riskType.replace('_', ' ');
-        this.elements.currentStateBadge.className = 'badge ' + this.getRiskBadgeClass(riskType);
+        if (this.elements.currentStateBadge) {
+            this.elements.currentStateBadge.textContent = riskType.replace('_', ' ');
+            this.elements.currentStateBadge.className = 'badge ' + this.getRiskBadgeClass(riskType);
+        }
         
         // Update priority score
-        const score = this.currentRisk?.score || 0;
-        this.elements.priorityScore.textContent = `${score}/100`;
+        if (this.elements.priorityScore) {
+            const score = this.currentRisk?.score || 0;
+            this.elements.priorityScore.textContent = `${score}/100`;
+        }
         
         // Update next risk indicator
-        this.elements.nextRiskIndicator.textContent = this.getNextRiskIndicator();
+        if (this.elements.nextRiskIndicator) {
+            this.elements.nextRiskIndicator.textContent = this.getNextRiskIndicator();
+        }
     }
     
     /**
@@ -569,14 +663,20 @@ class RiskSpotlight {
      */
     toggleDetails() {
         const details = this.elements.details;
+        if (!details) return;
+        
         const isVisible = details.style.display === 'block';
         
         if (isVisible) {
             details.style.display = 'none';
-            this.elements.detailsToggle.innerHTML = '<i class="bi bi-info-circle"></i> Details';
+            if (this.elements.detailsToggle) {
+                this.elements.detailsToggle.innerHTML = '<i class="bi bi-info-circle"></i> Details';
+            }
         } else {
             details.style.display = 'block';
-            this.elements.detailsToggle.innerHTML = '<i class="bi bi-chevron-up"></i> Hide';
+            if (this.elements.detailsToggle) {
+                this.elements.detailsToggle.innerHTML = '<i class="bi bi-chevron-up"></i> Hide';
+            }
         }
     }
     
@@ -709,7 +809,9 @@ window.RiskSpotlight = new RiskSpotlight();
 document.addEventListener('DOMContentLoaded', function() {
     // Wait a bit for other components to initialize
     setTimeout(() => {
-        window.RiskSpotlight.initialize();
+        if (window.RiskSpotlight) {
+            window.RiskSpotlight.initialize();
+        }
     }, 1000);
 });
 
