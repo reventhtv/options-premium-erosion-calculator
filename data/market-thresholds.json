@@ -1,0 +1,60 @@
+{
+  "version": "1.0",
+  "description": "Indian Market Risk Thresholds for Options Trading",
+  "lastUpdated": "2024-01-01",
+  "thresholds": {
+    "theta": {
+      "daysToExpiryMax": 7,
+      "dailyDecayPercentMin": 1.2,
+      "instruments": {
+        "NIFTY": 1.2,
+        "BANKNIFTY": 1.0,
+        "FINNIFTY": 1.1,
+        "SENSEX": 1.3,
+        "DEFAULT": 1.2
+      }
+    },
+    "iv": {
+      "highPercentile": 70,
+      "lowPercentile": 30,
+      "lookbackDays": 30,
+      "instruments": {
+        "NIFTY": { "high": 70, "low": 30 },
+        "BANKNIFTY": { "high": 75, "low": 25 },
+        "FINNIFTY": { "high": 72, "low": 28 },
+        "DEFAULT": { "high": 70, "low": 30 }
+      }
+    },
+    "gamma": {
+      "daysToExpiryMax": 10,
+      "strikeRangePercent": 0.01,
+      "instrumentThresholds": {
+        "NIFTY": 0.0004,
+        "BANKNIFTY": 0.0006,
+        "FINNIFTY": 0.0005,
+        "SENSEX": 0.0003,
+        "DEFAULT": 0.0004
+      }
+    },
+    "delta": {
+      "netDeltaThreshold": 0.25,
+      "instruments": {
+        "NIFTY": 0.25,
+        "BANKNIFTY": 0.3,
+        "FINNIFTY": 0.25,
+        "DEFAULT": 0.25
+      }
+    }
+  },
+  "marketHours": {
+    "nse": "09:15-15:30",
+    "expiryDay": "Thursday",
+    "specialSessions": ["RBI Policy", "Budget", "Election Results"]
+  },
+  "notes": {
+    "theta": "Weekly expiries accelerate decay from T+5. Indian retail traders systematically underestimate theta.",
+    "iv": "Sharp IV regimes around RBI policy, expiry weeks, and event days. Indian markets show higher IV persistence.",
+    "gamma": "Weekly ATM options can flip P&L violently. Retail traders underestimate convexity in weekly expiries.",
+    "delta": "Many Indian traders have strong directional bias. Net delta helps surface unconscious directional exposure."
+  }
+}
