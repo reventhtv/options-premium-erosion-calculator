@@ -6,6 +6,7 @@
 // GLOBAL VARIABLES AND CONSTANTS
 // ============================================================================
 let options = [];
+window.options = options;
 let erosionChart = null;
 let plChart = null;
 let autoCalculate = true;
@@ -46,6 +47,26 @@ function initializeTheme() {
     
     // Update chart colors after a short delay to ensure DOM is ready
     setTimeout(updateChartColorsForCurrentTheme, 100);
+}
+
+function toggleVolSurfaceIcon() {
+    const chevron = document.getElementById('volSurfaceChevron');
+    const icon = document.getElementById('volSurfaceIcon');
+    if (chevron && icon) {
+        const isCollapsed = chevron.classList.contains('bi-chevron-down');
+        chevron.className = isCollapsed ? 'bi bi-chevron-up' : 'bi bi-chevron-down';
+        icon.className = isCollapsed ? 'bi bi-cloud-arrow-down' : 'bi bi-cloud-arrow-up';
+    }
+}
+
+function toggleBSMInfoIcon() {
+    const chevron = document.getElementById('bsmInfoChevron');
+    const icon = document.getElementById('bsmInfoIcon');
+    if (chevron && icon) {
+        const isCollapsed = chevron.classList.contains('bi-chevron-down');
+        chevron.className = isCollapsed ? 'bi bi-chevron-up' : 'bi bi-chevron-down';
+        icon.className = isCollapsed ? 'bi bi-info-circle-fill' : 'bi bi-info-circle';
+    }
 }
 
 function updateThemeIcon(isDark) {

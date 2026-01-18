@@ -127,6 +127,8 @@ class RiskSpotlight {
         
         // Show the container
         this.elements.container.style.display = 'block';
+        this.elements.container.style.visibility = 'visible';
+        this.elements.container.style.opacity = '1';
         
         // Set initial state
         this.updateRiskDisplay('NEUTRAL', 'Initializing risk analysis...');
