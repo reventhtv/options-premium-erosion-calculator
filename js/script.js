@@ -5,8 +5,24 @@
 // ============================================================================
 // GLOBAL VARIABLES AND CONSTANTS
 // ============================================================================
-let options = [];
-window.options = options;
+let _options = [];
+
+// Create a reactive options array that stays in sync
+Object.defineProperty(window, 'options', {
+    get: function() {
+        return _options;
+    },
+    set: function(value) {
+        _options = value;
+        // When window.options is set, also update our local reference
+        options = _options;
+        console.log('🔁 Window.options updated:', _options.length, 'options');
+    }
+});
+
+// Alias for local use
+const options = window.options;
+
 let erosionChart = null;
 let plChart = null;
 let autoCalculate = true;
@@ -23,6 +39,20 @@ const BSM_MODEL = {
         'Dividend yield support'
     ]
 };
+
+// Add this function to sync options with window
+function syncOptionsToWindow() {
+    // Force update of window.options
+    window.options = _options;
+    console.log('🔁 Options synced to window:', _options.length, 'options');
+    
+    // Trigger risk update
+    if (window.RiskSpotlight && window.RiskSpotlight.updateRiskSpotlight) {
+        setTimeout(() => {
+            window.RiskSpotlight.updateRiskSpotlight();
+        }, 100);
+    }
+}
 
 // ============================================================================
 // UNIFIED THEME MANAGEMENT (FIXED - SINGLE SOURCE OF TRUTH)
@@ -318,10 +348,10 @@ class VolatilitySurface {
 const volSurface = new VolatilitySurface();
 
 // ============================================================================
-// CORE OPTION MANAGEMENT
+// CORE OPTION MANAGEMENT - UPDATED WITH PROPER SYNC
 // ============================================================================
 function initializeDefaultOptions() {
-    options = [];
+    _options.length = 0; // Clear array in place
     const spot = parseFloat(document.getElementById('spotPrice').value);
     const iv = parseFloat(document.getElementById('impliedVol').value) / 100;
     const days = parseInt(document.getElementById('daysToExpiry').value);
@@ -366,11 +396,12 @@ function initializeDefaultOptions() {
     });
     
     updateOptionsTable();
+    syncOptionsToWindow(); // Sync after adding options
     if (autoCalculate) updateAllCalculations();
 }
 
 function addOption(optionData) {
-    const id = options.length > 0 ? Math.max(...options.map(o => o.id)) + 1 : 1;
+    const id = _options.length > 0 ? Math.max(..._options.map(o => o.id)) + 1 : 1;
     const spot = parseFloat(document.getElementById('spotPrice').value);
     const iv = parseFloat(document.getElementById('impliedVol').value) / 100;
     const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
@@ -435,7 +466,14 @@ function addOption(optionData) {
         }
     };
     
-    options.push(option);
+    // Add to options array
+    _options.push(option);
+    
+    // CRITICAL: Sync with window.options
+    syncOptionsToWindow();
+    
+    console.log(`➕ Added ${option.type} option, total options: ${_options.length}`);
+    
     return option;
 }
 
@@ -462,7 +500,7 @@ function updateOptionsTable() {
     // Clear and rebuild table
     tbody.innerHTML = '';
     
-    options.forEach((option, index) => {
+    _options.forEach((option, index) => {
         const priceDiff = option.premium - option.theoreticalPrice;
         const priceDiffClass = Math.abs(priceDiff) > 0.5 ? 
             (priceDiff > 0 ? 'text-danger' : 'text-success') : 'text-muted';
@@ -613,7 +651,7 @@ function handleOptionInputBlur(e) {
     
     if (value === '' || value === null || value === undefined) {
         // Restore original value
-        const option = options.find(o => o.id === id);
+        const option = _options.find(o => o.id === id);
         if (option) {
             input.value = getFormattedOptionValue(option, field);
         }
@@ -628,7 +666,7 @@ function handleOptionInputBlur(e) {
         // When premium changes, recalculate IV
         const spot = parseFloat(document.getElementById('spotPrice').value);
         const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
-        const option = options.find(o => o.id === id);
+        const option = _options.find(o => o.id === id);
         
         if (option && option.days > 0) {
             const T = option.days / 365;
@@ -652,7 +690,7 @@ function handleOptionInputBlur(e) {
         // When IV changes, recalculate Greeks and theoretical price
         const spot = parseFloat(document.getElementById('spotPrice').value);
         const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
-        const option = options.find(o => o.id === id);
+        const option = _options.find(o => o.id === id);
         
         if (option && option.days > 0) {
             const T = option.days / 365;
@@ -694,6 +732,9 @@ function handleOptionInputBlur(e) {
             updateAllCalculations();
         }, 100);
     }
+    
+    // Sync after any modification
+    syncOptionsToWindow();
 }
 
 function handleOptionInputChange(e) {
@@ -720,7 +761,7 @@ function getFormattedOptionValue(option, field) {
 }
 
 function updatePriceDifference(id) {
-    const option = options.find(o => o.id === id);
+    const option = _options.find(o => o.id === id);
     if (!option) return;
     
     const priceDiff = option.premium - option.theoreticalPrice;
@@ -740,7 +781,7 @@ function updatePriceDifference(id) {
 }
 
 function recalculateBSM(id) {
-    const option = options.find(o => o.id === id);
+    const option = _options.find(o => o.id === id);
     if (!option) return;
     
     const spot = parseFloat(document.getElementById('spotPrice').value);
@@ -790,10 +831,13 @@ function recalculateBSM(id) {
     
     // Update the specific inputs without refreshing entire table
     updateOptionInputs(id);
+    
+    // Sync after recalculation
+    syncOptionsToWindow();
 }
 
 function updateOptionInputs(id) {
-    const option = options.find(o => o.id === id);
+    const option = _options.find(o => o.id === id);
     if (!option) return;
     
     // Update all inputs for this option
@@ -831,7 +875,7 @@ function updateOptionInputs(id) {
 }
 
 function updateSingleOption(id) {
-    const option = options.find(o => o.id === id);
+    const option = _options.find(o => o.id === id);
     if (!option) return;
     
     // Get current values from all input fields
@@ -853,11 +897,12 @@ function updateSingleOption(id) {
     // Recalculate BSM with updated values
     recalculateBSM(id);
     updateAllCalculations();
+    syncOptionsToWindow(); // Sync after update
     showNotification(`Option ${id} updated`);
 }
 
 function updateOptionField(id, field, value) {
-    const option = options.find(o => o.id === id);
+    const option = _options.find(o => o.id === id);
     if (!option) return;
     
     // Update the specific field
@@ -954,7 +999,7 @@ function initializeCollapsibleSections() {
 }
 
 // ============================================================================
-// REST OF THE FUNCTIONS
+// REST OF THE FUNCTIONS - UPDATED WITH SYNC
 // ============================================================================
 
 function loadPreset(presetName) {
@@ -966,9 +1011,10 @@ function loadPreset(presetName) {
             document.getElementById('daysToExpiry').value = 30;
             document.getElementById('riskFreeRate').value = 6.5;
             document.getElementById('dividendYield').value = 0;
-            options = [];
+            _options.length = 0; // Clear in place
             addCallOption();
             addPutOption();
+            syncOptionsToWindow(); // Sync after loading preset
             showNotification('NIFTY ATM preset loaded!');
             break;
         case 'banknifty_weekly':
@@ -977,15 +1023,17 @@ function loadPreset(presetName) {
             document.getElementById('impliedVol').value = 18;
             document.getElementById('daysToExpiry').value = 7;
             document.getElementById('riskFreeRate').value = 6.5;
-            options = [];
+            _options.length = 0; // Clear in place
             addCallOption();
             addPutOption();
+            syncOptionsToWindow(); // Sync after loading preset
             showNotification('BANKNIFTY Weekly preset loaded!');
             break;
         case 'straddle':
-            options = [];
+            _options.length = 0; // Clear in place
             addCallOption();
             addPutOption();
+            syncOptionsToWindow(); // Sync after loading preset
             showNotification('ATM Straddle preset loaded!');
             break;
     }
@@ -994,23 +1042,24 @@ function loadPreset(presetName) {
 
 function setATM() {
     const spot = parseFloat(document.getElementById('spotPrice').value);
-    if (options.length === 0) {
+    if (_options.length === 0) {
         addCallOption();
         addPutOption();
     } else {
-        options.forEach(option => {
+        _options.forEach(option => {
             option.strike = spot;
             option.moneyness = 'ATM';
         });
     }
     updateOptionsTable();
     updateAllCalculations();
+    syncOptionsToWindow(); // Sync after change
     showNotification('All strikes set to At The Money');
 }
 
 function setITM() {
     const spot = parseFloat(document.getElementById('spotPrice').value);
-    options.forEach(option => {
+    _options.forEach(option => {
         if (option.type === 'CALL') {
             option.strike = spot * 0.98;
             option.moneyness = 'ITM';
@@ -1021,12 +1070,13 @@ function setITM() {
     });
     updateOptionsTable();
     updateAllCalculations();
+    syncOptionsToWindow(); // Sync after change
     showNotification('All strikes set to In The Money');
 }
 
 function setOTM() {
     const spot = parseFloat(document.getElementById('spotPrice').value);
-    options.forEach(option => {
+    _options.forEach(option => {
         if (option.type === 'CALL') {
             option.strike = spot * 1.02;
             option.moneyness = 'OTM';
@@ -1037,6 +1087,7 @@ function setOTM() {
     });
     updateOptionsTable();
     updateAllCalculations();
+    syncOptionsToWindow(); // Sync after change
     showNotification('All strikes set to Out of The Money');
 }
 
@@ -1050,9 +1101,10 @@ function resetAll() {
     document.getElementById('volatilitySkew').value = -0.002;
     document.getElementById('volatilitySmile').value = 0.0001;
     document.getElementById('termStructure').value = 'normal';
-    options = [];
+    _options.length = 0; // Clear in place
     updateOptionsTable();
     updateAllCalculations();
+    syncOptionsToWindow(); // Sync after reset
     if (erosionChart) erosionChart.destroy();
     if (plChart) plChart.destroy();
     showNotification('All options and settings reset');
@@ -1077,7 +1129,7 @@ function calculatePL() {
     const plData = priceLevels.map(price => {
         let callPL = 0, putPL = 0, netPL = 0, extrinsicValue = 0;
         
-        options.forEach(option => {
+        _options.forEach(option => {
             const T = option.days / 365;
             const iv = option.iv / 100;
             const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
@@ -1200,9 +1252,9 @@ function updatePLChart(priceLevels = null, plData = null) {
                     }
                 },
                 tooltip: {
-                    backgroundColor: isDark ? 'rgba(26, 29, 32, 0.9)' : 'rgba(255, 255, 255, 0.9)',
-                    titleColor: textColor,
-                    bodyColor: textColor,
+                    backgroundColor = isDark ? 'rgba(26, 29, 32, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                    titleColor = textColor,
+                    bodyColor = textColor,
                     callbacks: {
                         label: function(context) {
                             return `${context.dataset.label || ''}: ₹${context.parsed.y.toFixed(2)}`;
@@ -1337,14 +1389,15 @@ function calculatePLStatistics(plData) {
 }
 
 function clearAllOptions() {
-    if (options.length === 0) {
+    if (_options.length === 0) {
         showNotification('No options to clear');
         return;
     }
-    if (confirm(`Clear all ${options.length} options?`)) {
-        options = [];
+    if (confirm(`Clear all ${_options.length} options?`)) {
+        _options.length = 0; // Clear in place
         updateOptionsTable();
         updateAllCalculations();
+        syncOptionsToWindow(); // Sync after clear
         showNotification('All options cleared');
     }
 }
@@ -1357,8 +1410,9 @@ function addPair() {
 
 function setDaysToExpiry(days) {
     document.getElementById('daysToExpiry').value = days;
-    options.forEach(option => option.days = days);
+    _options.forEach(option => option.days = days);
     updateAllCalculations();
+    syncOptionsToWindow(); // Sync after change
     showNotification(`Days to expiry set to ${days}`);
 }
 
@@ -1389,6 +1443,7 @@ function updateUnderlying() {
     }
     document.getElementById('spotPrice').value = spotPrice;
     updateAllCalculations();
+    syncOptionsToWindow(); // Sync after change
     showNotification(`Underlying updated to ${underlying}`);
 }
 
@@ -1432,33 +1487,36 @@ function toggleView(viewType) {
 }
 
 function calculateAll() {
-    options.forEach(option => recalculateBSM(option.id));
+    _options.forEach(option => recalculateBSM(option.id));
     updateAllCalculations();
     calculatePL();
+    syncOptionsToWindow(); // Sync after calculation
     showNotification('All calculations completed');
 }
 
 function cloneOption(id) {
-    const originalOption = options.find(o => o.id === id);
+    const originalOption = _options.find(o => o.id === id);
     if (!originalOption) return;
     const clone = {
         ...originalOption,
-        id: Math.max(...options.map(o => o.id)) + 1,
+        id: Math.max(..._options.map(o => o.id)) + 1,
         strike: originalOption.strike + (originalOption.type === 'CALL' ? 100 : -100)
     };
-    options.push(clone);
+    _options.push(clone);
     updateOptionsTable();
     updateAllCalculations();
+    syncOptionsToWindow(); // Sync after clone
     showNotification(`Option ${id} cloned`);
 }
 
 function deleteOption(id) {
-    const optionIndex = options.findIndex(o => o.id === id);
+    const optionIndex = _options.findIndex(o => o.id === id);
     if (optionIndex === -1) return;
-    if (confirm(`Delete ${options[optionIndex].type} option?`)) {
-        options.splice(optionIndex, 1);
+    if (confirm(`Delete ${_options[optionIndex].type} option?`)) {
+        _options.splice(optionIndex, 1);
         updateOptionsTable();
         updateAllCalculations();
+        syncOptionsToWindow(); // Sync after delete
         showNotification(`Option ${id} deleted`);
     }
 }
@@ -1523,7 +1581,7 @@ function updateErosionChart() {
         let callPremium = 0, putPremium = 0;
         let callExtrinsicVal = 0, putExtrinsicVal = 0;
         
-        options.forEach(option => {
+        _options.forEach(option => {
             if (day <= option.days) {
                 const remainingDays = option.days - day;
                 const T = remainingDays / 365;
@@ -1647,7 +1705,7 @@ function calculateImpliedVolatility() {
     const spot = parseFloat(document.getElementById('spotPrice').value);
     const r = parseFloat(document.getElementById('riskFreeRate').value) / 100;
     
-    options.forEach(option => {
+    _options.forEach(option => {
         const T = option.days / 365;
         if (T > 0) {
             const iv = BlackScholesPricing.calculateImpliedVol(
@@ -1663,6 +1721,7 @@ function calculateImpliedVolatility() {
     });
     
     updateOptionsTable();
+    syncOptionsToWindow(); // Sync after calculation
     alert('Implied volatility calculated for all options');
 }
 
@@ -1672,9 +1731,9 @@ function validatePutCallParity() {
     const days = parseInt(document.getElementById('daysToExpiry').value);
     const pairs = [];
     
-    options.forEach(call => {
+    _options.forEach(call => {
         if (call.type === 'CALL') {
-            const matchingPut = options.find(p => 
+            const matchingPut = _options.find(p => 
                 p.type === 'PUT' && p.strike === call.strike && p.days === call.days
             );
             if (matchingPut) {
@@ -1717,7 +1776,7 @@ function updateVolatilitySurface() {
     
     volSurface.updateFromMarket(atmVol, skew, smile);
     
-    options.forEach(option => {
+    _options.forEach(option => {
         const moneyness = (option.strike - parseFloat(document.getElementById('spotPrice').value)) / 
                          parseFloat(document.getElementById('spotPrice').value);
         const vol = volSurface.getVolatility(moneyness, option.days);
@@ -1725,6 +1784,7 @@ function updateVolatilitySurface() {
     });
     
     updateAllCalculations();
+    syncOptionsToWindow(); // Sync after update
     alert(`Volatility surface updated:\nATM: ${(atmVol*100).toFixed(2)}%\nSkew: ${skew}\nSmile: ${smile}`);
 }
 
@@ -1791,7 +1851,7 @@ function addPutOption() {
 // CALCULATION ENGINE
 // ============================================================================
 function updateAllCalculations() {
-    if (options.length === 0) return;
+    if (_options.length === 0) return;
     const spot = parseFloat(document.getElementById('spotPrice').value);
     const iv = parseFloat(document.getElementById('impliedVol').value) / 100;
     const days = parseInt(document.getElementById('daysToExpiry').value);
@@ -1802,7 +1862,7 @@ function updateAllCalculations() {
     let totalRho = 0, totalExtrinsic = 0, totalIntrinsic = 0;
     let atmCall = null, atmPut = null;
     
-    options.forEach(option => {
+    _options.forEach(option => {
         totalTheta += option.theta;
         totalWeeklyErosion += option.theta * 7;
         totalTimeValue += option.premium;
@@ -1854,6 +1914,9 @@ function updateAllCalculations() {
     }
     
     updateErosionChart();
+    
+    // Sync after all calculations
+    syncOptionsToWindow();
 }
 
 // ============================================================================
@@ -1861,7 +1924,7 @@ function updateAllCalculations() {
 // ============================================================================
 function exportToCSV() {
     let csv = 'Type,Strike,Premium,Theta,Delta,Gamma,Vega,Rho,Days,Moneyness,IV%,Intrinsic,Extrinsic,Theoretical,D1,D2,Model\n';
-    options.forEach(option => {
+    _options.forEach(option => {
         csv += `${option.type},${option.strike},${option.premium},${option.theta},${option.delta},${option.gamma},${option.vega},${option.rho},${option.days},${option.moneyness},${option.iv},${option.intrinsic},${option.extrinsic},${option.theoreticalPrice},${option.d1},${option.d2},${option.model}\n`;
     });
     
@@ -1932,8 +1995,8 @@ document.addEventListener('keydown', function(e) {
             case 'i': calculateImpliedVolatility(); break;
             case 'v': validatePutCallParity(); break;
             case 't': toggleTheme(); break; // Theme toggle shortcut
-            case '1': if (options.length > 0) recalculateBSM(options[0].id); break;
-            case '2': if (options.length > 1) recalculateBSM(options[1].id); break;
+            case '1': if (_options.length > 0) recalculateBSM(_options[0].id); break;
+            case '2': if (_options.length > 1) recalculateBSM(_options[1].id); break;
         }
     }
     
@@ -1942,7 +2005,7 @@ document.addEventListener('keydown', function(e) {
         case 'F2': e.preventDefault(); loadPreset('banknifty_weekly'); break;
         case 'F3': e.preventDefault(); toggleView('advanced'); break;
         case 'F4': e.preventDefault(); toggleView('pro'); break;
-        case 'F5': e.preventDefault(); options.forEach(o => recalculateBSM(o.id)); updateAllCalculations(); break;
+        case 'F5': e.preventDefault(); _options.forEach(o => recalculateBSM(o.id)); updateAllCalculations(); break;
     }
     
     if (!e.altKey && !e.ctrlKey && !e.shiftKey) {
@@ -2019,5 +2082,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('%cBlack-Scholes-Merton Model Active', 'color: #6c757d;');
         console.log('%cUnified Dark/Light Theme System Active', 'color: #0dcaf0;');
         console.log('%cCollapsible Sections Initialized', 'color: #20c997;');
+        console.log('%cRisk Spotlight Sync System Active', 'color: #fd7e14;');
     }, 500);
 });
