@@ -302,13 +302,7 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
 .mr-lb{font-size:.48rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-bottom:.06rem;white-space:nowrap}
 .mr-vl{font-family:var(--mono);font-size:.78rem;font-weight:700;letter-spacing:-.02em}
 .mr-sb{font-size:.46rem;color:var(--t3);white-space:nowrap}
-.mr-g{color:var(--green)}.mr-b{color:var(--blue)}.mr-y{color:var(--yellow)}.mr-o{color:var(--orange)}.mr-p{color:var(--purple)}.mr-r{color:var(--red)}.mr-c{color:var(--cyan)}
-.risk-row{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--bd)}
-.risk-it{padding:.4rem .56rem;border-right:1px solid var(--bd)}.risk-it:last-child{border-right:none}
-.risk-lb{font-size:.49rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-bottom:.1rem}
-.risk-vl{font-family:var(--mono);font-size:.73rem;font-weight:600}
-.risk-sb{font-size:.49rem;color:var(--t3);margin-top:.04rem}
-.fpv.fut{color:var(--yellow)}
+.mr-g{color:var(--green)}.mr-b{color:var(--blue)}.mr-y{color:var(--yellow)}.mr-o{color:var(--orange)}.mr-p{color:var(--purple)}.mr-r{color:var(--red)}.mr-c{color:var(--cyan)}.fpv.fut{color:var(--yellow)}
 .strat-sec{padding:.95rem 1.2rem}
 .strat-panel{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rlg);padding:.82rem;margin-bottom:.82rem}
 .sp-header{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.52rem}
@@ -327,7 +321,7 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
 .leg-dir.long{color:var(--green)}.leg-dir.short{color:var(--red)}
 .leg-row{display:grid;grid-template-columns:repeat(6,1fr);gap:.18rem}
 .lk{font-size:.48rem;color:var(--t3);margin-bottom:.05rem}.lv{font-family:var(--mono);font-size:.65rem;font-weight:600;color:var(--t1)}
-.sm-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:.34rem}
+.sm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.34rem}
 .sm-card{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:.42rem .5rem;text-align:center}
 .sm-lb{font-size:.47rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-bottom:.12rem}
 .sm-vl{font-family:var(--mono);font-size:.8rem;font-weight:700}
@@ -338,7 +332,7 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
 .pll{display:flex;align-items:center;gap:.28rem;font-size:.57rem;color:var(--t3)}
 .pll-line{width:20px;height:2px;border-radius:1px}
 .pll-dash{width:20px;height:0;border-top:2px dashed rgba(255,255,255,.35)}
-@media(max-width:1200px){.metrics-row{grid-template-columns:repeat(4,1fr)}.sm-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:1200px){.metrics-row{grid-template-columns:repeat(4,1fr)}.sm-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:900px){.sm-grid{grid-template-columns:repeat(2,1fr)}.pos-greeks{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
@@ -748,18 +742,13 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
                 <div class="em-sub">total position × 5</div>
               </div>
               <div class="em-item">
-                <div class="em-lbl">Breakeven</div>
-                <div class="em-val" id="emBE">—</div>
-                <div class="em-sub">at expiry</div>
+                <div class="em-lbl">θ Annual Yield</div>
+                <div class="em-val" id="emYield" style="color:var(--yellow)">—</div>
+                <div class="em-sub">θ÷prem×365</div>
               </div>
             </div>
           </div>
-          <div class="risk-row">
-            <div class="risk-it"><div class="risk-lb">θ % of Prem</div><div class="risk-vl" id="rmThPct" style="color:var(--orange)">—</div><div class="risk-sb">daily erosion rate</div></div>
-            <div class="risk-it"><div class="risk-lb">Days → 50% TV</div><div class="risk-vl" id="rmD50" style="color:var(--purple)">—</div><div class="risk-sb">time val halved</div></div>
-            <div class="risk-it"><div class="risk-lb">Max Loss (pos)</div><div class="risk-vl" id="rmMaxL" style="color:var(--red)">—</div><div class="risk-sb">prem paid total</div></div>
-            <div class="risk-it"><div class="risk-lb">θ Annual Yield</div><div class="risk-vl" id="rmYield" style="color:var(--yellow)">—</div><div class="risk-sb">theta/prem×365</div></div>
-          </div>
+
         </div>
 
         <div class="chart-card">
@@ -846,17 +835,15 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
               <th class="cde">Δ Call</th>
               <th class="cga">Γ</th>
               <th class="cve">ν Vega</th>
-              <th class="cpop">PoP CE</th>
               <th class="cput">PE ₹</th>
               <th class="cth">θ Put</th>
               <th class="cde">Δ Put</th>
-              <th class="cpop">PoP PE</th>
               <th class="cyiv">IV%</th>
               <th>C−P</th>
               <th>Parity</th>
             </tr></thead>
             <tbody id="chainBody">
-              <tr><td colspan="14"><div class="empty-msg">Click <strong style="color:var(--blue)">Run BSM Calculator</strong> to generate chain</div></td></tr>
+              <tr><td colspan="12"><div class="empty-msg">Click <strong style="color:var(--blue)">Run BSM Calculator</strong> to generate chain</div></td></tr>
             </tbody>
           </table>
         </div>
@@ -1207,7 +1194,6 @@ function calculate() {
   const tPos  = th * qty;            // theta × lots × lot size
   const tWeek = tPos * 5;            // 5 trading days
 
-  const bePrice = A.type === 'put' ? i.K - paid : i.K + paid;
 
   st('emU',  fRs(tUnit, 4));
   st('emL',  fRs(tLot, 2));
@@ -1215,7 +1201,7 @@ function calculate() {
   st('emT',  fRs(tPos, 2));
   st('emTS', fRs(tLot, 2) + '/lot × ' + i.lots + ' lot' + (i.lots > 1 ? 's' : ''));
   st('emW',  fRs(tWeek, 2));
-  st('emBE', '₹' + bePrice.toFixed(2));
+
   st('bThRate', 'θ/unit: ' + fRs(tUnit, 4) + '/day');
 
   /* ── Update formula strip F (futures) ── */
@@ -1255,6 +1241,7 @@ function calculate() {
   }
   const thPct    = paid > 0 ? Math.abs(thScaled) / paid * 100 : 0;
   const tAnnYld  = paid > 0 ? Math.abs(thScaled) / paid * 365 * 100 : 0;
+  st('emYield', tAnnYld > 0 ? tAnnYld.toFixed(0) + '% p.a.' : '—');
   const qty2     = i.lots * i.lot;
   const maxLoss  = paid * qty2;
   // Days to 50% time value
@@ -1277,10 +1264,7 @@ function calculate() {
   st('mD50',   d50 !== null ? d50 + 'd' : 'N/A');
   st('mMaxL',  fRs(maxLoss, 0));
   // R:R for risk row (will be filled by strategy)
-  st('rmThPct', thPct.toFixed(2) + '%/d');
-  st('rmD50',   d50 !== null ? d50 + 'd' : 'N/A');
-  st('rmMaxL',  fRs(maxLoss, 0));
-  st('rmYield', tAnnYld.toFixed(0) + '% p.a.');
+
   // theta display with scaling
   if (ts !== 1) {
     const gThEl = el('gTh'); if (gThEl) gThEl.textContent = f2(thScaled, 4);
@@ -1471,23 +1455,20 @@ function buildChain(i) {
     const ts  = tScale();
     const fwd    = i.S * Math.exp(-i.q * i.T) - K * Math.exp(-i.r * i.T);
     const parity = Math.abs((r2s.call - r2s.put) - fwd);
-    const popCE  = (r2s.Nd2 * 100).toFixed(1) + '%';
-    const popPE  = ((1 - r2s.Nd2) * 100).toFixed(1) + '%';
+
     const tr     = document.createElement('tr');
     if (isATM) tr.className = 'atmrow';
 
     tr.innerHTML = `
       <td><span class="sklbl">${K.toLocaleString('en-IN')}</span>${isATM ? '<span class="atm-pill">ATM</span>' : ''}</td>
       <td class="ccall">${r2s.call.toFixed(2)}</td>
-      <td class="cth">${(r2s.theta_c * ts).toFixed(4)}</td>
-      <td class="cde">${r2s.delta_c.toFixed(4)}</td>
-      <td class="cga">${r2s.gamma.toFixed(6)}</td>
-      <td class="cve">${r2s.vega.toFixed(4)}</td>
-      <td class="cpop">${popCE}</td>
+      <td class="cth">${(r2s.theta_c * ts).toFixed(2)}</td>
+      <td class="cde">${r2s.delta_c.toFixed(2)}</td>
+      <td class="cga">${r2s.gamma.toFixed(3)}</td>
+      <td class="cve">${r2s.vega.toFixed(2)}</td>
       <td class="cput">${r2s.put.toFixed(2)}</td>
-      <td class="cth">${(r2s.theta_p * ts).toFixed(4)}</td>
-      <td class="cde">${r2s.delta_p.toFixed(4)}</td>
-      <td class="cpop">${popPE}</td>
+      <td class="cth">${(r2s.theta_p * ts).toFixed(2)}</td>
+      <td class="cde">${r2s.delta_p.toFixed(2)}</td>
       <td class="cyiv">${iv2.toFixed(1)}%</td>
       <td>${(r2s.call - r2s.put).toFixed(2)}</td>
       <td class="${parity < 0.5 ? 'cok' : 'cerr'}">${parity < 0.5 ? '✓' : '±' + parity.toFixed(2)}</td>`;
@@ -1628,10 +1609,10 @@ function buildSDRows() {
       <div class="sdc"><span class="sdn">${K.toLocaleString('en-IN')}</span>${isATM ? '<span class="sdatm">ATM</span>' : ''}
         <span class="sd-badge ${mC}" style="margin-left:.22rem;font-size:.44rem">${mL}</span></div>
       <div class="sdc sdce">${r2sd.call.toFixed(2)}</div>
-      <div class="sdc sddc">${r2sd.delta_c.toFixed(3)}</div>
-      <div class="sdc sdth">${(r2sd.theta_c * tsSD).toFixed(4)}</div>
+      <div class="sdc sddc">${r2sd.delta_c.toFixed(2)}</div>
+      <div class="sdc sdth">${(r2sd.theta_c * tsSD).toFixed(2)}</div>
       <div class="sdc sdpe">${r2sd.put.toFixed(2)}</div>
-      <div class="sdc sddp">${r2sd.delta_p.toFixed(3)}</div>
+      <div class="sdc sddp">${r2sd.delta_p.toFixed(2)}</div>
       <div class="sdc" style="color:var(--green);font-weight:600">${popSD}</div>`;
     row.addEventListener('click', () => pickStrike(K));
     con.appendChild(row);
@@ -1660,7 +1641,7 @@ function syncSDTrigger(K, sp, res) {
   else                      { mL = 'OTM ' + pd.toFixed(1) + '%'; mC = 'otm'; }
   const b = el('sdBadge');
   b.textContent = mL; b.className = 'sd-badge ' + mC;
-  if (res) el('sdPreview').textContent = 'CE ₹' + res.call.toFixed(2) + '  ·  PE ₹' + res.put.toFixed(2) + '  ·  Δ ' + res.delta_c.toFixed(3);
+  if (res) el('sdPreview').textContent = 'CE ₹' + res.call.toFixed(2) + '  ·  PE ₹' + res.put.toFixed(2) + '  ·  Δ ' + res.delta_c.toFixed(2);
 }
 
 function toggleSD(e) { e.stopPropagation(); A.sdOpen ? closeSD() : openSD(); }
@@ -2003,7 +1984,7 @@ function drawStrategy(i, legs) {
   st('pgVe',  fRs(nVega, 2) + '/1%σ');
 
   /* Gamma — per-unit (summed across legs), more intuitive than position-level */
-  st('pgGa', perUnitGamma.toFixed(6));
+  st('pgGa', perUnitGamma.toFixed(4));
 
   /* Delta-hedge in futures:
      nDelta = total position delta in underlying units (lots × lotSize × unit_delta)
@@ -2052,9 +2033,9 @@ function drawStrategy(i, legs) {
         '<div class="leg-row">' +
         '<div><div class="lk">Strike</div><div class="lv">₹' + lg.K.toLocaleString('en-IN') + '</div></div>' +
         '<div><div class="lk">' + (lg.dir > 0 ? 'Premium' : 'Credit') + '</div><div class="lv" style="color:' + (lg.dir > 0 ? 'var(--red)' : 'var(--green)') + '">' + (lg.dir > 0 ? '−' : '+') + '₹' + prem.toFixed(2) + '</div></div>' +
-        '<div><div class="lk">Delta</div><div class="lv" style="color:' + (delta >= 0 ? 'var(--blue)' : 'var(--orange)') + '">' + (delta >= 0 ? '+' : '') + delta.toFixed(4) + '</div></div>' +
-        '<div><div class="lk">Theta/d</div><div class="lv" style="color:' + (theta >= 0 ? 'var(--green)' : 'var(--orange)') + '">' + (theta >= 0 ? '+' : '') + theta.toFixed(4) + '</div></div>' +
-        '<div><div class="lk">Vega/1%σ</div><div class="lv" style="color:' + (vega >= 0 ? 'var(--cyan)' : 'var(--t3)') + '">' + (vega >= 0 ? '+' : '') + vega.toFixed(4) + '</div></div>' +
+        '<div><div class="lk">Delta</div><div class="lv" style="color:' + (delta >= 0 ? 'var(--blue)' : 'var(--orange)') + '">' + (delta >= 0 ? '+' : '') + delta.toFixed(3) + '</div></div>' +
+        '<div><div class="lk">Theta/d</div><div class="lv" style="color:' + (theta >= 0 ? 'var(--green)' : 'var(--orange)') + '">' + (theta >= 0 ? '+' : '') + theta.toFixed(3) + '</div></div>' +
+        '<div><div class="lk">Vega/1%σ</div><div class="lv" style="color:' + (vega >= 0 ? 'var(--cyan)' : 'var(--t3)') + '">' + (vega >= 0 ? '+' : '') + vega.toFixed(3) + '</div></div>' +
         '<div><div class="lk">IV used</div><div class="lv">' + lg.iv.toFixed(1) + '%</div></div>' +
         '</div>';
       lc.appendChild(d);
@@ -2116,18 +2097,7 @@ function drawStrategy(i, legs) {
         sb: 'profit ÷ risk',
         c:  'var(--cyan)'
       },
-      {
-        lb: 'Net θ/day',
-        vl: fRs(nTheta, 0),
-        sb: (ts > 1 ? 'trd-day' : 'cal') + ' · whole pos',
-        c:  nTheta > 0 ? 'var(--green)' : 'var(--orange)'
-      },
-      {
-        lb: 'Net Delta',
-        vl: nDelta.toFixed(2),
-        sb: 'equiv. spot units',
-        c:  nDelta > 0 ? 'var(--green)' : nDelta < 0 ? 'var(--red)' : 'var(--t2)'
-      },
+
     ];
     items.forEach(it => {
       const d = document.createElement('div');
@@ -2181,7 +2151,7 @@ function drawStrategy(i, legs) {
         legend: {
           position: 'top',
           labels: {
-            filter: item => !item.text.startsWith('BE ') || BEs.length <= 2,
+            filter: item => !item.text.startsWith('BE '),
             color: '#5A6780', font: { family: "'DM Sans'", size: 9 }, boxWidth: 10, padding: 8
           }
         }
