@@ -2135,15 +2135,7 @@ function drawStrategy(i, legs) {
       d.innerHTML = '<div class="sm-lb">' + it.lb + '</div><div class="sm-vl" style="color:' + it.c + '">' + it.vl + '</div><div class="sm-sb">' + it.sb + '</div>';
       mc.appendChild(d);
     });
-    /* Breakeven row below grid */
-    if (BEs.length) {
-      const beDiv = document.createElement('div');
-      beDiv.style.cssText = 'margin-top:.42rem;padding:.36rem .54rem;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);display:flex;align-items:center;gap:.6rem;flex-wrap:wrap';
-      beDiv.innerHTML = '<span style="font-size:.52rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3)">Breakeven' + (BEs.length > 1 ? 's' : '') + '</span>' +
-        BEs.map(be => `<span style="font-family:var(--mono);font-size:.76rem;font-weight:700;color:var(--yellow)">₹${be.toFixed(0)}</span><span style="font-size:.52rem;color:var(--t3)">${((be - i.S)/i.S*100).toFixed(2)}% from spot</span>`).join('<span style="color:var(--bd2);font-size:.7rem">·</span>');
-      mc.parentNode.insertBefore(beDiv, mc.nextSibling);
-    }
-  }
+  }  /* close if(mc) */
 
   /* ── Payoff chart with BE markers and spot indicator ── */
   const seg2 = { borderColor: c2 => c2.p0.parsed.y >= 0 ? 'rgba(34,197,94,.85)' : 'rgba(239,68,68,.78)' };
@@ -2208,14 +2200,20 @@ function drawStrategy(i, legs) {
     }
   });
 
-  /* Cleanup stale breakeven divs from previous render */
-  const oldBeDivs = document.querySelectorAll('#stratMetrics + div');
-  oldBeDivs.forEach(d => d.remove());
+  /* ── Breakeven strip (single instance, ID-managed) ── */
+  const oldBe = document.getElementById('beStrip');
+  if (oldBe) oldBe.remove();
   if (BEs.length && mc) {
     const beDiv = document.createElement('div');
-    beDiv.style.cssText = 'margin-top:.42rem;padding:.36rem .54rem;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);display:flex;align-items:center;gap:.6rem;flex-wrap:wrap';
-    beDiv.innerHTML = '<span style="font-size:.52rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);flex-shrink:0">Breakeven' + (BEs.length > 1 ? 's' : '') + '</span>' +
-      BEs.map(be => `<span style="font-family:var(--mono);font-size:.76rem;font-weight:700;color:var(--yellow)">₹${Math.round(be).toLocaleString('en-IN')}</span><span style="font-size:.52rem;color:var(--t3);white-space:nowrap">${((be - i.S)/i.S*100).toFixed(2)}% from spot</span>`).join('<span style="color:var(--bd2);margin:0 .2rem">·</span>');
+    beDiv.id = 'beStrip';
+    beDiv.style.cssText = 'margin-top:.42rem;padding:.36rem .54rem;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap';
+    beDiv.innerHTML = '<span style="font-size:.52rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);flex-shrink:0;margin-right:.2rem">Breakeven' + (BEs.length > 1 ? 's' : '') + '</span>' +
+      BEs.map(be => {
+        const pct = ((be - i.S) / i.S * 100);
+        const col = pct >= 0 ? 'var(--green)' : 'var(--red)';
+        return '<span style="font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--yellow)">₹' + Math.round(be).toLocaleString('en-IN') + '</span>' +
+               '<span style="font-size:.5rem;color:' + col + ';white-space:nowrap">' + (pct >= 0 ? '+' : '') + pct.toFixed(2) + '% from spot</span>';
+      }).join('<span style="color:var(--bd2);margin:0 .3rem;font-size:.7rem">·</span>');
     mc.after(beDiv);
   }
 }
