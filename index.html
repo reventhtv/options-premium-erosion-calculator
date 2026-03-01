@@ -1166,8 +1166,8 @@ function calculate() {
   if (pb) {
     pb.className = 'parity ' + (parDiff < 0.5 ? 'ok' : 'err');
     pb.innerHTML = parDiff < 0.5
-      ? `<svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> Put-Call Parity: Valid (diff = ${parDiff.toFixed(4)})`
-      : `⚠ Parity breach: ±${parDiff.toFixed(4)}`;
+      ? `<svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> Put-Call Parity: Valid (diff = ${parDiff.toFixed(2)})`
+      : `⚠ Parity breach: ±${parDiff.toFixed(2)}`;
   }
   st('bATM', 'ATM: ₹' + (Math.round(i.S / A.step) * A.step).toLocaleString('en-IN'));
 
@@ -1176,14 +1176,14 @@ function calculate() {
   const de = A.type === 'put' ? res.delta_p : res.delta_c;
   const rh = A.type === 'put' ? res.rho_p   : res.rho_c;
 
-  st('gTh',  f2(th, 4));
-  st('gThS', fRs(th, 4) + '/unit/day');
-  st('gDe',  f2(de, 4));
+  st('gTh',  f2(th, 2));
+  st('gThS', fRs(th, 2) + '/unit/day');
+  st('gDe',  f2(de, 2));
   st('gDeS', fRs(de * qty, 2) + ' total/₹1');
-  st('gGa',  f2(res.gamma, 6));
-  st('gVe',  f2(res.vega, 4));
-  st('gVeS', fRs(res.vega, 4) + '/unit/1%σ');
-  st('gRh',  f2(rh, 4));
+  st('gGa',  f2(res.gamma, 4));
+  st('gVe',  f2(res.vega, 2));
+  st('gVeS', fRs(res.vega, 2) + '/unit/1%σ');
+  st('gRh',  f2(rh, 2));
   st('gIV',  i.iv.toFixed(2) + '%');
 
   /* ── Erosion breakdown ──
@@ -1195,14 +1195,14 @@ function calculate() {
   const tWeek = tPos * 5;            // 5 trading days
 
 
-  st('emU',  fRs(tUnit, 4));
+  st('emU',  fRs(tUnit, 2));
   st('emL',  fRs(tLot, 2));
-  st('emLS', f2(tUnit, 4) + ' × ' + i.lot + ' qty');
+  st('emLS', f2(tUnit, 2) + ' × ' + i.lot + ' qty');
   st('emT',  fRs(tPos, 2));
   st('emTS', fRs(tLot, 2) + '/lot × ' + i.lots + ' lot' + (i.lots > 1 ? 's' : ''));
   st('emW',  fRs(tWeek, 2));
 
-  st('bThRate', 'θ/unit: ' + fRs(tUnit, 4) + '/day');
+  st('bThRate', 'θ/unit: ' + fRs(tUnit, 2) + '/day');
 
   /* ── Update formula strip F (futures) ── */
   const futF = gv('iFut'); if (futF > 0) { const e = el('fpF'); if (e) e.textContent = futF.toFixed(2); }
@@ -1267,13 +1267,13 @@ function calculate() {
 
   // theta display with scaling
   if (ts !== 1) {
-    const gThEl = el('gTh'); if (gThEl) gThEl.textContent = f2(thScaled, 4);
-    const gThSEl = el('gThS'); if (gThSEl) gThSEl.textContent = fRs(thScaled, 4) + '/unit/trd-day';
-    st('emU', fRs(thScaled, 4));
+    const gThEl = el('gTh'); if (gThEl) gThEl.textContent = f2(thScaled, 2);
+    const gThSEl = el('gThS'); if (gThSEl) gThSEl.textContent = fRs(thScaled, 2) + '/unit/trd-day';
+    st('emU', fRs(thScaled, 2));
     st('emL', fRs(thScaled * i.lot, 2));
     st('emT', fRs(thScaled * qty2, 2));
     st('emW', fRs(thScaled * qty2 * 5, 2));
-    st('bThRate', 'theta/unit: ' + fRs(thScaled, 4) + '/trd-day');
+    st('bThRate', 'theta/unit: ' + fRs(thScaled, 2) + '/trd-day');
   }
   /* ── Strategy builder ── */
   const legs = buildLegs(i);
@@ -1517,7 +1517,7 @@ function buildScenarios(i, res) {
     card.className = 'sc-card';
     card.innerHTML = `<div class="sc-lbl">${sc.lbl}</div>
       <div class="sc-val ${cls}">${sgn}₹${dQty.toFixed(2)}</div>
-      <div class="sc-desc">${sc.desc} · unit Δ: ${sgn}₹${d.toFixed(4)} · new px: ₹${newP.toFixed(2)}</div>`;
+      <div class="sc-desc">${sc.desc} · unit Δ: ${sgn}₹${d.toFixed(2)} · new px: ₹${newP.toFixed(2)}</div>`;
     grid.appendChild(card);
   });
 }
