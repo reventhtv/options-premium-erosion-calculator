@@ -1,0 +1,3525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Options Analyzer — BSM Premium Erosion Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ═══════════════════════════ DESIGN TOKENS ════════════════════════════ */
+:root {
+  --bg:#0C0E14; --bg2:#11131A; --bg3:#161920; --bg4:#1C1F29;
+  --bd:#242836; --bd2:#2E3347;
+  --blue:#3B82F6; --green:#22C55E; --red:#EF4444; --orange:#F97316;
+  --purple:#A855F7; --cyan:#06B6D4; --yellow:#EAB308; --pink:#EC4899;
+  --t1:#F1F5F9; --t2:#94A3B8; --t3:#5A6780; --t4:#363D52;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono','Courier New',monospace;
+  --r:8px; --rsm:6px; --rlg:12px;
+}
+
+/* ═══════════════════════════ RESET ════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:var(--sans);background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden;line-height:1.5}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:4px}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+
+/* ═══════════════════════════ TOPBAR ═══════════════════════════════════ */
+.topbar{height:56px;background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 1.25rem;position:sticky;top:0;z-index:200;flex-shrink:0;gap:0}
+.brand{display:flex;align-items:center;gap:.5rem;padding-right:1.25rem;border-right:1px solid var(--bd);margin-right:1.25rem;flex-shrink:0}
+.brand-icon{width:32px;height:32px;background:var(--blue);border-radius:var(--rsm);display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:800;color:#fff}
+.brand-name{font-size:.88rem;font-weight:700;letter-spacing:-.02em;color:var(--t1)}
+.brand-sub{font-size:.6rem;color:var(--t3);display:block;margin-top:-2px}
+.ul-tabs{display:flex;gap:.2rem;flex:1;overflow-x:auto}
+.ul-tabs::-webkit-scrollbar{display:none}
+.ul-tab{display:flex;flex-direction:column;align-items:flex-start;padding:.28rem .75rem;border-radius:var(--rsm);border:1px solid transparent;cursor:pointer;background:none;transition:all .14s;flex-shrink:0;min-width:78px}
+.ul-tab:hover{background:var(--bg4)}
+.ul-tab.active{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.3)}
+.ul-tab-name{font-size:.7rem;font-weight:600;color:var(--t2)}
+.ul-tab.active .ul-tab-name{color:var(--blue)}
+.ul-tab-price{font-family:var(--mono);font-size:.63rem;color:var(--t3)}
+.ul-tab.active .ul-tab-price{color:var(--t2)}
+.topbar-right{display:flex;align-items:center;gap:.75rem;margin-left:auto;flex-shrink:0}
+.live-badge{display:flex;align-items:center;gap:.35rem;font-size:.62rem;font-weight:500;color:var(--green);padding:.2rem .55rem;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:20px;letter-spacing:.04em;text-transform:uppercase}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.btn{font-family:var(--sans);font-size:.74rem;font-weight:600;padding:.38rem .82rem;border-radius:var(--rsm);border:1px solid transparent;cursor:pointer;display:inline-flex;align-items:center;gap:.32rem;transition:all .14s;white-space:nowrap}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(59,130,246,.3)}
+.btn-primary:hover{background:#5294f7;box-shadow:0 4px 16px rgba(59,130,246,.4);transform:translateY(-1px)}
+.btn-ghost{background:var(--bg4);color:var(--t2);border-color:var(--bd)}
+.btn-ghost:hover{background:var(--bd);color:var(--t1)}
+
+/* ═══════════════════════════ LAYOUT ═══════════════════════════════════ */
+.workspace{display:grid;grid-template-columns:318px 1fr;flex:1;min-height:0}
+
+/* ═══════════════════════════ INPUT PANEL ══════════════════════════════ */
+.input-panel{background:var(--bg2);border-right:1px solid var(--bd);overflow-y:auto;display:flex;flex-direction:column}
+.ip-sec{padding:.9rem 1rem;border-bottom:1px solid var(--bd)}
+.ip-sec:last-of-type{border-bottom:none}
+.sec-title{font-size:.6rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:.78rem;display:flex;align-items:center;gap:.38rem}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--bd)}
+.field{margin-bottom:.68rem}
+.field:last-child{margin-bottom:0}
+.field-label{font-size:.68rem;font-weight:500;color:var(--t2);margin-bottom:.26rem;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.field-hint{font-size:.58rem;color:var(--t3);font-style:italic;font-weight:400}
+.iw{display:flex;align-items:stretch;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r);overflow:hidden;transition:border-color .14s,box-shadow .14s}
+.iw:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.iw.glow-green{animation:greenPulse 1.6s ease forwards}
+@keyframes greenPulse{
+  0%{border-color:var(--green);box-shadow:0 0 0 3px rgba(34,197,94,.22)}
+  65%{border-color:var(--green);box-shadow:0 0 0 2px rgba(34,197,94,.1)}
+  100%{border-color:var(--bd2);box-shadow:none}
+}
+.pfx,.sfx{font-size:.7rem;font-weight:500;color:var(--t3);padding:0 .52rem;background:var(--bg4);display:flex;align-items:center;flex-shrink:0;white-space:nowrap}
+.pfx{border-right:1px solid var(--bd)}
+.sfx{border-left:1px solid var(--bd)}
+.field input[type=number]{flex:1;font-family:var(--mono);font-size:.84rem;font-weight:500;background:transparent;border:none;outline:none;color:var(--t1);padding:.46rem .58rem;min-width:0}
+.stepper{display:flex;flex-direction:column;border-left:1px solid var(--bd)}
+.step-btn{flex:1;background:none;border:none;border-bottom:1px solid var(--bd);color:var(--t3);cursor:pointer;padding:0 .4rem;font-size:.55rem;display:flex;align-items:center;justify-content:center;transition:all .1s}
+.step-btn:last-child{border-bottom:none}
+.step-btn:hover{background:var(--bg4);color:var(--blue)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:.58rem}
+
+/* ── Strike dropdown ────────────────────────────────────────────────── */
+.sd-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r);padding:.46rem .62rem;cursor:pointer;transition:border-color .14s,box-shadow .14s;text-align:left;gap:.5rem}
+.sd-trigger:hover{border-color:var(--blue)}
+.sd-trigger.open{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.sd-tl{display:flex;align-items:center;gap:.38rem}
+.sd-tr{display:flex;align-items:center;gap:.42rem;flex-shrink:0}
+.sd-sym{font-size:.76rem;color:var(--t3)}
+.sd-val{font-family:var(--mono);font-size:.94rem;font-weight:700;color:var(--t1);letter-spacing:-.02em}
+.sd-badge{font-size:.52rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.08rem .3rem;border-radius:3px;border:1px solid;flex-shrink:0}
+.sd-badge.atm{color:var(--blue);background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.35)}
+.sd-badge.itm{color:var(--green);background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3)}
+.sd-badge.otm{color:var(--red);background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25)}
+.sd-preview{font-family:var(--mono);font-size:.58rem;color:var(--t3)}
+.sd-arrow{color:var(--t3);transition:transform .2s;flex-shrink:0}
+.sd-trigger.open .sd-arrow{transform:rotate(180deg)}
+/* Panel */
+.sd-panel{display:none;position:absolute;top:calc(100% + 5px);left:0;right:0;background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--rlg);box-shadow:0 12px 40px rgba(0,0,0,.6);z-index:300;overflow:hidden;max-height:360px;flex-direction:column}
+.sd-panel.open{display:flex}
+.sd-cols{display:grid;grid-template-columns:1.7fr 1fr .82fr .82fr 1fr .82fr;padding:.4rem .72rem;background:var(--bg3);border-bottom:1px solid var(--bd);flex-shrink:0}
+.sd-ch{font-size:.5rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);text-align:right}
+.sd-ch:first-child{text-align:left}
+.sd-ch.hce{color:rgba(59,130,246,.8)}.sd-ch.hpe{color:rgba(239,68,68,.8)}.sd-ch.hth{color:rgba(249,115,22,.8)}
+.sd-body{overflow-y:auto;flex:1}
+.sd-body::-webkit-scrollbar{width:3px}
+.sd-row{display:grid;grid-template-columns:1.7fr 1fr .82fr .82fr 1fr .82fr;padding:.4rem .72rem;border-bottom:1px solid rgba(36,40,54,.45);cursor:pointer;transition:background .1s;align-items:center}
+.sd-row:last-child{border-bottom:none}
+.sd-row:hover{background:var(--bg4)}
+.sd-row.atmr{background:rgba(59,130,246,.05);border-left:2px solid var(--blue)}
+.sd-row.atmr:hover{background:rgba(59,130,246,.1)}
+.sd-row.sel{background:rgba(59,130,246,.09)}
+.sdc{font-family:var(--mono);font-size:.67rem;text-align:right;color:var(--t2)}
+.sdc:first-child{text-align:left;font-family:var(--sans)}
+.sdn{font-weight:700;font-size:.75rem;color:var(--t1)}
+.sdatm{font-size:.43rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:.05rem .22rem;border-radius:2px;margin-left:.22rem;vertical-align:middle}
+.sdce{color:var(--blue)!important;font-weight:600}.sdpe{color:var(--red)!important;font-weight:600}
+.sddc{color:rgba(59,130,246,.8)!important}.sddp{color:rgba(239,68,68,.75)!important}.sdth{color:var(--orange)!important}
+
+/* ── Type tabs ─────────────────────────────────────────────────────── */
+.type-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:.28rem;margin-bottom:.65rem}
+.type-tab{font-family:var(--sans);font-size:.68rem;font-weight:600;padding:.4rem;border-radius:var(--rsm);border:1px solid var(--bd2);background:var(--bg3);color:var(--t2);cursor:pointer;text-align:center;transition:all .14s}
+.type-tab:hover{background:var(--bg4);color:var(--t1)}
+.type-tab.call.active{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.5);color:var(--blue)}
+.type-tab.put.active{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.45);color:var(--red)}
+.type-tab.both.active{background:rgba(234,179,8,.1);border-color:rgba(234,179,8,.4);color:var(--yellow)}
+
+/* ── Auto-fill badge ───────────────────────────────────────────────── */
+.auto-badge{display:none;align-items:center;gap:.2rem;font-size:.54rem;font-weight:600;color:var(--green);background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.22);padding:.08rem .32rem;border-radius:3px;flex-shrink:0}
+.auto-badge.on{display:inline-flex}
+
+/* ── Presets, calc btn ─────────────────────────────────────────────── */
+.preset-chips{display:flex;flex-wrap:wrap;gap:.28rem}
+.preset-chip{font-size:.62rem;font-weight:500;padding:.2rem .48rem;border-radius:20px;border:1px solid var(--bd2);background:var(--bg4);color:var(--t3);cursor:pointer;transition:all .12s}
+.preset-chip:hover{border-color:var(--blue);color:var(--blue);background:rgba(59,130,246,.08)}
+.calc-wrap{padding:.85rem 1rem;border-top:1px solid var(--bd);margin-top:auto;display:flex;flex-direction:column;gap:.45rem}
+.calc-btn{width:100%;font-family:var(--sans);font-size:.84rem;font-weight:700;padding:.66rem 1rem;border-radius:var(--r);border:none;background:var(--blue);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:all .15s;box-shadow:0 2px 12px rgba(59,130,246,.3)}
+.calc-btn:hover{background:#5294f7;box-shadow:0 4px 20px rgba(59,130,246,.42);transform:translateY(-1px)}
+.calc-btn:active{transform:translateY(0)}
+.parity{display:flex;align-items:center;justify-content:center;gap:.32rem;font-size:.62rem;font-weight:500;padding:.26rem;border-radius:var(--rsm)}
+.parity.ok{color:var(--green);background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2)}
+.parity.err{color:var(--red);background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)}
+.info-note{display:flex;align-items:flex-start;gap:.38rem;font-size:.58rem;color:var(--t3);line-height:1.45;padding:.42rem .58rem;background:var(--bg4);border:1px solid var(--bd);border-radius:var(--rsm);margin-top:.45rem}
+
+/* ═══════════════════════════ OUTPUT PANEL ═════════════════════════════ */
+.output-panel{overflow-y:auto;background:var(--bg);display:flex;flex-direction:column}
+
+/* Price header */
+.price-hdr{background:var(--bg2);border-bottom:1px solid var(--bd);padding:.78rem 1.2rem;display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap;flex-shrink:0}
+.ph-blk{display:flex;flex-direction:column;gap:.07rem}
+.ph-lbl{font-size:.58rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+.ph-val{font-family:var(--mono);font-size:1.48rem;font-weight:600;letter-spacing:-.03em;line-height:1.1}
+.ph-val.call{color:var(--blue)}.ph-val.put{color:var(--red)}.ph-val.neu{color:var(--t1);font-size:1.08rem}
+.ph-sub{font-size:.6rem;color:var(--t3);display:flex;gap:.42rem;flex-wrap:wrap}
+.ph-sub strong{color:var(--t2)}
+.ph-div{width:1px;height:36px;background:var(--bd);flex-shrink:0}
+
+/* Formula strip */
+.fstrip{background:var(--bg3);border-bottom:1px solid var(--bd);padding:.38rem 1.2rem;display:flex;align-items:center;overflow-x:auto;flex-shrink:0}
+.fstrip::-webkit-scrollbar{display:none}
+.fpi{display:flex;align-items:baseline;gap:.2rem;padding:0 .72rem;border-right:1px solid var(--bd);flex-shrink:0}
+.fpi:first-child{padding-left:0}.fpi:last-child{border-right:none}
+.fpk{font-family:Georgia,serif;font-style:italic;font-size:.8em;color:var(--t3)}
+.fpv{font-family:var(--mono);font-weight:600;color:var(--t2);font-size:.7rem}
+.fpv.dim{color:var(--t4)}.fpu{font-size:.55rem;color:var(--t4)}
+
+/* Greeks row */
+.greeks-row{display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid var(--bd);background:var(--bg2);flex-shrink:0}
+.gc{padding:.82rem .88rem;border-right:1px solid var(--bd);position:relative;cursor:default;transition:background .14s}
+.gc:last-child{border-right:none}
+.gc:hover{background:var(--bg3)}
+.gc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.28rem}
+.gc-name{font-size:.58rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.gc-sym{font-family:Georgia,serif;font-style:italic;font-size:.98rem;color:var(--t4);line-height:1}
+.gc-val{font-family:var(--mono);font-size:1.02rem;font-weight:600;letter-spacing:-.02em;line-height:1;transition:all .3s}
+.gc-sub{font-size:.56rem;color:var(--t3);margin-top:.16rem}
+.gc-bar{position:absolute;top:0;left:0;right:0;height:2px;border-radius:0 0 2px 2px;transform:scaleX(0);transform-origin:left;transition:transform .25s}
+.gc:hover .gc-bar{transform:scaleX(1)}
+.gth .gc-val{color:var(--orange)}.gth .gc-bar{background:var(--orange)}
+.gde .gc-val{color:var(--blue)}.gde .gc-bar{background:var(--blue)}
+.gga .gc-val{color:var(--purple)}.gga .gc-bar{background:var(--purple)}
+.gve .gc-val{color:var(--cyan)}.gve .gc-bar{background:var(--cyan)}
+.grh .gc-val{color:var(--pink)}.grh .gc-bar{background:var(--pink)}
+.giv .gc-val{color:var(--green)}.giv .gc-bar{background:var(--green)}
+
+/* Content tabs */
+.ctab-bar{display:flex;background:var(--bg2);border-bottom:1px solid var(--bd);padding:0 1.2rem;flex-shrink:0}
+.ctab{font-family:var(--sans);font-size:.72rem;font-weight:500;padding:.6rem .92rem;background:none;border:none;border-bottom:2px solid transparent;color:var(--t3);cursor:pointer;transition:all .14s;margin-bottom:-1px;white-space:nowrap}
+.ctab:hover{color:var(--t2)}.ctab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+.tab-body{display:none}.tab-body.active{display:block}
+
+/* Charts */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:.95rem;padding:.95rem 1.2rem}
+.chart-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rlg);overflow:hidden}
+.chart-head{display:flex;align-items:center;justify-content:space-between;padding:.68rem .92rem;border-bottom:1px solid var(--bd)}
+.chart-title{font-size:.68rem;font-weight:600;color:var(--t2)}
+.chart-body{padding:.78rem .68rem .48rem}
+.badge{font-size:.58rem;font-weight:600;padding:.14rem .38rem;border-radius:4px;border:1px solid}
+.badge-green{color:var(--green);background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.25)}
+.badge-red{color:var(--red);background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.22)}
+.badge-orange{color:var(--orange);background:rgba(249,115,22,.08);border-color:rgba(249,115,22,.25)}
+.badge-blue{color:var(--blue);background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.25)}
+.badge-muted{color:var(--t3);background:var(--bg4);border-color:var(--bd2)}
+
+/* Erosion metrics grid */
+.em-grid{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--bd);margin-top:.58rem}
+.em-item{padding:.52rem .68rem;border-right:1px solid var(--bd)}
+.em-item:last-child{border-right:none}
+.em-lbl{font-size:.55rem;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:.16rem}
+.em-val{font-family:var(--mono);font-size:.8rem;font-weight:600;letter-spacing:-.02em}
+.em-sub{font-size:.53rem;color:var(--t3);margin-top:.07rem}
+
+/* Option chain */
+.chain-sec{padding:.95rem 1.2rem}
+.chain-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.78rem}
+.chain-wrap{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rlg);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:.71rem}
+thead th{font-size:.56rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);padding:.52rem .78rem;text-align:right;background:var(--bg3);border-bottom:1px solid var(--bd);white-space:nowrap}
+thead th:first-child{text-align:left}
+tbody td{padding:.38rem .78rem;text-align:right;border-bottom:1px solid rgba(36,40,54,.5);font-family:var(--mono);font-size:.68rem;color:var(--t2);transition:background .1s}
+tbody td:first-child{text-align:left;font-family:var(--sans)}
+tbody tr:hover td{background:var(--bg3)}
+tbody tr.atmrow td{background:rgba(59,130,246,.04)}
+tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
+.sklbl{font-family:var(--mono);font-weight:700;font-size:.74rem;color:var(--t1)}
+.atm-pill{font-size:.43rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);padding:.06rem .22rem;border-radius:2px;margin-left:.25rem;vertical-align:middle}
+.ccall{color:var(--blue)!important;font-weight:600}.cput{color:var(--red)!important;font-weight:600}
+.cth{color:var(--orange)!important}.cde{color:var(--blue)!important}.cga{color:var(--purple)!important}.cve{color:var(--cyan)!important}
+.cok{color:var(--green)!important}.cerr{color:var(--red)!important}.cmut{color:var(--t3)!important}
+
+/* Scenarios */
+.sc-sec{padding:.95rem 1.2rem}
+.sc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.78rem}
+.sc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.58rem}
+.sc-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rlg);padding:.78rem;transition:border-color .14s}
+.sc-card:hover{border-color:var(--bd2)}
+.sc-lbl{font-size:.6rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:.32rem}
+.sc-val{font-family:var(--mono);font-size:.92rem;font-weight:600;letter-spacing:-.02em;margin-bottom:.16rem}
+.sc-desc{font-size:.58rem;color:var(--t3)}
+.cpr{color:var(--green)!important}.cls{color:var(--red)!important}.cne{color:var(--t2)!important}
+
+/* Sensitivity */
+.sens-sec{padding:.95rem 1.2rem;display:grid;grid-template-columns:1fr 1fr;gap:.95rem}
+.sens-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rlg);overflow:hidden}
+.sens-head{padding:.58rem .82rem;border-bottom:1px solid var(--bd);font-size:.66rem;font-weight:600;color:var(--t2);background:var(--bg3);display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.sens-row{display:flex;align-items:center;justify-content:space-between;padding:.4rem .82rem;border-bottom:1px solid rgba(36,40,54,.45);font-size:.68rem;gap:.5rem}
+.sens-row:last-child{border-bottom:none}
+.sens-row:hover{background:var(--bg3)}
+.sens-row.curr{background:rgba(59,130,246,.05);border-left:2px solid var(--blue)}
+.skey{color:var(--t2);font-family:var(--mono);flex:1}
+.sce{color:var(--blue);font-family:var(--mono);font-weight:600}
+.spe{color:var(--red);font-family:var(--mono);font-weight:600}
+
+/* Animations */
+@keyframes numFlash{0%{opacity:.3}100%{opacity:1}}
+.flash{animation:numFlash .32s ease}
+.empty-msg{text-align:center;padding:2.5rem 2rem;color:var(--t3);font-size:.73rem}
+
+/* Responsive */
+@media(max-width:1200px){
+  .greeks-row{grid-template-columns:repeat(3,1fr)}
+  .gc:nth-child(3){border-right:none}
+  .gc:nth-child(n+4){border-top:1px solid var(--bd)}
+  .charts-grid{grid-template-columns:1fr}
+  .sc-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:900px){
+  .workspace{grid-template-columns:1fr}
+  .input-panel{border-right:none;border-bottom:1px solid var(--bd)}
+  .sens-sec{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .greeks-row{grid-template-columns:repeat(2,1fr)}
+  .sc-grid{grid-template-columns:1fr 1fr}
+  .em-grid{grid-template-columns:repeat(3,1fr)}
+}
+
+/* ══ PRO ENHANCEMENTS CSS ══════════════════════════════════════════ */
+.tgl-row{display:flex;align-items:center;justify-content:space-between;gap:.4rem;margin:.45rem 0 .28rem}
+.tgl-lbl{font-size:.66rem;font-weight:500;color:var(--t2)}
+.tgl-grp{display:flex;border-radius:var(--rsm);overflow:hidden;border:1px solid var(--bd2)}
+.tgl-btn{font-family:var(--sans);font-size:.62rem;font-weight:600;padding:.22rem .58rem;background:var(--bg4);color:var(--t3);border:none;cursor:pointer;transition:all .12s;white-space:nowrap}
+.tgl-btn:not(:last-child){border-right:1px solid var(--bd2)}
+.tgl-btn.on{background:var(--blue);color:#fff}
+.tgl-btn.on-orange{background:var(--orange);color:#fff}
+.alert-strip{display:none;margin-top:.38rem;padding:.3rem .46rem;border-radius:var(--rsm);font-size:.57rem;line-height:1.5;align-items:flex-start;gap:.32rem;border:1px solid}
+.alert-strip.show{display:flex}
+.al-orange{background:rgba(249,115,22,.08);border-color:rgba(249,115,22,.28);color:var(--orange)}
+.strat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.26rem;margin-bottom:.46rem}
+.strat-btn{font-family:var(--sans);font-size:.6rem;font-weight:600;padding:.26rem .28rem;border-radius:var(--rsm);border:1px solid var(--bd2);background:var(--bg3);color:var(--t3);cursor:pointer;text-align:center;transition:all .12s;line-height:1.35}
+.strat-btn:hover{background:var(--bg4);color:var(--t2)}
+.strat-btn.active{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.5);color:var(--blue)}
+.strat-btn.credit.active{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.5);color:var(--green)}
+.metrics-row{background:var(--bg3);border-bottom:1px solid var(--bd);display:grid;grid-template-columns:repeat(9,1fr);flex-shrink:0;overflow-x:auto}
+.mr-it{padding:.38rem .48rem;border-right:1px solid var(--bd);min-width:60px}.mr-it:last-child{border-right:none}
+.mr-lb{font-size:.48rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-bottom:.06rem;white-space:nowrap}
+.mr-vl{font-family:var(--mono);font-size:.78rem;font-weight:700;letter-spacing:-.02em}
+.mr-sb{font-size:.46rem;color:var(--t3);white-space:nowrap}
+.mr-g{color:var(--green)}.mr-b{color:var(--blue)}.mr-y{color:var(--yellow)}.mr-o{color:var(--orange)}.mr-p{color:var(--purple)}.mr-r{color:var(--red)}.mr-c{color:var(--cyan)}.fpv.fut{color:var(--yellow)}
+.strat-sec{padding:.95rem 1.2rem}
+.strat-panel{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rlg);padding:.82rem;margin-bottom:.82rem}
+.sp-header{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.52rem}
+.sp-name{font-size:.78rem;font-weight:700;color:var(--t1)}
+.sp-desc{font-size:.58rem;color:var(--t3);margin-top:.12rem;line-height:1.45}
+.sp-badges{display:flex;gap:.26rem;flex-shrink:0}
+.pos-greeks{display:grid;grid-template-columns:repeat(5,1fr);background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:.52rem;overflow:hidden}
+.pg-it{padding:.38rem .52rem;border-right:1px solid var(--bd)}.pg-it:last-child{border-right:none}
+.pg-lb{font-size:.48rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--t3);margin-bottom:.07rem}
+.pg-vl{font-family:var(--mono);font-size:.75rem;font-weight:700}
+.pg-sb{font-size:.44rem;color:var(--t3);margin-top:.04rem;line-height:1.3}
+.legs-wrap{display:grid;gap:.38rem;margin-bottom:.52rem}
+.leg-card{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:.5rem}
+.leg-card.long{border-left:3px solid var(--green)}.leg-card.short{border-left:3px solid var(--red)}
+.leg-dir{font-size:.53rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.22rem}
+.leg-dir.long{color:var(--green)}.leg-dir.short{color:var(--red)}
+.leg-row{display:grid;grid-template-columns:repeat(6,1fr);gap:.18rem}
+.lk{font-size:.48rem;color:var(--t3);margin-bottom:.05rem}.lv{font-family:var(--mono);font-size:.65rem;font-weight:600;color:var(--t1)}
+.sm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.34rem}
+.sm-card{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:.42rem .5rem;text-align:center}
+.sm-lb{font-size:.47rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-bottom:.12rem}
+.sm-vl{font-family:var(--mono);font-size:.8rem;font-weight:700}
+.sm-sb{font-size:.47rem;color:var(--t3);margin-top:.04rem}
+.cpop{color:var(--green)!important;font-weight:600!important}
+.cyiv{color:var(--yellow)!important}
+.pl-legend{display:flex;gap:.7rem;padding:.35rem 1.2rem .15rem;flex-wrap:wrap}
+.pll{display:flex;align-items:center;gap:.28rem;font-size:.57rem;color:var(--t3)}
+.pll-line{width:20px;height:2px;border-radius:1px}
+.pll-dash{width:20px;height:0;border-top:2px dashed rgba(255,255,255,.35)}
+@media(max-width:1400px){.metrics-row{grid-template-columns:repeat(5,1fr)}.sm-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:1200px){.metrics-row{grid-template-columns:repeat(4,1fr)}.sm-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.sm-grid{grid-template-columns:repeat(2,1fr)}.pos-greeks{grid-template-columns:repeat(3,1fr)}}
+
+/* ═══════════════════════════ IV RANK GAUGE ════════════════════════════ */
+.ivr-gauge-wrap{margin:.32rem 0 .1rem;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;position:relative}
+.ivr-gauge-fill{height:100%;border-radius:3px;transition:width .4s,background .4s}
+.ivr-regime{font-size:.5rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.06rem .28rem;border-radius:10px;display:inline-block;margin-top:.06rem}
+.ivr-buy{background:rgba(34,197,94,.15);color:var(--green)}
+.ivr-sell{background:rgba(239,68,68,.15);color:var(--red)}
+.ivr-neutral{background:rgba(234,179,8,.15);color:var(--yellow)}
+.mr-it.ivr-it{min-width:80px}
+
+/* ═══════════════════════════ COMPARE TAB ══════════════════════════════ */
+.cmp-sec{padding:.95rem 1.2rem}
+.cmp-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem;flex-wrap:wrap;gap:.5rem}
+.cmp-title{font-size:.76rem;font-weight:600}
+.cmp-subtitle{font-size:.6rem;color:var(--t3);margin-top:.1rem}
+.cmp-bias-row{display:flex;gap:.38rem;align-items:center;margin-bottom:.82rem;flex-wrap:wrap}
+.cmp-bias-lbl{font-size:.62rem;color:var(--t3);font-weight:600;margin-right:.2rem}
+.bias-btn{font-family:var(--sans);font-size:.62rem;font-weight:600;padding:.22rem .6rem;border-radius:20px;border:1px solid var(--bd2);background:var(--bg4);color:var(--t2);cursor:pointer;transition:all .13s}
+.bias-btn.active-bull{background:rgba(34,197,94,.15);border-color:var(--green);color:var(--green)}
+.bias-btn.active-bear{background:rgba(239,68,68,.15);border-color:var(--red);color:var(--red)}
+.bias-btn.active-neut{background:rgba(234,179,8,.15);border-color:var(--yellow);color:var(--yellow)}
+.cmp-table-wrap{overflow-x:auto;border:1px solid var(--bd);border-radius:var(--r)}
+.cmp-table{width:100%;border-collapse:collapse;font-size:.66rem}
+.cmp-table th{background:var(--bg4);padding:.38rem .6rem;text-align:left;font-size:.53rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);border-bottom:1px solid var(--bd);white-space:nowrap}
+.cmp-table td{padding:.38rem .6rem;border-bottom:1px solid var(--bd);vertical-align:middle;white-space:nowrap}
+.cmp-table tbody tr:last-child td{border-bottom:none}
+.cmp-table tbody tr:hover{background:var(--bg3)}
+.cmp-table tbody tr.cmp-best{background:rgba(59,130,246,.06);border-left:2px solid var(--blue)}
+.cmp-badge-best{font-size:.44rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:rgba(59,130,246,.18);color:var(--blue);border:1px solid rgba(59,130,246,.3);padding:.03rem .26rem;border-radius:8px;margin-left:.3rem;vertical-align:middle}
+.cmp-note{font-size:.56rem;color:var(--t3);margin-top:.68rem;padding:.42rem .52rem;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rsm)}
+.cmp-empty{padding:2.5rem 1.2rem;text-align:center;color:var(--t3);font-size:.72rem}
+
+/* ═══════════════════════════ POSITION TRACKER ═════════════════════════ */
+.pos-sec{padding:.95rem 1.2rem;display:grid;grid-template-columns:300px 1fr;gap:.95rem;align-items:start}
+@media(max-width:1100px){.pos-sec{grid-template-columns:1fr}}
+.pos-form-card{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:.72rem .8rem}
+.pos-form-title{font-size:.6rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--t3);margin-bottom:.7rem}
+.pos-form-row{display:grid;grid-template-columns:1fr 1fr;gap:.48rem;margin-bottom:.48rem}
+.pos-form-row.full{grid-template-columns:1fr}
+.pos-field-lbl{font-size:.62rem;font-weight:500;color:var(--t2);margin-bottom:.2rem}
+.pos-iw{display:flex;align-items:stretch;background:var(--bg4);border:1px solid var(--bd2);border-radius:var(--rsm);overflow:hidden}
+.pos-iw:focus-within{border-color:var(--blue)}
+.pos-iw input{background:none;border:none;outline:none;font-family:var(--mono);font-size:.72rem;font-weight:500;color:var(--t1);padding:.3rem .42rem;width:100%}
+.pos-iw .pos-sfx{font-size:.6rem;color:var(--t3);padding:0 .4rem;background:var(--bg3);display:flex;align-items:center;border-left:1px solid var(--bd)}
+.pos-type-row{display:flex;gap:.3rem;margin-bottom:.5rem}
+.pos-type-btn{flex:1;font-family:var(--sans);font-size:.62rem;font-weight:600;padding:.26rem .3rem;border-radius:var(--rsm);border:1px solid var(--bd2);background:var(--bg4);color:var(--t3);cursor:pointer;transition:all .13s;text-align:center}
+.pos-type-btn.active-call{background:rgba(34,197,94,.12);border-color:var(--green);color:var(--green)}
+.pos-type-btn.active-put{background:rgba(239,68,68,.12);border-color:var(--red);color:var(--red)}
+.pos-calc-btn{width:100%;font-family:var(--sans);font-size:.7rem;font-weight:700;padding:.38rem;border-radius:var(--rsm);border:none;background:var(--blue);color:#fff;cursor:pointer;transition:all .14s;margin-top:.3rem}
+.pos-calc-btn:hover{background:#5294f7}
+.pos-result-area{display:flex;flex-direction:column;gap:.62rem}
+.pos-pnl-banner{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:.7rem .9rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+.pos-pnl-main{font-family:var(--mono);font-size:1.6rem;font-weight:800;letter-spacing:-.02em}
+.pos-pnl-main.profit{color:var(--green)}.pos-pnl-main.loss{color:var(--red)}
+.pos-pnl-sub{font-size:.6rem;color:var(--t3);margin-top:.16rem}
+.pos-pnl-stats{display:flex;flex-direction:column;gap:.2rem;text-align:right}
+.pos-pnl-stat{font-size:.6rem;color:var(--t2)}
+.pos-stat-val{font-family:var(--mono);font-weight:600}
+.pos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem}
+@media(max-width:1300px){.pos-grid{grid-template-columns:repeat(2,1fr)}}
+.pos-card{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:.44rem .5rem}
+.pos-card-lbl{font-size:.47rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-bottom:.12rem}
+.pos-card-val{font-family:var(--mono);font-size:.78rem;font-weight:700}
+.pos-card-sub{font-size:.47rem;color:var(--t3);margin-top:.06rem}
+.pos-decay-bar-wrap{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:.55rem .7rem}
+.pos-decay-title{font-size:.56rem;font-weight:600;color:var(--t2);margin-bottom:.42rem}
+.pos-decay-track{height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;margin-bottom:.28rem}
+.pos-decay-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--green),var(--orange),var(--red));transition:width .5s}
+.pos-decay-labels{display:flex;justify-content:space-between;font-size:.5rem;color:var(--t3)}
+.pos-empty{display:flex;align-items:center;justify-content:center;padding:2.5rem 1rem;color:var(--t3);font-size:.72rem;text-align:center;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r)}
+.pos-direction-badge{font-size:.55rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.1rem .4rem;border-radius:10px}
+.pos-long{background:rgba(34,197,94,.12);color:var(--green)}
+.pos-short{background:rgba(239,68,68,.12);color:var(--red)}
+
+/* ── LIVE DATA PANEL ─────────────────────────────────────────────────── */
+.live-panel{background:var(--bg3);border-bottom:1px solid var(--bd);padding:.45rem 1.2rem;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;flex-shrink:0}
+.live-panel-lbl{font-size:.58rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);white-space:nowrap}
+.live-exp-sel{font-family:var(--mono);font-size:.68rem;color:var(--t1);background:var(--bg4);border:1px solid var(--bd2);border-radius:var(--rsm);padding:.22rem .4rem;outline:none;cursor:pointer;min-width:120px}
+.live-exp-sel:focus{border-color:var(--blue)}
+.live-load-btn{font-family:var(--sans);font-size:.65rem;font-weight:700;padding:.24rem .65rem;border-radius:var(--rsm);border:none;background:var(--blue);color:#fff;cursor:pointer;transition:all .14s;white-space:nowrap;display:flex;align-items:center;gap:.3rem}
+.live-load-btn:hover{background:#5294f7}
+.live-load-btn:disabled{background:var(--bg4);color:var(--t3);cursor:not-allowed}
+.live-status{font-size:.6rem;color:var(--t3);display:flex;align-items:center;gap:.3rem}
+.live-status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.live-status-dot.green{background:var(--green);box-shadow:0 0 5px rgba(34,197,94,.5)}
+.live-status-dot.red{background:var(--red)}
+.live-status-dot.amber{background:var(--yellow);animation:pulse 1.5s infinite}
+.live-spot-badge{font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--t1);padding:.14rem .4rem;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:var(--rsm)}
+.live-dte-badge{font-size:.6rem;color:var(--orange);padding:.1rem .32rem;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.2);border-radius:var(--rsm)}
+.live-divider{width:1px;height:20px;background:var(--bd);flex-shrink:0}
+.live-refresh-btn{font-family:var(--sans);font-size:.6rem;font-weight:600;padding:.18rem .45rem;border-radius:var(--rsm);border:1px solid var(--bd2);background:var(--bg4);color:var(--t2);cursor:pointer;transition:all .13s;display:none}
+.live-refresh-btn.visible{display:inline-flex;align-items:center;gap:.25rem}
+.live-refresh-btn:hover{border-color:var(--blue);color:var(--blue)}
+.live-chain-badge{font-size:.55rem;color:var(--green);padding:.08rem .3rem;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:var(--rsm);display:none}
+.live-chain-badge.visible{display:inline-block}
+.live-offline-note{font-size:.57rem;color:var(--t4);display:none}
+.live-offline-note.visible{display:block}
+
+/* ── MAX PAIN ─────────────────────────────────── */
+.mp-sec{padding:.95rem 1.2rem;display:flex;flex-direction:column;gap:.85rem}
+.mp-top{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:start}
+@media(max-width:1100px){.mp-top{grid-template-columns:1fr}}
+.mp-controls{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:.72rem .8rem;display:flex;flex-direction:column;gap:.52rem}
+.mp-ctrl-title{font-size:.6rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--t3);margin-bottom:.1rem}
+.mp-ctrl-row{display:flex;gap:.42rem;align-items:center;flex-wrap:wrap}
+.mp-ctrl-lbl{font-size:.62rem;color:var(--t2);white-space:nowrap;min-width:80px}
+.mp-ctrl-iw{display:flex;align-items:stretch;background:var(--bg4);border:1px solid var(--bd2);border-radius:var(--rsm);overflow:hidden;width:90px}
+.mp-ctrl-iw input{background:none;border:none;outline:none;font-family:var(--mono);font-size:.72rem;font-weight:500;color:var(--t1);padding:.28rem .38rem;width:100%}
+.mp-ctrl-iw .mp-sfx{font-size:.6rem;color:var(--t3);padding:0 .36rem;background:var(--bg3);display:flex;align-items:center;border-left:1px solid var(--bd)}
+.mp-btn{font-family:var(--sans);font-size:.62rem;font-weight:700;padding:.28rem .7rem;border-radius:var(--rsm);border:none;cursor:pointer;transition:all .14s}
+.mp-btn-primary{background:var(--blue);color:#fff}
+.mp-btn-primary:hover{background:#5294f7}
+.mp-btn-ghost{background:var(--bg4);border:1px solid var(--bd2);color:var(--t2)}
+.mp-btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+
+.mp-table-wrap{overflow-x:auto}
+.mp-table{width:100%;border-collapse:collapse;font-size:.66rem}
+.mp-table thead tr{background:var(--bg3)}
+.mp-table th{padding:.36rem .52rem;text-align:right;font-size:.52rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);border-bottom:1px solid var(--bd);white-space:nowrap}
+.mp-table th:first-child,.mp-table td:first-child{text-align:center}
+.mp-table td{padding:.28rem .52rem;text-align:right;font-family:var(--mono);font-size:.64rem;color:var(--t2);border-bottom:1px solid rgba(255,255,255,.04)}
+.mp-table tr:hover{background:rgba(255,255,255,.025)}
+.mp-table tr.mp-atm td{background:rgba(59,130,246,.07);color:var(--t1)}
+.mp-table tr.mp-maxpain td{background:rgba(234,179,8,.08)!important;color:var(--yellow)!important;font-weight:700}
+.mp-table input[type=number]{background:var(--bg4);border:1px solid var(--bd2);border-radius:3px;font-family:var(--mono);font-size:.64rem;color:var(--t1);padding:.18rem .28rem;width:88px;outline:none;text-align:right}
+.mp-table input[type=number]:focus{border-color:var(--blue)}
+.mp-strike-lbl{font-size:.66rem;font-weight:700;color:var(--t1);font-family:var(--mono)}
+.mp-atm-badge{font-size:.44rem;font-weight:600;background:rgba(59,130,246,.15);color:var(--blue);padding:.06rem .24rem;border-radius:8px;margin-left:.2rem;vertical-align:middle}
+.mp-mp-badge{font-size:.44rem;font-weight:600;background:rgba(234,179,8,.15);color:var(--yellow);padding:.06rem .24rem;border-radius:8px;margin-left:.2rem;vertical-align:middle}
+
+.mp-results{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem}
+@media(max-width:1300px){.mp-results{grid-template-columns:repeat(2,1fr)}}
+.mp-result-card{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:.52rem .6rem}
+.mp-result-card.highlight{border-color:rgba(234,179,8,.45);background:rgba(234,179,8,.06)}
+.mp-result-lbl{font-size:.47rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-bottom:.1rem}
+.mp-result-val{font-family:var(--mono);font-size:.88rem;font-weight:800;color:var(--t1)}
+.mp-result-sub{font-size:.47rem;color:var(--t3);margin-top:.06rem}
+
+.mp-chart-wrap{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:.65rem .8rem}
+.mp-chart-title{font-size:.56rem;font-weight:600;color:var(--t2);margin-bottom:.5rem}
+.mp-pain-chart-wrap{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:.65rem .8rem}
+
+.mp-note{font-size:.56rem;color:var(--t3);line-height:1.6;padding:.5rem .65rem;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:var(--rsm)}
+.mp-empty{display:flex;align-items:center;justify-content:center;padding:2rem 1rem;color:var(--t3);font-size:.72rem;text-align:center;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r)}
+
+</style>
+</head>
+<body>
+<div style="display:flex;flex-direction:column;min-height:100vh">
+
+<!-- ════════════════ TOPBAR ════════════════════════════════════════════ -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">OA</div>
+    <div>
+      <div class="brand-name">Options Analyzer</div>
+      <span class="brand-sub">BSM Premium Erosion Calculator</span>
+    </div>
+  </div>
+
+  <!-- Underlying quick-switch tabs -->
+  <div class="ul-tabs">
+    <button class="ul-tab active" data-ul="NIFTY 50"  data-scrip="13"  data-spot="25000" data-lot="65"  data-step="50"  data-ivh="22" data-ivl="9"  onclick="selectUL(this)">
+      <span class="ul-tab-name">NIFTY 50</span><span class="ul-tab-price">₹25,000</span>
+    </button>
+    <button class="ul-tab" data-ul="BANKNIFTY" data-scrip="25" data-spot="60000" data-lot="15"  data-step="100" data-ivh="35" data-ivl="12" onclick="selectUL(this)">
+      <span class="ul-tab-name">BANKNIFTY</span><span class="ul-tab-price">₹60,000</span>
+    </button>
+    <button class="ul-tab" data-ul="FINNIFTY"  data-scrip="14366"  data-spot="20100" data-lot="40"  data-step="50"  data-ivh="28" data-ivl="10"  onclick="selectUL(this)">
+      <span class="ul-tab-name">FINNIFTY</span><span class="ul-tab-price">₹20,100</span>
+    </button>
+    <button class="ul-tab" data-ul="SENSEX"    data-scrip="442"    data-spot="73800" data-lot="10"  data-step="500" data-ivh="22" data-ivl="9" onclick="selectUL(this)">
+      <span class="ul-tab-name">SENSEX</span><span class="ul-tab-price">₹73,800</span>
+    </button>
+    <button class="ul-tab" data-ul="RELIANCE"  data-scrip="0"  data-spot="2900"  data-lot="250" data-step="10"  data-ivh="38" data-ivl="14"  onclick="selectUL(this)">
+      <span class="ul-tab-name">RELIANCE</span><span class="ul-tab-price">₹2,900</span>
+    </button>
+    <button class="ul-tab" data-ul="HDFCBANK"  data-scrip="0"  data-spot="1640"  data-lot="550" data-step="10"  data-ivh="30" data-ivl="11"  onclick="selectUL(this)">
+      <span class="ul-tab-name">HDFCBANK</span><span class="ul-tab-price">₹1,640</span>
+    </button>
+    <button class="ul-tab" data-ul="ICICIBANK" data-scrip="0" data-spot="1120"  data-lot="700" data-step="5"   data-ivh="32" data-ivl="13"   onclick="selectUL(this)">
+      <span class="ul-tab-name">ICICIBANK</span><span class="ul-tab-price">₹1,120</span>
+    </button>
+  </div>
+
+  <div class="topbar-right">
+    <div class="live-badge" id="topbarLiveBadge"><div class="live-dot"></div>BSM Engine</div>
+    <button class="btn btn-ghost" onclick="applyPreset('atm')">Set ATM</button>
+    <button class="btn btn-primary" onclick="calculate()">
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polygon points="5,3 19,12 5,21"/></svg>
+      Calculate
+    </button>
+  </div>
+</div>
+
+
+<!-- ════════════════ LIVE DATA PANEL ════════════════════════════════════ -->
+<div class="live-panel" id="livePanel">
+  <span class="live-panel-lbl">Live Data</span>
+  <div class="live-status" id="liveStatus">
+    <div class="live-status-dot amber" id="liveStatusDot"></div>
+    <span id="liveStatusText">Connecting…</span>
+  </div>
+  <div class="live-divider"></div>
+  <span class="live-panel-lbl">Expiry</span>
+  <select class="live-exp-sel" id="liveExpiry" onchange="onExpiryChange()">
+    <option value="">— select underlying first —</option>
+  </select>
+  <button class="live-load-btn" id="liveLoadBtn" onclick="loadLiveChain()" disabled>
+    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+    Load Live
+  </button>
+  <div class="live-divider"></div>
+  <span class="live-spot-badge" id="liveSpotBadge" style="display:none"></span>
+  <span class="live-dte-badge"  id="liveDteBadge"  style="display:none"></span>
+  <span class="live-chain-badge" id="liveChainBadge">✓ Live chain loaded</span>
+  <button class="live-refresh-btn" id="liveRefreshBtn" onclick="loadLiveChain()">
+    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+    Refresh
+  </button>
+  <span class="live-offline-note" id="liveOfflineNote">Backend offline — using BSM estimates</span>
+</div>
+
+<!-- ════════════════ WORKSPACE ═════════════════════════════════════════ -->
+<div class="workspace">
+
+  <!-- ══ INPUT PANEL ══════════════════════════════════════════════════ -->
+  <div class="input-panel">
+
+    <!-- Price Inputs -->
+    <div class="ip-sec">
+      <div class="sec-title">Price Inputs</div>
+
+      <div class="field">
+        <div class="field-label">Spot Price <span class="field-hint">Current market price (S)</span></div>
+        <div class="iw">
+          <div class="pfx">₹</div>
+          <input type="number" id="iSpot" value="25000" step="50" oninput="onInput()">
+          <div class="stepper">
+            <button class="step-btn" onclick="nudge('iSpot', 50)">▲</button>
+            <button class="step-btn" onclick="nudge('iSpot',-50)">▼</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Futures Price (Black-76) -->
+      <div class="field">
+        <div class="field-label">Futures Price <span class="field-hint">Near-month (F) — Black-76</span>
+          <button onclick="autoFutures()" style="font-size:.51rem;padding:.05rem .24rem;border:1px solid var(--bd2);border-radius:3px;background:var(--bg4);color:var(--t3);cursor:pointer;font-family:var(--sans);margin-left:auto">Auto ↻</button>
+        </div>
+        <div class="iw">
+          <div class="pfx">₹</div>
+          <input type="number" id="iFut" value="25000" step="50" oninput="onFutInput()">
+          <div class="sfx" id="sBasis" style="font-size:.52rem;color:var(--t4);min-width:4.2rem;text-align:right">basis 0</div>
+        </div>
+        <div class="alert-strip al-orange" id="alertBasis">
+          <svg width="8" height="8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span id="alertBasisMsg"></span>
+        </div>
+      </div>
+
+      <!-- Strike dropdown -->
+      <div class="field" style="position:relative">
+        <div class="field-label">Strike Price <span class="field-hint">Select from live BSM chain (K)</span></div>
+        <input type="hidden" id="iStrike" value="25000">
+        <button class="sd-trigger" id="sdTrigger" onclick="toggleSD(event)" type="button">
+          <div class="sd-tl">
+            <span class="sd-sym">₹</span>
+            <span class="sd-val"   id="sdVal">25,000</span>
+            <span class="sd-badge atm" id="sdBadge">ATM</span>
+          </div>
+          <div class="sd-tr">
+            <span class="sd-preview" id="sdPreview">Open to view chain</span>
+            <svg class="sd-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6,9 12,15 18,9"/></svg>
+          </div>
+        </button>
+        <div class="sd-panel" id="sdPanel">
+          <div class="sd-cols">
+            <span class="sd-ch">Strike</span>
+            <span class="sd-ch hce">CE ₹</span>
+            <span class="sd-ch hce">Δ Call</span>
+            <span class="sd-ch hth">θ/unit/d</span>
+            <span class="sd-ch hpe">PE ₹</span>
+            <span class="sd-ch hpe">Δ Put</span>
+            <span class="sd-ch" style="color:var(--green)">PoP</span>
+          </div>
+          <div class="sd-body" id="sdBody"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Volatility & Time -->
+    <div class="ip-sec">
+      <div class="sec-title">Volatility &amp; Time</div>
+      <div class="g2">
+        <div class="field">
+          <div class="field-label">Implied Vol <span class="field-hint">σ</span></div>
+          <div class="iw">
+            <input type="number" id="iIV" value="14" step="0.5" min="0.1" max="300" oninput="onInput()">
+            <div class="sfx">%</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">Days to Expiry <span class="field-hint">T</span></div>
+          <div class="iw">
+            <input type="number" id="iDTE" value="21" step="1" min="1" max="730" oninput="onInput()">
+            <div class="stepper">
+              <button class="step-btn" onclick="nudge('iDTE', 1)">▲</button>
+              <button class="step-btn" onclick="nudge('iDTE',-1)">▼</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="info-note">
+        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        Risk-free rate (6.5% RBI repo) &amp; dividend yield (0%) are fixed internally — negligible impact on short-dated Indian options.
+      </div>
+      <!-- IV Skew Toggle -->
+      <div class="tgl-row">
+        <span class="tgl-lbl">IV Model</span>
+        <div class="tgl-grp">
+          <button class="tgl-btn on" id="tSkewFlat" onclick="setSkewMode('flat')">Flat σ</button>
+          <button class="tgl-btn" id="tSkewOn" onclick="setSkewMode('skew')">Skew</button>
+        </div>
+      </div>
+      <div id="skewInputs" style="display:none">
+        <div class="g2" style="margin-bottom:.3rem">
+          <div class="field"><div class="field-label">Put Wing IV <span class="field-hint">OTM puts σ</span></div><div class="iw"><input type="number" id="iIVPut" value="16" step="0.5" min="0.1" oninput="onInput()"><div class="sfx">%</div></div></div>
+          <div class="field"><div class="field-label">Call Wing IV <span class="field-hint">OTM calls σ</span></div><div class="iw"><input type="number" id="iIVCall" value="12" step="0.5" min="0.1" oninput="onInput()"><div class="sfx">%</div></div></div>
+        </div>
+      </div>
+      <!-- IV Rank Inputs -->
+      <div class="tgl-row" style="margin-top:.5rem;margin-bottom:.1rem">
+        <span class="tgl-lbl">IV Range <span style="font-size:.51rem;color:var(--t4)">(52w)</span></span>
+        <button onclick="toggleIVRank()" id="ivRankToggle" style="font-size:.51rem;padding:.05rem .26rem;border:1px solid var(--bd2);border-radius:3px;background:var(--bg4);color:var(--t3);cursor:pointer;font-family:var(--sans)">Set ▾</button>
+      </div>
+      <div id="ivRankInputs" style="display:none;margin-bottom:.3rem">
+        <div class="g2">
+          <div class="field">
+            <div class="field-label">52w High <span class="field-hint">peak IV</span></div>
+            <div class="iw"><input type="number" id="iIVHigh" value="22" step="0.5" min="1" max="300" oninput="onInput()"><div class="sfx">%</div></div>
+          </div>
+          <div class="field">
+            <div class="field-label">52w Low <span class="field-hint">trough IV</span></div>
+            <div class="iw"><input type="number" id="iIVLow" value="9" step="0.5" min="0.5" max="200" oninput="onInput()"><div class="sfx">%</div></div>
+          </div>
+        </div>
+        <div class="ivr-gauge-wrap" id="ivrGauge">
+          <div class="ivr-gauge-fill" id="ivrFill" style="width:0%;background:var(--green)"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.18rem">
+          <span style="font-size:.5rem;color:var(--t4)" id="ivrLowLbl">Low: 9%</span>
+          <span class="ivr-regime ivr-buy" id="ivrRegime">—</span>
+          <span style="font-size:.5rem;color:var(--t4)" id="ivrHighLbl">High: 22%</span>
+        </div>
+      </div>
+      <!-- Theta Basis Toggle -->
+      <div class="tgl-row" style="margin-top:.4rem">
+        <span class="tgl-lbl">Theta Basis</span>
+        <div class="tgl-grp">
+          <button class="tgl-btn on" id="tThetaCal" onclick="setThetaBasis('cal')">Cal /365</button>
+          <button class="tgl-btn" id="tThetaTrd" onclick="setThetaBasis('trd')">Trd /252</button>
+        </div>
+      </div>
+      <div class="alert-strip al-orange" id="alertWeekend">
+        <svg width="8" height="8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span id="alertWeekendMsg"></span>
+      </div>
+    </div>
+
+    <!-- Trade Setup -->
+    <div class="ip-sec">
+      <div class="sec-title">Trade Setup</div>
+
+      <div class="field"><div class="field-label">Strategy</div>
+        <div class="strat-grid">
+          <button class="strat-btn active" data-strat="single" onclick="setStrat(this)">Single Leg</button>
+          <button class="strat-btn" data-strat="bull_cs" onclick="setStrat(this)">Bull Call Sprd</button>
+          <button class="strat-btn" data-strat="bear_ps" onclick="setStrat(this)">Bear Put Sprd</button>
+          <button class="strat-btn" data-strat="straddle" onclick="setStrat(this)">Long Straddle</button>
+          <button class="strat-btn" data-strat="strangle" onclick="setStrat(this)">Long Strangle</button>
+          <button class="strat-btn credit" data-strat="iron_condor" onclick="setStrat(this)">Iron Condor</button>
+        </div>
+      </div>
+      <div id="divWidth" style="display:none" class="field"><div class="field-label">Wing Width <span class="field-hint">strikes between legs</span></div><div class="iw"><input type="number" id="iWidth" value="5" step="1" min="1" max="30" oninput="onInput()"><div class="sfx">strikes</div></div></div>
+      <div id="divSingleType">
+      <div class="field">
+        <div class="field-label">Analyse</div>
+        <div class="type-tabs">
+          <button class="type-tab call active" id="tCE"   onclick="setType('call')">CE — Call</button>
+          <button class="type-tab put"          id="tPE"   onclick="setType('put')">PE — Put</button>
+          <button class="type-tab both"         id="tBoth" onclick="setType('both')">Both</button>
+        </div>
+      </div>
+      </div><!-- /divSingleType -->
+
+      <div class="g2">
+        <div class="field">
+          <div class="field-label">Contracts</div>
+          <div class="iw">
+            <input type="number" id="iLots" value="1" step="1" min="1" oninput="onInput()">
+            <div class="sfx">lots</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">Lot Size</div>
+          <div class="iw">
+            <input type="number" id="iLotSz" value="65" step="1" min="1" oninput="onInput()">
+            <div class="sfx">qty</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Premium Paid — auto-filled, manually overridable -->
+      <div class="field" style="margin-bottom:0">
+        <div class="field-label">
+          Premium Paid
+          <span class="auto-badge" id="autoBadge">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            Auto-filled
+          </span>
+        </div>
+        <div class="iw" id="premWrap">
+          <div class="pfx">₹</div>
+          <input type="number" id="iPrem" value="0" step="0.05" min="0" oninput="onPremManual()">
+          <div class="sfx" style="font-size:.58rem">/unit</div>
+        </div>
+        <div style="margin-top:.26rem;font-size:.56rem;color:var(--t3);line-height:1.5">
+          Auto-fills when you select a strike, change IV or DTE, or switch CE/PE. Edit manually to lock your actual fill price.
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Presets -->
+    <div class="ip-sec">
+      <div class="sec-title">Quick Presets</div>
+      <div class="preset-chips">
+        <button class="preset-chip" onclick="applyPreset('atm')">ATM</button>
+        <button class="preset-chip" onclick="applyPreset('otm5')">5% OTM</button>
+        <button class="preset-chip" onclick="applyPreset('itm5')">5% ITM</button>
+        <button class="preset-chip" onclick="applyPreset('weekly')">Weekly 7d</button>
+        <button class="preset-chip" onclick="applyPreset('monthly')">Monthly 30d</button>
+        <button class="preset-chip" onclick="applyPreset('highiv')">High IV 40%</button>
+        <button class="preset-chip" onclick="applyPreset('lowiv')">Low IV 8%</button>
+      </div>
+    </div>
+
+    <!-- Calculate -->
+    <div class="calc-wrap">
+      <button class="calc-btn" onclick="calculate()">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 7H6a2 2 0 00-2 2v9a2 2 0 002 2h9a2 2 0 002-2v-3M16 5l2 2 4-4M19 10V6h-4"/></svg>
+        Run BSM Calculator
+      </button>
+      <div id="parityBadge" class="parity ok">
+        <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        Put-Call Parity: Valid
+      </div>
+    </div>
+
+  </div><!-- /input-panel -->
+
+  <!-- ══ OUTPUT PANEL ══════════════════════════════════════════════════ -->
+  <div class="output-panel">
+
+    <!-- Price Header -->
+    <div class="price-hdr">
+      <div class="ph-blk">
+        <div class="ph-lbl">Call CE Premium</div>
+        <div class="ph-val call" id="oCallPx">₹—</div>
+        <div class="ph-sub">Intrinsic: <strong id="oCallIntr">—</strong> &nbsp;Extrinsic: <strong id="oCallExtr">—</strong></div>
+      </div>
+      <div class="ph-div"></div>
+      <div class="ph-blk">
+        <div class="ph-lbl">Put PE Premium</div>
+        <div class="ph-val put" id="oPutPx">₹—</div>
+        <div class="ph-sub">Intrinsic: <strong id="oPutIntr">—</strong> &nbsp;Extrinsic: <strong id="oPutExtr">—</strong></div>
+      </div>
+      <div class="ph-div"></div>
+      <div class="ph-blk">
+        <div class="ph-lbl">Call Breakeven at Expiry</div>
+        <div class="ph-val neu" id="oCallBE">₹—</div>
+        <div class="ph-sub"><span id="oCallMoney">—</span> &nbsp;·&nbsp; Strike + Paid</div>
+      </div>
+      <div class="ph-div"></div>
+      <div class="ph-blk">
+        <div class="ph-lbl">Put Breakeven at Expiry</div>
+        <div class="ph-val neu" id="oPutBE">₹—</div>
+        <div class="ph-sub"><span id="oPutMoney">—</span> &nbsp;·&nbsp; Strike − Paid</div>
+      </div>
+      <div class="ph-div"></div>
+      <div class="ph-blk">
+        <div class="ph-lbl">Notional Value</div>
+        <div class="ph-val neu" id="oNotional">₹—</div>
+        <div class="ph-sub" id="oQtyLabel">—</div>
+      </div>
+    </div>
+
+    <!-- Formula strip (BSM internals, transparent to trader) -->
+    <div class="fstrip">
+      <div class="fpi"><span class="fpk">S</span><span class="fpv" id="fpS">25,000</span></div>
+      <div class="fpi"><span class="fpk">F</span><span class="fpv fut" id="fpF">25,000</span><span class="fpu">fut</span></div>
+      <div class="fpi"><span class="fpk">K</span><span class="fpv" id="fpK">25,000</span></div>
+      <div class="fpi"><span class="fpk">T</span><span class="fpv" id="fpT">21</span><span class="fpu">d</span></div>
+      <div class="fpi"><span class="fpk">σ</span><span class="fpv" id="fpSig">14.00</span><span class="fpu">%</span></div>
+      <div class="fpi" title="Fixed: RBI Repo Rate"><span class="fpk">r</span><span class="fpv dim">6.50</span><span class="fpu">% fixed</span></div>
+      <div class="fpi" title="Fixed: no dividend"><span class="fpk">q</span><span class="fpv dim">0.00</span><span class="fpu">% fixed</span></div>
+      <div class="fpi"><span class="fpk">d₁</span><span class="fpv" id="fpD1">—</span></div>
+      <div class="fpi"><span class="fpk">d₂</span><span class="fpv" id="fpD2">—</span></div>
+      <div class="fpi"><span class="fpk">N(d₁)</span><span class="fpv" id="fpNd1">—</span></div>
+      <div class="fpi"><span class="fpk">N(d₂)</span><span class="fpv" id="fpNd2">—</span></div>
+      <div class="fpi"><span class="fpk">n(d₁)</span><span class="fpv" id="fpnd1">—</span></div>
+    </div>
+
+    <!-- Greeks row -->
+    <div class="greeks-row">
+      <div class="gc gth" title="Theta — ₹ premium lost per calendar day, per unit. Negative = decay against buyer.">
+        <div class="gc-top"><div class="gc-name">Theta</div><div class="gc-sym">θ</div></div>
+        <div class="gc-val" id="gTh">—</div>
+        <div class="gc-sub" id="gThS">₹/unit/day</div>
+        <div class="gc-bar"></div>
+      </div>
+      <div class="gc gde" title="Delta — ₹ premium change per ₹1 spot move. Call: 0 to 1. Put: −1 to 0.">
+        <div class="gc-top"><div class="gc-name">Delta</div><div class="gc-sym">Δ</div></div>
+        <div class="gc-val" id="gDe">—</div>
+        <div class="gc-sub" id="gDeS">per ₹1 spot</div>
+        <div class="gc-bar"></div>
+      </div>
+      <div class="gc gga" title="Gamma — rate of change of Delta. How fast your Delta exposure changes as spot moves.">
+        <div class="gc-top"><div class="gc-name">Gamma</div><div class="gc-sym">Γ</div></div>
+        <div class="gc-val" id="gGa">—</div>
+        <div class="gc-sub">Δ change/₹1</div>
+        <div class="gc-bar"></div>
+      </div>
+      <div class="gc gve" title="Vega — ₹ change per 1% IV move. Same for call and put.">
+        <div class="gc-top"><div class="gc-name">Vega</div><div class="gc-sym">ν</div></div>
+        <div class="gc-val" id="gVe">—</div>
+        <div class="gc-sub" id="gVeS">₹/unit/1% σ</div>
+        <div class="gc-bar"></div>
+      </div>
+      <div class="gc grh" title="Rho — ₹ change per 1% rate change. Negligible for short-dated options.">
+        <div class="gc-top"><div class="gc-name">Rho</div><div class="gc-sym">ρ</div></div>
+        <div class="gc-val" id="gRh">—</div>
+        <div class="gc-sub">₹/unit/1% rate</div>
+        <div class="gc-bar"></div>
+      </div>
+      <div class="gc giv" title="Implied Volatility — annualised market expectation of future price swings.">
+        <div class="gc-top"><div class="gc-name">Impl. Vol</div><div class="gc-sym">σ</div></div>
+        <div class="gc-val" id="gIV">—</div>
+        <div class="gc-sub">annualised</div>
+        <div class="gc-bar"></div>
+      </div>
+    </div>
+
+    <!-- Probability & Risk Metrics Row -->
+    <div class="metrics-row" id="metricsRow">
+      <div class="mr-it"><div class="mr-lb">PoP</div><div class="mr-vl mr-g" id="mPoP">—</div><div class="mr-sb">prob of profit</div></div>
+      <div class="mr-it"><div class="mr-lb">ITM %</div><div class="mr-vl mr-b" id="mITM">—</div><div class="mr-sb">prob in-the-money</div></div>
+      <div class="mr-it"><div class="mr-lb">Exp Value</div><div class="mr-vl mr-y" id="mEV">—</div><div class="mr-sb">bsm − paid</div></div>
+      <div class="mr-it"><div class="mr-lb">θ %/day</div><div class="mr-vl mr-o" id="mThPct">—</div><div class="mr-sb">daily erosion rate</div></div>
+      <div class="mr-it"><div class="mr-lb">Days→50%TV</div><div class="mr-vl mr-p" id="mD50">—</div><div class="mr-sb">time val halved</div></div>
+      <div class="mr-it"><div class="mr-lb">Max Loss</div><div class="mr-vl mr-r" id="mMaxL">—</div><div class="mr-sb">premium at risk</div></div>
+      <div class="mr-it"><div class="mr-lb">R:R</div><div class="mr-vl mr-c" id="mRR">—</div><div class="mr-sb">reward:risk</div></div>
+      <div class="mr-it ivr-it"><div class="mr-lb">IV Rank</div><div class="mr-vl mr-y" id="mIVR">—</div><div class="mr-sb" id="mIVRSb">52-week range</div></div>
+      <div class="mr-it ivr-it"><div class="mr-lb">IV Signal</div><div class="mr-vl" id="mIVSig">—</div><div class="mr-sb" id="mIVSigSb">premium regime</div></div>
+    </div>
+
+    <!-- Content tabs -->
+    <div class="ctab-bar">
+      <button class="ctab active" onclick="switchTab('erosion',this)">📉 Erosion</button>
+      <button class="ctab"        onclick="switchTab('pl',this)">📊 P&amp;L Profile</button>
+      <button class="ctab"        onclick="switchTab('strategy',this)">🏗 Strategy</button>
+      <button class="ctab"        onclick="switchTab('chain',this)">⛓ Option Chain</button>
+      <button class="ctab"        onclick="switchTab('scenarios',this)">🎯 Scenarios</button>
+      <button class="ctab"        onclick="switchTab('sensitivity',this)">🌡 Sensitivity</button>
+      <button class="ctab"        onclick="switchTab('compare',this)">⚖ Compare</button>
+      <button class="ctab"        onclick="switchTab('position',this)">📍 Position</button>
+      <button class="ctab"        onclick="switchTab('maxpain',this)">⚡ Max Pain</button>
+    </div>
+
+    <!-- TAB: Erosion -->
+    <div class="tab-body active" id="tab-erosion">
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-head">
+            <span class="chart-title">Premium Erosion — Days to Expiry</span>
+            <span class="badge badge-orange" id="bThRate">θ/unit: —</span>
+          </div>
+          <div class="chart-body">
+            <div style="height:216px;position:relative"><canvas id="cErosion"></canvas></div>
+            <div class="em-grid">
+              <div class="em-item">
+                <div class="em-lbl">θ Per Unit/Day</div>
+                <div class="em-val" id="emU" style="color:var(--orange)">—</div>
+                <div class="em-sub">raw Greek value</div>
+              </div>
+              <div class="em-item">
+                <div class="em-lbl">Per Lot/Day</div>
+                <div class="em-val" id="emL" style="color:var(--orange)">—</div>
+                <div class="em-sub" id="emLS">θ × lot size</div>
+              </div>
+              <div class="em-item">
+                <div class="em-lbl">Total Position/Day</div>
+                <div class="em-val" id="emT" style="color:var(--red)">—</div>
+                <div class="em-sub" id="emTS">× lots</div>
+              </div>
+              <div class="em-item">
+                <div class="em-lbl">Weekly (5d)</div>
+                <div class="em-val" id="emW" style="color:var(--orange)">—</div>
+                <div class="em-sub">total position × 5</div>
+              </div>
+              <div class="em-item">
+                <div class="em-lbl">θ Annual Yield</div>
+                <div class="em-val" id="emYield" style="color:var(--yellow)">—</div>
+                <div class="em-sub">θ÷prem×365</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-head">
+            <span class="chart-title">Theta Acceleration vs DTE</span>
+            <span class="badge badge-muted">|θ| grows near expiry</span>
+          </div>
+          <div class="chart-body">
+            <div style="height:258px;position:relative"><canvas id="cTheta"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: P&L -->
+    <div class="tab-body" id="tab-pl">
+      <div class="charts-grid">
+        <div class="chart-card" style="grid-column:1/-1">
+          <div class="chart-head">
+            <span class="chart-title">P&amp;L Profile — At Expiry (solid) &amp; Today's BSM Value (dashed)</span>
+            <div style="display:flex;gap:.38rem">
+              <span class="badge badge-green" id="bMaxP">Max Profit: —</span>
+              <span class="badge badge-red"   id="bMaxL">Max Loss: —</span>
+              <span class="badge badge-muted"  id="bRR">R:R —</span>
+            </div>
+          </div>
+          <div class="chart-body">
+            <div style="height:285px;position:relative"><canvas id="cPL"></canvas></div>
+          </div>
+          <div class="pl-legend">
+            <span class="pll"><span class="pll-line" style="background:rgba(59,130,246,.85)"></span>Call expiry</span>
+            <span class="pll"><span class="pll-dash"></span>Call today</span>
+            <span class="pll"><span class="pll-line" style="background:rgba(239,68,68,.85)"></span>Put expiry</span>
+            <span class="pll"><span class="pll-dash"></span>Put today</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Strategy -->
+    <div class="tab-body" id="tab-strategy">
+      <div class="strat-sec">
+        <div class="strat-panel">
+          <div class="sp-header">
+            <div><div class="sp-name" id="spName">Single Leg</div><div class="sp-desc" id="spDesc">Direct play.</div></div>
+            <div class="sp-badges" id="spBadges"></div>
+          </div>
+          <div class="pos-greeks">
+            <div class="pg-it"><div class="pg-lb">Net Delta</div><div class="pg-vl" id="pgDe" style="color:var(--blue)">—</div><div class="pg-sb">whole pos</div></div>
+            <div class="pg-it"><div class="pg-lb">Net θ/day</div><div class="pg-vl" id="pgTh" style="color:var(--orange)">—</div><div class="pg-sb" id="pgThSb">cal-day</div></div>
+            <div class="pg-it"><div class="pg-lb">Net Vega</div><div class="pg-vl" id="pgVe" style="color:var(--cyan)">—</div><div class="pg-sb">whole pos/1%σ</div></div>
+            <div class="pg-it"><div class="pg-lb">Γ per unit</div><div class="pg-vl" id="pgGa" style="color:var(--purple)">—</div><div class="pg-sb">Δ chg/₹1/unit</div></div>
+            <div class="pg-it" style="border-right:none"><div class="pg-lb">Δ-Hedge</div><div class="pg-vl" id="pgHedge" style="color:var(--yellow)">—</div><div class="pg-sb" id="pgHedgeSb">futures units</div></div>
+          </div>
+          <div class="legs-wrap" id="legCards"></div>
+          <div class="sm-grid" id="stratMetrics"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-head"><span class="chart-title">Strategy Payoff at Expiry</span><span class="badge badge-muted" id="spNetBadge">Net: —</span></div>
+          <div class="chart-body"><div style="height:252px;position:relative"><canvas id="cStrat"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Chain -->
+    <div class="tab-body" id="tab-chain">
+      <div class="chain-sec">
+        <div class="chain-hdr">
+          <div>
+            <div style="font-size:.76rem;font-weight:600">BSM Option Chain — ±6 strikes around selected strike</div>
+            <div style="font-size:.6rem;color:var(--t3);margin-top:.1rem">All Greeks per unit per day. θ shown negative (decay).</div>
+          </div>
+          <div style="display:flex;gap:.48rem;align-items:center">
+            <span class="badge badge-blue" id="bATM">ATM: ₹—</span>
+            <button class="btn btn-ghost" style="font-size:.62rem;padding:.26rem .52rem" onclick="calculate()">Refresh</button>
+          </div>
+        </div>
+        <div class="chain-wrap">
+          <table>
+            <thead><tr>
+              <th>Strike</th>
+              <th class="ccall">CE ₹</th>
+              <th class="cth">θ Call</th>
+              <th class="cde">Δ Call</th>
+              <th class="cga">Γ</th>
+              <th class="cve">ν Vega</th>
+              <th class="cput">PE ₹</th>
+              <th class="cth">θ Put</th>
+              <th class="cde">Δ Put</th>
+              <th class="cyiv">IV%</th>
+              <th>C−P</th>
+              <th>Parity</th>
+            </tr></thead>
+            <tbody id="chainBody">
+              <tr><td colspan="12"><div class="empty-msg">Click <strong style="color:var(--blue)">Run BSM Calculator</strong> to generate chain</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Scenarios -->
+    <div class="tab-body" id="tab-scenarios">
+      <div class="sc-sec">
+        <div class="sc-hdr">
+          <div>
+            <div style="font-size:.76rem;font-weight:600">Scenario Analysis</div>
+            <div style="font-size:.6rem;color:var(--t3);margin-top:.1rem">P&amp;L impact on total position (lots × lot size). Base = BSM price at current inputs.</div>
+          </div>
+          <span class="badge badge-muted" id="bScBase">Base: —</span>
+        </div>
+        <div class="sc-grid" id="scGrid">
+          <div class="sc-card"><div class="sc-lbl">No data</div><div class="sc-val cne">Run calculator</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Sensitivity -->
+    <div class="tab-body" id="tab-sensitivity">
+      <div class="sens-sec">
+        <div class="sens-card">
+          <div class="sens-head">
+            IV Sensitivity — CE &amp; PE at different σ
+            <span class="badge badge-muted" id="bCurrIV">—</span>
+          </div>
+          <div id="ivSensBody"><div class="empty-msg">Run calculator first</div></div>
+        </div>
+        <div class="sens-card">
+          <div class="sens-head">
+            DTE Sensitivity — CE &amp; PE at different T
+            <span class="badge badge-muted" id="bCurrDTE">—</span>
+          </div>
+          <div id="dteSensBody"><div class="empty-msg">Run calculator first</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Compare -->
+    <div class="tab-body" id="tab-compare">
+      <div class="cmp-sec">
+        <div class="cmp-hdr">
+          <div>
+            <div class="cmp-title">Strategy Comparison — Same View, Different Structures</div>
+            <div class="cmp-subtitle">All metrics computed at current spot, IV, and DTE. Net credit shown as positive. Select your market bias to highlight the best structure.</div>
+          </div>
+          <div id="cmpIVRBadge"></div>
+        </div>
+        <div class="cmp-bias-row">
+          <span class="cmp-bias-lbl">My Bias:</span>
+          <button class="bias-btn active-bull" id="bBull" onclick="setCmpBias('bull',this)">📈 Bullish</button>
+          <button class="bias-btn" id="bBear" onclick="setCmpBias('bear',this)">📉 Bearish</button>
+          <button class="bias-btn" id="bNeut" onclick="setCmpBias('neut',this)">↔ Neutral</button>
+        </div>
+        <div id="cmpTableWrap">
+          <div class="cmp-empty">Run the BSM Calculator first to see comparison</div>
+        </div>
+        <div class="cmp-note" id="cmpNote" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Position Tracker -->
+    <div class="tab-body" id="tab-position">
+      <div class="pos-sec">
+
+        <!-- Entry Form -->
+        <div class="pos-form-card">
+          <div class="pos-form-title">📍 Trade Entry Details</div>
+
+          <div style="margin-bottom:.44rem">
+            <div class="pos-field-lbl">Direction</div>
+            <div class="pos-type-row">
+              <button class="pos-type-btn active-call" id="ptLong" onclick="setPosDir('long',this)">▲ Long</button>
+              <button class="pos-type-btn" id="ptShort" onclick="setPosDir('short',this)">▼ Short</button>
+            </div>
+          </div>
+
+          <div style="margin-bottom:.44rem">
+            <div class="pos-field-lbl">Option Type</div>
+            <div class="pos-type-row">
+              <button class="pos-type-btn active-call" id="ptCall" onclick="setPosType('call',this)">CE Call</button>
+              <button class="pos-type-btn" id="ptPut"  onclick="setPosType('put', this)">PE Put</button>
+            </div>
+          </div>
+
+          <div class="pos-form-row">
+            <div>
+              <div class="pos-field-lbl">Entry Strike</div>
+              <div class="pos-iw"><input type="number" id="ptStrike" value="25000" step="50" placeholder="25000"><div class="pos-sfx">₹</div></div>
+            </div>
+            <div>
+              <div class="pos-field-lbl">Entry Premium</div>
+              <div class="pos-iw"><input type="number" id="ptPrem" value="0" step="0.05" placeholder="auto"><div class="pos-sfx">₹/u</div></div>
+            </div>
+          </div>
+
+          <div class="pos-form-row">
+            <div>
+              <div class="pos-field-lbl">Entry Spot <span style="font-size:.52rem;color:var(--t4)">(underlying at entry)</span></div>
+              <div class="pos-iw"><input type="number" id="ptEntrySpot" value="25000" step="50" placeholder="25000"><div class="pos-sfx">₹</div></div>
+            </div>
+            <div>
+              <div class="pos-field-lbl">Entry DTE</div>
+              <div class="pos-iw"><input type="number" id="ptEntryDTE" value="21" step="1" min="1"><div class="pos-sfx">days</div></div>
+            </div>
+          </div>
+
+          <div class="pos-form-row">
+            <div>
+              <div class="pos-field-lbl">Lots</div>
+              <div class="pos-iw"><input type="number" id="ptLots" value="1" step="1" min="1"><div class="pos-sfx">lots</div></div>
+            </div>
+            <div>
+              <div class="pos-field-lbl">Entry IV <span style="font-size:.52rem;color:var(--t4)">(σ at entry)</span></div>
+              <div class="pos-iw"><input type="number" id="ptEntryIV" value="14" step="0.5" min="0.1"><div class="pos-sfx">%</div></div>
+            </div>
+          </div>
+
+
+
+          <div style="margin-bottom:.32rem">
+            <div class="pos-field-lbl" style="margin-bottom:.1rem">Auto-fill from Calculator</div>
+            <button onclick="posAutoFill()" style="width:100%;font-size:.62rem;font-weight:600;padding:.3rem;border-radius:var(--rsm);border:1px solid var(--bd2);background:var(--bg4);color:var(--t2);cursor:pointer;font-family:var(--sans);transition:all .13s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--bd2)'">↙ Pull from current inputs</button>
+          </div>
+
+          <button class="pos-calc-btn" onclick="calcPosition()">Calculate Position P&amp;L</button>
+        </div>
+
+        <!-- Results Area -->
+        <div class="pos-result-area" id="posResultArea">
+          <div class="pos-empty">Fill in trade details and click <strong>Calculate Position P&amp;L</strong></div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- TAB: Max Pain Calculator -->
+    <div class="tab-body" id="tab-maxpain">
+      <div class="mp-sec">
+
+        <!-- Controls row -->
+        <div class="mp-controls">
+          <div class="mp-ctrl-title">⚡ Max Pain &amp; OI Builder</div>
+          <div class="mp-ctrl-row">
+            <span class="mp-ctrl-lbl">Centre Strike</span>
+            <div class="mp-ctrl-iw"><input type="number" id="mpCentre" value="25000" step="50"><div class="mp-sfx">₹</div></div>
+            <span class="mp-ctrl-lbl" style="min-width:70px">Step</span>
+            <div class="mp-ctrl-iw"><input type="number" id="mpStep" value="50" step="50" min="10"><div class="mp-sfx">₹</div></div>
+            <span class="mp-ctrl-lbl" style="min-width:70px">Strikes ±</span>
+            <div class="mp-ctrl-iw"><input type="number" id="mpRange" value="8" min="2" max="20"><div class="mp-sfx">each</div></div>
+            <button class="mp-btn mp-btn-ghost" onclick="mpSync()">↙ Sync from calc</button>
+            <button class="mp-btn mp-btn-ghost" onclick="mpGenStrikes()">↻ Rebuild grid</button>
+            <button class="mp-btn mp-btn-primary" onclick="mpCalculate()">⚡ Calculate Max Pain</button>
+          </div>
+          <div style="font-size:.56rem;color:var(--t3)">Enter Open Interest for each strike below. CE OI = call writers, PE OI = put writers. Values in thousands optional — just keep units consistent.</div>
+        </div>
+
+        <!-- OI Input Table -->
+        <div class="mp-table-wrap">
+          <table class="mp-table" id="mpTable">
+            <thead><tr>
+              <th>Strike</th>
+              <th>CE OI <span style="font-weight:400;color:var(--t4)">(call writers)</span></th>
+              <th>PE OI <span style="font-weight:400;color:var(--t4)">(put writers)</span></th>
+              <th>CE OI %</th>
+              <th>PE OI %</th>
+              <th>Net OI (PE−CE)</th>
+              <th>Max Pain Score</th>
+            </tr></thead>
+            <tbody id="mpTbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Results (shown after Calculate) -->
+        <div id="mpResultsWrap" style="display:none">
+          <div class="mp-results" id="mpCards"></div>
+        </div>
+
+        <!-- OI Distribution Chart -->
+        <div class="mp-chart-wrap" id="mpChartWrap" style="display:none">
+          <div class="mp-chart-title">Open Interest Distribution</div>
+          <canvas id="mpOIChart" height="90"></canvas>
+        </div>
+
+        <!-- Max Pain Curve Chart -->
+        <div class="mp-pain-chart-wrap" id="mpPainChartWrap" style="display:none">
+          <div class="mp-chart-title">Total Option Pain by Expiry Price — Min = Max Pain Strike</div>
+          <canvas id="mpPainChart" height="90"></canvas>
+        </div>
+
+        <div class="mp-note" id="mpNote" style="display:none"></div>
+
+      </div>
+    </div>
+
+  </div><!-- /output-panel -->
+</div><!-- /workspace -->
+</div><!-- /app -->
+
+<script>
+'use strict';
+/*
+ * ══════════════════════════════════════════════════════════════════════
+ * BSM OPTIONS PREMIUM EROSION CALCULATOR
+ * Version: 3.0 (clean rebuild — June 2025)
+ *
+ * VALIDATION NOTES
+ * ─────────────────
+ * Section 1  Math:  erf approximation, max error < 1.5×10⁻⁷ (A&S 7.1.26)
+ * Section 2  BSM:   Merton (1973) continuous-dividend model
+ *   • Prices validated: ATM call ≈ ATM put at S=K, r=q=0
+ *   • theta_c/p: negative (decay), divided by 365 (calendar days)
+ *   • delta_c ∈ (0,1), delta_p ∈ (−1,0)
+ *   • gamma > 0 always, vega > 0 always
+ *   • Put-call parity: C − P = S·e^(−qT) − K·e^(−rT)
+ *   • vega ×0.01 so result is ₹ per 1% IV move (not per 1 unit)
+ *   • rho ×0.01 so result is ₹ per 1% rate change
+ * Section 5  Premium sync: _writing guard prevents programmatic
+ *            el.value writes from triggering oninput on Chrome
+ * ══════════════════════════════════════════════════════════════════════
+ */
+
+/* ── SECTION 1: Standard Normal Math ─────────────────────────────────
+   Using Abramowitz & Stegun 7.1.26 polynomial approximation for erf.
+   This gives Φ(x) accurate to < 7.5×10⁻⁸ — more than adequate
+   for options pricing (BSM itself makes stronger assumptions).
+─────────────────────────────────────────────────────────────────────── */
+function erf(x) {
+  const sign = x < 0 ? -1 : 1;
+  x = Math.abs(x);
+  const t = 1 / (1 + 0.3275911 * x);
+  const y = 1 - (((((1.061405429*t - 1.453152027)*t + 1.421413741)*t
+                    - 0.284496736)*t + 0.254829592)*t) * Math.exp(-x*x);
+  return sign * y;
+}
+const Phi = x => 0.5 * (1 + erf(x / Math.SQRT2));        // N(x) cumulative
+const phi = x => Math.exp(-0.5*x*x) / Math.sqrt(2*Math.PI); // n(x) PDF
+
+/* ── SECTION 2: BSM Pricing Engine ───────────────────────────────────
+   Model: Black-Scholes-Merton with continuous dividend yield q.
+
+   INPUTS (all validated before call):
+     S     = spot price                (₹, positive)
+     K     = strike price              (₹, positive)
+     T     = time to expiry in YEARS   (dte / 365, > 0)
+     r     = risk-free rate as decimal (0.065 for 6.5%)
+     sigma = implied volatility        (iv / 100, > 0)
+     q     = dividend yield as decimal (0.0 for index options)
+
+   OUTPUTS (ALL PER UNIT, not per lot):
+     call, put         premium in ₹
+     theta_c, theta_p  ₹ decay per CALENDAR DAY (already ÷365) — negative
+     delta_c           ∈ (0,1)
+     delta_p           ∈ (−1,0)
+     gamma             same for call & put, always positive
+     vega              ₹ per 1% IV move (×0.01 built in)
+     rho_c, rho_p      ₹ per 1% rate move (×0.01 built in)
+─────────────────────────────────────────────────────────────────────── */
+function bsm(S, K, T, r, sigma, q) {
+  if (!S || !K || T <= 0 || sigma <= 0) return null;
+
+  const sqT  = Math.sqrt(T);
+  const d1   = (Math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / (sigma * sqT);
+  const d2   = d1 - sigma * sqT;
+
+  const eqT  = Math.exp(-q * T);   // discount factor for dividends
+  const erT  = Math.exp(-r * T);   // discount factor for risk-free
+
+  const Nd1  = Phi(d1);  const Nd2  = Phi(d2);
+  const Nmd1 = Phi(-d1); const Nmd2 = Phi(-d2);
+  const nd1  = phi(d1);
+
+  /* Prices */
+  const call = S * eqT * Nd1  - K * erT * Nd2;
+  const put  = K * erT * Nmd2 - S * eqT * Nmd1;
+
+  /* Theta — per calendar day (÷365).
+     Using calendar days is standard for NSE/BSE listed options.
+     Result is negative (erosion against the buyer). */
+  const theta_c = (-(S * eqT * nd1 * sigma) / (2 * sqT)
+                   - r * K * erT * Nd2
+                   + q * S * eqT * Nd1) / 365;
+  const theta_p = (-(S * eqT * nd1 * sigma) / (2 * sqT)
+                   + r * K * erT * Nmd2
+                   - q * S * eqT * Nmd1) / 365;
+
+  /* Delta */
+  const delta_c =  eqT * Nd1;
+  const delta_p = -eqT * Nmd1;
+
+  /* Gamma — same for call and put */
+  const gamma = eqT * nd1 / (S * sigma * sqT);
+
+  /* Vega — ×0.01 so result is ₹ per 1% IV move (not per 100% unit) */
+  const vega = S * eqT * nd1 * sqT * 0.01;
+
+  /* Rho — ×0.01 so result is ₹ per 1% rate change */
+  const rho_c =  K * T * erT * Nd2  * 0.01;
+  const rho_p = -K * T * erT * Nmd2 * 0.01;
+
+  return { call, put, d1, d2, Nd1, Nd2, nd1,
+           theta_c, theta_p, delta_c, delta_p,
+           gamma, vega, rho_c, rho_p };
+}
+
+/* ── SECTION 3: Constants & App State ────────────────────────────────
+   r = 6.5% RBI Repo Rate.  q = 0% (index options, no dividend impact).
+   Both have negligible effect on short-dated options (≤30 DTE).
+─────────────────────────────────────────────────────────────────────── */
+const R = 0.065;   // risk-free rate (fixed)
+const Q = 0.0;     // dividend yield (fixed)
+
+const A = {               // Application state
+  type      : 'call',     // 'call' | 'put' | 'both'
+  step      : 50,         // current underlying strike interval
+    scrip     : 13,         // Dhan scrip ID for live data
+  premManual: false,      // true = trader has locked premium manually
+  sdOpen    : false,      // strike dropdown open flag
+  lastBSM   : null,       // last full BSM result object
+  thetaBasis: 'cal',      // 'cal' = /365, 'trd' = /252
+  skewMode  : 'flat',     // 'flat' | 'skew'
+  strategy  : 'single',   // current strategy
+};
+let cStrat = null;
+
+/* ── SECTION 4: DOM & Formatting Helpers ─────────────────────────────*/
+const el   = id => document.getElementById(id);
+const gv   = id => parseFloat(el(id).value) || 0;
+const f2   = (n, d=2) => isFinite(n) ? n.toFixed(d) : '—';
+const fRs  = (n, d=2) => isFinite(n) ? (n < 0 ? '−₹' : '₹') + Math.abs(n).toFixed(d) : '—';
+
+function st(id, val) {
+  const e = el(id); if (!e) return;
+  e.textContent = val;
+  e.classList.remove('flash'); void e.offsetWidth; e.classList.add('flash');
+}
+
+function getInputs() {
+  const dte = gv('iDTE'), iv = gv('iIV');
+  return {
+    S    : gv('iSpot'),
+    K    : gv('iStrike'),
+    T    : dte / 365,
+    dte, iv,
+    sigma: iv / 100,
+    r: R, q: Q,
+    lots : Math.max(1, gv('iLots')),
+    lot  : Math.max(1, gv('iLotSz')),
+    paid : gv('iPrem'),
+    F    : gv('iFut'),
+  };
+}
+
+/* ── SECTION 5: Premium Paid Auto-Sync ───────────────────────────────
+   THE KEY DESIGN DECISION:
+   Premium Paid always reflects the current BSM price for the selected
+   strike at the current IV and DTE — UNLESS the trader has manually
+   typed a custom price (their actual fill).
+
+   BUG FIXED HERE:
+   Some Chromium versions fire the 'input' DOM event when JavaScript
+   sets element.value programmatically. If this happened, onPremManual()
+   would set A.premManual = true, blocking all future auto-updates.
+
+   FIX: _writing flag. syncPrem() sets it true before writing, false
+   after. onPremManual() returns immediately if _writing is true.
+
+   STATE MACHINE:
+   ┌─────────────────────────────────────────────────────────────┐
+   │ premManual = false (default)                                │
+   │   → syncPrem() WILL update iPrem on every calculate()       │
+   │   → Badge shows "Auto-filled"                               │
+   ├─────────────────────────────────────────────────────────────┤
+   │ premManual = true (trader typed in iPrem)                   │
+   │   → syncPrem() does NOTHING — respects trader's fill price  │
+   │   → Badge is hidden                                         │
+   ├─────────────────────────────────────────────────────────────┤
+   │ Reset to premManual = false when:                           │
+   │   • Trader picks a strike from dropdown                     │
+   │   • Trader switches CE / PE / Both                          │
+   │   • Trader selects a different underlying                   │
+   │   • Trader applies a preset                                 │
+   └─────────────────────────────────────────────────────────────┘
+─────────────────────────────────────────────────────────────────────── */
+let _writing = false;  // guard: prevents programmatic .value write from triggering oninput
+
+function syncPrem(res) {
+  if (A.premManual) return;  // trader has locked a custom price — respect it
+
+  const price = A.type === 'call' ? res.call
+              : A.type === 'put'  ? res.put
+              : res.call + res.put;   // Both = total straddle cost
+
+  _writing = true;                    // arm the guard
+  el('iPrem').value = price.toFixed(2);
+  _writing = false;                   // disarm
+
+  /* Visual feedback */
+  el('autoBadge').classList.add('on');
+  const w = el('premWrap');
+  w.classList.remove('glow-green'); void w.offsetWidth; w.classList.add('glow-green');
+}
+
+function onPremManual() {
+  if (_writing) return;        // programmatic write — not the trader
+  A.premManual = true;
+  el('autoBadge').classList.remove('on');
+  calculate();
+}
+
+/* ── SECTION 6: Main Calculate ───────────────────────────────────────
+   Execution order matters:
+   1. getInputs()  — read current field values
+   2. bsm()        — compute prices and Greeks
+   3. syncPrem()   — update iPrem IF not manual (uses BSM result)
+   4. gv('iPrem')  — re-read AFTER sync → all downstream uses correct paid
+   5. Render all output sections with consistent paid value
+─────────────────────────────────────────────────────────────────────── */
+let cErosion = null, cTheta = null, cPL = null;
+
+function calculate() {
+  const i = getInputs();
+  if (!i.S || !i.K || !i.dte || !i.iv) return;
+  const res = bsm(i.S, i.K, i.T, i.r, i.sigma, i.q);
+  if (!res) return;
+
+  /* Step 1: Sync premium — updates iPrem if not manual */
+  syncPrem(res);
+
+  /* Step 2: Re-read paid AFTER sync → correct value for all sections */
+  const paid = gv('iPrem');
+  A.lastBSM  = { ...i, ...res, paid };
+
+  const qty      = i.lots * i.lot;
+  const callIntr = Math.max(0, i.S - i.K);
+  const putIntr  = Math.max(0, i.K - i.S);
+
+  /* ── Formula strip ── */
+  st('fpS',   i.S.toLocaleString('en-IN'));
+  st('fpK',   i.K.toLocaleString('en-IN'));
+  st('fpT',   i.dte);
+  st('fpSig', i.iv.toFixed(2));
+  st('fpD1',  f2(res.d1, 4));
+  st('fpD2',  f2(res.d2, 4));
+  st('fpNd1', f2(res.Nd1, 4));
+  st('fpNd2', f2(res.Nd2, 4));
+  st('fpnd1', f2(res.nd1, 4));
+
+  /* ── Price header ── */
+  st('oCallPx',   '₹' + res.call.toFixed(2));
+  st('oPutPx',    '₹' + res.put.toFixed(2));
+  st('oCallIntr', '₹' + callIntr.toFixed(2));
+  st('oCallExtr', '₹' + Math.max(0, res.call - callIntr).toFixed(2));
+  st('oPutIntr',  '₹' + putIntr.toFixed(2));
+  st('oPutExtr',  '₹' + Math.max(0, res.put  - putIntr).toFixed(2));
+
+  /* Breakeven = Strike ± paid (what was actually paid, now correctly synced) */
+  st('oCallBE',   '₹' + (i.K + paid).toFixed(2));
+  st('oPutBE',    '₹' + (i.K - paid).toFixed(2));
+  st('oNotional', '₹' + (res.call * qty).toLocaleString('en-IN', {maximumFractionDigits:0}));
+  st('oQtyLabel',  qty.toLocaleString('en-IN') + ' units × ₹' + res.call.toFixed(2));
+
+  /* Moneyness labels */
+  const pct  = (i.S - i.K) / i.K * 100;
+  const callM = Math.abs(pct) < 0.5 ? 'ATM' : pct > 0 ? 'ITM +'+pct.toFixed(1)+'%' : 'OTM '+pct.toFixed(1)+'%';
+  const putM  = Math.abs(pct) < 0.5 ? 'ATM' : pct < 0 ? 'ITM '+Math.abs(pct).toFixed(1)+'%' : 'OTM +'+pct.toFixed(1)+'%';
+  const cm = el('oCallMoney'); if (cm) { cm.textContent = callM; cm.style.color = pct > 0.5 ? 'var(--green)' : pct < -0.5 ? 'var(--red)' : 'var(--blue)'; }
+  const pm = el('oPutMoney');  if (pm) { pm.textContent = putM;  pm.style.color = pct < -0.5 ? 'var(--green)' : pct > 0.5 ? 'var(--red)' : 'var(--blue)'; }
+
+  /* Put-call parity check: C − P = S·e^(−qT) − K·e^(−rT) */
+  const fwd     = i.S * Math.exp(-i.q*i.T) - i.K * Math.exp(-i.r*i.T);
+  const parDiff = Math.abs((res.call - res.put) - fwd);
+  const pb = el('parityBadge');
+  if (pb) {
+    pb.className = 'parity ' + (parDiff < 0.5 ? 'ok' : 'err');
+    pb.innerHTML = parDiff < 0.5
+      ? `<svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> Put-Call Parity: Valid (diff = ${parDiff.toFixed(2)})`
+      : `⚠ Parity breach: ±${parDiff.toFixed(2)}`;
+  }
+  st('bATM', 'ATM: ₹' + (Math.round(i.S / A.step) * A.step).toLocaleString('en-IN'));
+
+  /* ── Greeks (ALL per unit, not per lot) ── */
+  const th = A.type === 'put' ? res.theta_p : res.theta_c;
+  const de = A.type === 'put' ? res.delta_p : res.delta_c;
+  const rh = A.type === 'put' ? res.rho_p   : res.rho_c;
+
+  st('gTh',  f2(th, 2));
+  st('gThS', fRs(th, 2) + '/unit/day');
+  st('gDe',  f2(de, 2));
+  st('gDeS', fRs(de * qty, 2) + ' total/₹1');
+  st('gGa',  f2(res.gamma, 4));
+  st('gVe',  f2(res.vega, 2));
+  st('gVeS', fRs(res.vega, 2) + '/unit/1%σ');
+  st('gRh',  f2(rh, 2));
+  st('gIV',  i.iv.toFixed(2) + '%');
+
+  /* ── Erosion breakdown ──
+     Per unit (raw Greek) → Per lot (×lot size) → Total position (×lots)
+     This gives trader full audit trail: multiply up from the raw number */
+  const tUnit = th;
+  const tLot  = th * i.lot;          // e.g. theta × 65 for NIFTY
+  const tPos  = th * qty;            // theta × lots × lot size
+  const tWeek = tPos * 5;            // 5 trading days
+
+
+  st('emU',  fRs(tUnit, 2));
+  st('emL',  fRs(tLot, 2));
+  st('emLS', f2(tUnit, 2) + ' × ' + i.lot + ' qty');
+  st('emT',  fRs(tPos, 2));
+  st('emTS', fRs(tLot, 2) + '/lot × ' + i.lots + ' lot' + (i.lots > 1 ? 's' : ''));
+  st('emW',  fRs(tWeek, 2));
+
+  st('bThRate', 'θ/unit: ' + fRs(tUnit, 2) + '/day');
+
+  /* ── Update formula strip F (futures) ── */
+  const futF = gv('iFut'); if (futF > 0) { const e = el('fpF'); if (e) e.textContent = futF.toFixed(2); }
+
+  /* ── Update strike dropdown trigger preview ── */
+  syncSDTrigger(i.K, i.S, res);
+
+  /* ── Rebuild dropdown rows if open (prices refresh live) ── */
+  if (A.sdOpen) buildSDRows();
+
+  /* ── Futures basis + weekend alert ── */
+  updateBasis(); checkWeekend();
+
+  /* ── Charts ── */
+  drawErosion(i, res);
+  drawThetaAccel(i, res);
+  drawPL(i, res, paid);
+
+  /* ── Data tables ── */
+  buildChain(i);
+  buildScenarios(i, res);
+  buildSensitivity(i);
+  buildIVRank(i);
+  buildCompare(i);
+
+  /* ── Probability & Risk metrics ── */
+  const ts = tScale();
+  const thScaled = (A.type === 'put' ? res.theta_p : res.theta_c) * ts;
+  const price = A.type === 'call' ? res.call : A.type === 'put' ? res.put : res.call + res.put;
+  const pITM  = (A.type === 'put' ? 1 - res.Nd2 : res.Nd2) * 100;
+  const beK   = A.type === 'put' ? i.K - paid : i.K + paid;
+  const Fval  = (gv('iFut') > 0 ? gv('iFut') : i.S * Math.exp(R * i.T));
+  let pop = 0;
+  if (beK > 0 && i.T > 0 && i.sigma > 0) {
+    const sqT = Math.sqrt(i.T);
+    const dbe = (Math.log(Fval / beK) - 0.5 * i.sigma * i.sigma * i.T) / (i.sigma * sqT);
+    pop = (A.type === 'put' ? Phi(-dbe) : Phi(dbe)) * 100;
+  }
+  const thPct    = paid > 0 ? Math.abs(thScaled) / paid * 100 : 0;
+  const tAnnYld  = paid > 0 ? Math.abs(thScaled) / paid * 365 * 100 : 0;
+  st('emYield', tAnnYld > 0 ? tAnnYld.toFixed(0) + '% p.a.' : '—');
+  const qty2     = i.lots * i.lot;
+  const maxLoss  = paid * qty2;
+  // Days to 50% time value
+  const intrinsic = A.type === 'call' ? Math.max(0, i.S - i.K) : Math.max(0, i.K - i.S);
+  const tv0 = price - intrinsic;
+  let d50 = null;
+  if (tv0 > 0.5) {
+    for (let dd = i.dte - 1; dd >= 1; dd--) {
+      const r3 = bsm(i.S, i.K, dd/365, i.r, i.sigma, i.q); if (!r3) continue;
+      const p3 = A.type === 'call' ? r3.call : A.type === 'put' ? r3.put : r3.call + r3.put;
+      const tv3 = p3 - intrinsic;
+      if (tv3 <= tv0 * 0.5) { d50 = i.dte - dd; break; }
+    }
+  }
+  const ev = price - paid;
+  st('mPoP',   pop.toFixed(1) + '%');
+  st('mITM',   pITM.toFixed(1) + '%');
+  st('mEV',    fRs(ev, 2));
+  st('mThPct', thPct.toFixed(2) + '%/d');
+  st('mD50',   d50 !== null ? d50 + 'd' : 'N/A');
+  st('mMaxL',  fRs(maxLoss, 0));
+  // R:R for risk row (will be filled by strategy)
+
+  // theta display with scaling
+  if (ts !== 1) {
+    const gThEl = el('gTh'); if (gThEl) gThEl.textContent = f2(thScaled, 2);
+    const gThSEl = el('gThS'); if (gThSEl) gThSEl.textContent = fRs(thScaled, 2) + '/unit/trd-day';
+    st('emU', fRs(thScaled, 2));
+    st('emL', fRs(thScaled * i.lot, 2));
+    st('emT', fRs(thScaled * qty2, 2));
+    st('emW', fRs(thScaled * qty2 * 5, 2));
+    st('bThRate', 'theta/unit: ' + fRs(thScaled, 2) + '/trd-day');
+  }
+  /* ── Strategy builder ── */
+  const legs = buildLegs(i);
+  drawStrategy(i, legs);
+  let maxPQ = -Infinity, minPQ = Infinity;
+  const rngS = i.S * 0.18, q3 = i.lots * i.lot;
+  for (let n = 0; n <= 150; n++) {
+    const sv = (i.S - rngS) + rngS * 2 * n / 150;
+    const pv = stratPayoff(sv, legs) * q3;
+    if (pv > maxPQ) maxPQ = pv; if (pv < minPQ) minPQ = pv;
+  }
+  const lossA = Math.abs(minPQ);
+  const rrMet = lossA > 0 ? (maxPQ > 1e9 ? '∞:1' : (maxPQ / lossA).toFixed(2) + ':1') : '∞:0';
+  st('mRR', rrMet);
+}
+
+/* ── SECTION 7: Erosion Chart ────────────────────────────────────────
+   Holds Spot and σ constant. Varies T from current DTE → 0 days.
+   Shows how premium decays purely from time passing (ceteris paribus).
+   X-axis reversed: left = most time remaining (current state), right = expiry.
+─────────────────────────────────────────────────────────────────────── */
+function drawErosion(i, res) {
+  const ctx = el('cErosion').getContext('2d');
+  const labels = [], cV = [], pV = [];
+
+  for (let d = Math.ceil(i.dte); d >= 0; d--) {
+    labels.push(d + 'd');
+    if (d === 0) {
+      cV.push(Math.max(0, i.S - i.K));
+      pV.push(Math.max(0, i.K - i.S));
+    } else {
+      const r2 = bsm(i.S, i.K, d/365, i.r, i.sigma, i.q);
+      cV.push(r2 ? r2.call : null);
+      pV.push(r2 ? r2.put  : null);
+    }
+  }
+
+  const ds = [];
+  if (A.type !== 'put')  ds.push({ label:'Call CE', data:cV, borderColor:'rgba(59,130,246,.9)',  backgroundColor:'rgba(59,130,246,.07)',  borderWidth:2, pointRadius:0, fill:true, tension:.4 });
+  if (A.type !== 'call') ds.push({ label:'Put PE',  data:pV, borderColor:'rgba(239,68,68,.85)', backgroundColor:'rgba(239,68,68,.06)',  borderWidth:2, pointRadius:0, fill:true, tension:.4 });
+
+  if (cErosion) { cErosion.destroy(); cErosion = null; }
+  cErosion = new Chart(ctx, { type:'line', data:{ labels, datasets:ds }, options:mkOpts(true) });
+}
+
+/* ── SECTION 8: Theta Acceleration Chart ─────────────────────────────
+   Shows |θ| per unit as DTE decreases. Key insight: theta is NOT linear.
+   For ATM options it accelerates sharply in the last 7-14 days, which is
+   why short-dated option buyers face rapid premium erosion.
+─────────────────────────────────────────────────────────────────────── */
+function drawThetaAccel(i, res) {
+  const ctx = el('cTheta').getContext('2d');
+  const labels = [], tcV = [], tpV = [];
+
+  for (let d = Math.ceil(i.dte); d >= 1; d--) {
+    const r2 = bsm(i.S, i.K, d/365, i.r, i.sigma, i.q);
+    if (!r2) continue;
+    labels.push(d + 'd');
+    tcV.push(Math.abs(r2.theta_c));
+    tpV.push(Math.abs(r2.theta_p));
+  }
+
+  if (cTheta) { cTheta.destroy(); cTheta = null; }
+  cTheta = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets:[
+      { label:'|θ Call|', data:tcV, borderColor:'rgba(249,115,22,.9)',  backgroundColor:'rgba(249,115,22,.07)', borderWidth:2,   pointRadius:0, fill:true, tension:.4 },
+      { label:'|θ Put|',  data:tpV, borderColor:'rgba(239,68,68,.6)',   backgroundColor:'transparent',          borderWidth:1.5, pointRadius:0, tension:.4, borderDash:[4,4] },
+    ]},
+    options: mkOpts(true),
+  });
+}
+
+/* ── SECTION 9: P&L at Expiry Chart ─────────────────────────────────
+   Formula:
+     Long Call P&L = [max(0, S_expiry − K) − paid] × qty
+     Long Put  P&L = [max(0, K − S_expiry) − paid] × qty
+   paid = gv('iPrem'), which is either auto-synced BSM price or
+   trader's actual fill price — whichever is current.
+
+   Green segment = profit zones, red = loss zones.
+   Max loss for long option = premium paid × qty (limited risk).
+─────────────────────────────────────────────────────────────────────── */
+function drawPL(i, res, paid) {
+  const ctx  = el('cPL').getContext('2d');
+  const qty  = i.lots * i.lot;
+  const rng  = i.S * 0.14;
+  const cCost = paid > 0 ? paid : res.call;
+  const pCost = paid > 0 ? paid : res.put;
+
+  const labels = [], cPLd = [], pPLd = [], cNow = [], pNow = [];
+  let maxP = -Infinity, minP = Infinity;
+
+  for (let n = 0; n <= 100; n++) {
+    const s  = (i.S - rng) + rng * 2 * n / 100;
+    const cp = (Math.max(0, s - i.K) - cCost) * qty;
+    const pp = (Math.max(0, i.K - s) - pCost) * qty;
+    labels.push('₹' + Math.round(s).toLocaleString('en-IN'));
+    cPLd.push(cp); pPLd.push(pp);
+    // Today's BSM value at each spot
+    const r2 = bsm(s, i.K, i.T, i.r, i.sigma, i.q);
+    cNow.push(r2 ? (r2.call - cCost) * qty : null);
+    pNow.push(r2 ? (r2.put  - pCost) * qty : null);
+    const net = A.type === 'both' ? cp + pp : A.type === 'put' ? pp : cp;
+    if (net > maxP) maxP = net; if (net < minP) minP = net;
+  }
+
+  st('bMaxP', 'Max Profit: ' + (maxP > 1e9 ? '∞' : fRs(maxP, 0)));
+  st('bMaxL', 'Max Loss: '   + fRs(Math.abs(minP), 0));
+  const rrV = Math.abs(minP) > 0 ? (maxP > 1e9 ? '∞:1' : (maxP / Math.abs(minP)).toFixed(2) + ':1') : '∞:0';
+  st('bRR', 'R:R ' + rrV);
+
+  const seg = { borderColor: c => c.p0.parsed.y >= 0 ? 'rgba(34,197,94,.85)' : 'rgba(239,68,68,.78)' };
+  const ds  = [];
+  if (A.type !== 'put') {
+    ds.push({ label:'Call Expiry', data:cPLd, borderWidth:2.5, pointRadius:0, tension:.3, borderColor:'rgba(59,130,246,.85)', backgroundColor:'transparent', segment:seg });
+    ds.push({ label:'Call Today',  data:cNow, borderWidth:1.5, pointRadius:0, tension:.3, borderColor:'rgba(59,130,246,.42)', backgroundColor:'transparent', borderDash:[5,3] });
+  }
+  if (A.type !== 'call') {
+    ds.push({ label:'Put Expiry',  data:pPLd, borderWidth:2.5, pointRadius:0, tension:.3, borderColor:'rgba(239,68,68,.85)', backgroundColor:'transparent', segment:seg });
+    ds.push({ label:'Put Today',   data:pNow, borderWidth:1.5, pointRadius:0, tension:.3, borderColor:'rgba(239,68,68,.42)', backgroundColor:'transparent', borderDash:[5,3] });
+  }
+  if (A.type === 'both') {
+    const netE = cPLd.map((c, j) => c + pPLd[j]);
+    const netN = cNow.map((c, j) => c !== null && pNow[j] !== null ? c + pNow[j] : null);
+    ds.push({ label:'Net Expiry', data:netE, borderWidth:2.5, pointRadius:0, tension:.3, borderColor:'rgba(234,179,8,.9)', backgroundColor:'rgba(234,179,8,.04)', fill:true, segment:seg });
+    ds.push({ label:'Net Today',  data:netN, borderWidth:1.5, pointRadius:0, tension:.3, borderColor:'rgba(234,179,8,.45)', backgroundColor:'transparent', borderDash:[5,3] });
+  }
+
+  if (cPL) { cPL.destroy(); cPL = null; }
+  cPL = new Chart(ctx, {
+    type:'line', data:{ labels, datasets:ds },
+    options:{ ...mkOpts(false), scales:{
+      x:{ ticks:{ color:'#5A6780', font:{family:"'DM Mono'",size:9}, maxTicksLimit:10 }, grid:{color:'rgba(255,255,255,.04)'} },
+      y:{ ticks:{ color: c => c.tick.value >= 0 ? 'rgba(34,197,94,.85)' : 'rgba(239,68,68,.8)', font:{family:"'DM Mono'",size:9}, callback: v => '₹' + v.toFixed(0) },
+          grid:{ color: c => c.tick.value === 0 ? 'rgba(255,255,255,.18)' : 'rgba(255,255,255,.04)' } },
+    }},
+  });
+}
+
+function mkOpts(reverseX) {
+  return {
+    responsive:true, maintainAspectRatio:false,
+    interaction:{ mode:'index', intersect:false },
+    plugins:{
+      legend:{ position:'top', labels:{ color:'#5A6780', font:{family:"'DM Sans'",size:10}, boxWidth:10, padding:10 } },
+      tooltip:{ backgroundColor:'#1C1F29', borderColor:'#2E3347', borderWidth:1,
+        titleColor:'#F1F5F9', bodyColor:'#94A3B8',
+        titleFont:{family:"'DM Sans'",size:11,weight:'600'}, bodyFont:{family:"'DM Mono'",size:10}, padding:10,
+        callbacks:{ label: c => `  ${c.dataset.label}: ₹${(c.parsed.y ?? 0).toFixed(2)}` } },
+    },
+    scales:{
+      x:{ reverse:reverseX, ticks:{ color:'#5A6780', font:{family:"'DM Mono'",size:9}, maxTicksLimit:12 }, grid:{color:'rgba(255,255,255,.04)'} },
+      y:{ ticks:{ color:'#5A6780', font:{family:"'DM Mono'",size:9}, callback: v => '₹' + v.toFixed(1) }, grid:{color:'rgba(255,255,255,.04)'} },
+    },
+  };
+}
+
+/* ── SECTION 10: Option Chain Table (±6 strikes) ─────────────────────
+   All Greeks shown per unit (not per lot) — consistent with how
+   exchanges and Bloomberg quote them. θ shown negative (erosion).
+   Parity check: |C − P − (S·e^(−qT) − K·e^(−rT))| < 0.50 = valid.
+─────────────────────────────────────────────────────────────────────── */
+function buildChain(i) {
+  const atm  = Math.round(i.K / A.step) * A.step;
+  const body = el('chainBody');
+  body.innerHTML = '';
+
+  for (let n = -6; n <= 6; n++) {
+    const K  = atm + n * A.step;
+    const r2 = bsm(i.S, K, i.T, i.r, i.sigma, i.q);
+    if (!r2) continue;
+
+    const isATM  = Math.abs(K - atm) < A.step * 0.5;
+    const useSkew = A.skewMode === 'skew';
+    const ivP = gv('iIVPut') || i.iv, ivC = gv('iIVCall') || i.iv;
+    const iv2 = getSkewIV(K, i.S, i.iv, ivP, ivC, useSkew);
+    const r2s = iv2 !== i.iv ? bsm(i.S, K, i.T, i.r, iv2/100, i.q) : r2;
+    const ts  = tScale();
+    const fwd    = i.S * Math.exp(-i.q * i.T) - K * Math.exp(-i.r * i.T);
+    const parity = Math.abs((r2s.call - r2s.put) - fwd);
+
+    const tr     = document.createElement('tr');
+    if (isATM) tr.className = 'atmrow';
+
+    tr.innerHTML = `
+      <td><span class="sklbl">${K.toLocaleString('en-IN')}</span>${isATM ? '<span class="atm-pill">ATM</span>' : ''}</td>
+      <td class="ccall">${r2s.call.toFixed(2)}</td>
+      <td class="cth">${(r2s.theta_c * ts).toFixed(2)}</td>
+      <td class="cde">${r2s.delta_c.toFixed(2)}</td>
+      <td class="cga">${r2s.gamma.toFixed(3)}</td>
+      <td class="cve">${r2s.vega.toFixed(2)}</td>
+      <td class="cput">${r2s.put.toFixed(2)}</td>
+      <td class="cth">${(r2s.theta_p * ts).toFixed(2)}</td>
+      <td class="cde">${r2s.delta_p.toFixed(2)}</td>
+      <td class="cyiv">${iv2.toFixed(1)}%</td>
+      <td>${(r2s.call - r2s.put).toFixed(2)}</td>
+      <td class="${parity < 0.5 ? 'cok' : 'cerr'}">${parity < 0.5 ? '✓' : '±' + parity.toFixed(2)}</td>`;
+    body.appendChild(tr);
+  }
+}
+
+/* ── SECTION 11: Scenario Analysis ──────────────────────────────────
+   Each scenario: compute new BSM price → delta vs base → × qty.
+   Base = current BSM price (not premium paid) — shows market impact
+   of each scenario, independent of entry price.
+─────────────────────────────────────────────────────────────────────── */
+function buildScenarios(i, res) {
+  const qty  = i.lots * i.lot;
+  const base = A.type === 'put' ? res.put : res.call;
+  const getP = r2 => r2 ? (A.type === 'put' ? r2.put : r2.call) : null;
+
+  st('bScBase', 'Base: ₹' + base.toFixed(2) + ' × ' + qty + ' = ₹' + (base * qty).toFixed(2));
+
+  const scns = [
+    { lbl:'Spot +1%',    fn:() => bsm(i.S*1.01, i.K, i.T, i.r, i.sigma, i.q),                            desc:'+₹'+Math.round(i.S*.01)+' spot' },
+    { lbl:'Spot +2%',    fn:() => bsm(i.S*1.02, i.K, i.T, i.r, i.sigma, i.q),                            desc:'+₹'+Math.round(i.S*.02)+' spot' },
+    { lbl:'Spot −1%',    fn:() => bsm(i.S*0.99, i.K, i.T, i.r, i.sigma, i.q),                            desc:'−₹'+Math.round(i.S*.01)+' spot' },
+    { lbl:'Spot −2%',    fn:() => bsm(i.S*0.98, i.K, i.T, i.r, i.sigma, i.q),                            desc:'−₹'+Math.round(i.S*.02)+' spot' },
+    { lbl:'IV +5%',      fn:() => bsm(i.S, i.K, i.T, i.r, i.sigma+.05, i.q),                             desc:'Vega impact' },
+    { lbl:'IV −5%',      fn:() => bsm(i.S, i.K, i.T, i.r, Math.max(.01,i.sigma-.05), i.q),               desc:'Vega impact' },
+    { lbl:'IV +10%',     fn:() => bsm(i.S, i.K, i.T, i.r, i.sigma+.10, i.q),                             desc:'High vol spike' },
+    { lbl:'−1 Day',      fn:() => bsm(i.S, i.K, Math.max(1/365, i.T-1/365), i.r, i.sigma, i.q),          desc:'1-day θ erosion' },
+    { lbl:'−5 Days',     fn:() => bsm(i.S, i.K, Math.max(1/365, i.T-5/365), i.r, i.sigma, i.q),          desc:'Weekly θ erosion' },
+    { lbl:'−7 Days',     fn:() => bsm(i.S, i.K, Math.max(1/365, i.T-7/365), i.r, i.sigma, i.q),          desc:'θ incl. weekend' },
+    { lbl:'S+2% IV+5%',  fn:() => bsm(i.S*1.02, i.K, i.T, i.r, i.sigma+.05, i.q),                       desc:'Bull + vol up' },
+    { lbl:'S−2% IV+5%',  fn:() => bsm(i.S*0.98, i.K, i.T, i.r, i.sigma+.05, i.q),                       desc:'Bear + vol spike' },
+  ];
+
+  const grid = el('scGrid');
+  grid.innerHTML = '';
+  scns.forEach(sc => {
+    const r2   = sc.fn();
+    const newP = getP(r2);
+    if (newP === null) return;
+    const d    = newP - base;
+    const dQty = d * qty;
+    const cls  = dQty > 0.01 ? 'cpr' : dQty < -0.01 ? 'cls' : 'cne';
+    const sgn  = dQty >= 0 ? '+' : '';
+    const card = document.createElement('div');
+    card.className = 'sc-card';
+    card.innerHTML = `<div class="sc-lbl">${sc.lbl}</div>
+      <div class="sc-val ${cls}">${sgn}₹${dQty.toFixed(2)}</div>
+      <div class="sc-desc">${sc.desc} · unit Δ: ${sgn}₹${d.toFixed(2)} · new px: ₹${newP.toFixed(2)}</div>`;
+    grid.appendChild(card);
+  });
+}
+
+/* ── SECTION 12: Sensitivity Tables ─────────────────────────────────
+   IV table:   varies σ from −15% to +15% of current IV.
+   DTE table:  varies T from −15d to +10d of current DTE.
+   Both show CE and PE prices for easy comparison.
+─────────────────────────────────────────────────────────────────────── */
+function buildSensitivity(i) {
+  st('bCurrIV',  'σ = ' + i.iv.toFixed(1) + '%');
+  st('bCurrDTE', 'T = ' + i.dte + 'd');
+
+  /* IV sensitivity */
+  const ivOffsets  = [-15, -10, -5, -3, -2, 0, 2, 3, 5, 10, 15];
+  const ivBody = el('ivSensBody');
+  ivBody.innerHTML = '';
+  ivOffsets.forEach(off => {
+    const iv2 = i.iv + off;
+    if (iv2 <= 0) return;
+    const r2  = bsm(i.S, i.K, i.T, i.r, iv2/100, i.q);
+    if (!r2) return;
+    const isCurr = off === 0;
+    const row    = document.createElement('div');
+    row.className = 'sens-row' + (isCurr ? ' curr' : '');
+    row.innerHTML = `<span class="skey" style="${isCurr?'color:var(--blue);font-weight:600;':''}">σ = ${iv2.toFixed(1)}% ${off !== 0 ? '('+( off > 0 ? '+':'')+off+'%)' : '← current'}</span>
+      <span class="sce">CE ₹${r2.call.toFixed(2)}</span>
+      <span class="spe">PE ₹${r2.put.toFixed(2)}</span>`;
+    ivBody.appendChild(row);
+  });
+
+  /* DTE sensitivity */
+  const dteOffsets = [-15, -10, -7, -5, -3, 0, 3, 5, 7, 10];
+  const dteBody = el('dteSensBody');
+  dteBody.innerHTML = '';
+  dteOffsets.forEach(off => {
+    const d2 = i.dte + off;
+    if (d2 < 1) return;
+    const r2 = bsm(i.S, i.K, d2/365, i.r, i.sigma, i.q);
+    if (!r2) return;
+    const isCurr = off === 0;
+    const row    = document.createElement('div');
+    row.className = 'sens-row' + (isCurr ? ' curr' : '');
+    row.innerHTML = `<span class="skey" style="${isCurr?'color:var(--blue);font-weight:600;':''}">T = ${d2}d ${off !== 0 ? '('+(off > 0 ? '+':'')+off+'d)' : '← current'}</span>
+      <span class="sce">CE ₹${r2.call.toFixed(2)}</span>
+      <span class="spe">PE ₹${r2.put.toFixed(2)}</span>`;
+    dteBody.appendChild(row);
+  });
+}
+
+/* ── SECTION 13: Strike Dropdown ─────────────────────────────────────
+   Builds ±10 strikes around ATM from current Spot/IV/DTE inputs.
+   Each row: CE price, Call Delta, θ Call/unit/day, PE price, Put Delta.
+   Selecting a row: resets premManual=false, calls calculate()
+   → syncPrem() auto-fills iPrem with the fresh BSM price.
+─────────────────────────────────────────────────────────────────────── */
+function buildSDRows() {
+  const sp  = gv('iSpot');
+  const sig = gv('iIV') / 100;
+  const T   = gv('iDTE') / 365;
+  const atm = Math.round(sp / A.step) * A.step;
+  const cur = gv('iStrike');
+  const con = el('sdBody');
+  con.innerHTML = '';
+
+  for (let n = -10; n <= 10; n++) {
+    const K  = atm + n * A.step;
+    const r2 = bsm(sp, K, T, R, sig, Q);
+    if (!r2) continue;
+
+    const isATM = K === atm;
+    const pd    = (K - sp) / sp * 100;
+    let mL, mC;
+    if (Math.abs(pd) < 0.15)  { mL = 'ATM'; mC = 'atm'; }
+    else if (K < sp)           { mL = 'ITM ' + Math.abs(pd).toFixed(1) + '%'; mC = 'itm'; }
+    else                       { mL = 'OTM ' + pd.toFixed(1) + '%'; mC = 'otm'; }
+
+    const useSkewSD = A.skewMode === 'skew';
+    const ivPSD = gv('iIVPut') || gv('iIV'), ivCSD = gv('iIVCall') || gv('iIV');
+    const iv2SD = getSkewIV(K, sp, gv('iIV'), ivPSD, ivCSD, useSkewSD);
+    const r2sd  = iv2SD !== gv('iIV') ? bsm(sp, K, T, R, iv2SD/100, Q) : r2;
+    const tsSD  = tScale();
+    const popSD = (r2sd.Nd2 * 100).toFixed(0) + '%';
+    const row = document.createElement('div');
+    row.className = 'sd-row' + (isATM ? ' atmr' : '') + (K === cur ? ' sel' : '');
+    row.dataset.k = K;
+    row.style.gridTemplateColumns = '1.6fr 1fr .82fr .82fr 1fr .82fr .64fr';
+    row.innerHTML = `
+      <div class="sdc"><span class="sdn">${K.toLocaleString('en-IN')}</span>${isATM ? '<span class="sdatm">ATM</span>' : ''}
+        <span class="sd-badge ${mC}" style="margin-left:.22rem;font-size:.44rem">${mL}</span></div>
+      <div class="sdc sdce">${r2sd.call.toFixed(2)}</div>
+      <div class="sdc sddc">${r2sd.delta_c.toFixed(2)}</div>
+      <div class="sdc sdth">${(r2sd.theta_c * tsSD).toFixed(2)}</div>
+      <div class="sdc sdpe">${r2sd.put.toFixed(2)}</div>
+      <div class="sdc sddp">${r2sd.delta_p.toFixed(2)}</div>
+      <div class="sdc" style="color:var(--green);font-weight:600">${popSD}</div>`;
+    row.addEventListener('click', () => pickStrike(K));
+    con.appendChild(row);
+  }
+
+  /* Scroll selected/ATM into view */
+  setTimeout(() => {
+    const sel = con.querySelector('.sel') || con.querySelector('.atmr');
+    if (sel) sel.scrollIntoView({ block: 'center', behavior: 'instant' });
+  }, 20);
+}
+
+function pickStrike(K) {
+  el('iStrike').value = K;
+  A.premManual = false;    // reset → syncPrem will auto-fill on calculate()
+  closeSD();
+  calculate();             // runs syncPrem() → iPrem updated with fresh BSM price
+}
+
+function syncSDTrigger(K, sp, res) {
+  el('sdVal').textContent = K.toLocaleString('en-IN');
+  const pd = (K - sp) / sp * 100;
+  let mL, mC;
+  if (Math.abs(pd) < 0.15) { mL = 'ATM'; mC = 'atm'; }
+  else if (K < sp)          { mL = 'ITM ' + Math.abs(pd).toFixed(1) + '%'; mC = 'itm'; }
+  else                      { mL = 'OTM ' + pd.toFixed(1) + '%'; mC = 'otm'; }
+  const b = el('sdBadge');
+  b.textContent = mL; b.className = 'sd-badge ' + mC;
+  if (res) el('sdPreview').textContent = 'CE ₹' + res.call.toFixed(2) + '  ·  PE ₹' + res.put.toFixed(2) + '  ·  Δ ' + res.delta_c.toFixed(2);
+}
+
+function toggleSD(e) { e.stopPropagation(); A.sdOpen ? closeSD() : openSD(); }
+function openSD()    { buildSDRows(); el('sdPanel').classList.add('open'); el('sdTrigger').classList.add('open'); A.sdOpen = true; }
+function closeSD()   { el('sdPanel').classList.remove('open'); el('sdTrigger').classList.remove('open'); A.sdOpen = false; }
+document.addEventListener('click', e => {
+  if (A.sdOpen && !e.target.closest('#sdTrigger') && !e.target.closest('#sdPanel')) closeSD();
+});
+
+/* ── SECTION 14: UI Event Handlers ──────────────────────────────────*/
+function onInput() {
+  /* Update formula strip live (no BSM needed for these) */
+  st('fpS',   gv('iSpot').toLocaleString('en-IN'));
+  st('fpK',   gv('iStrike').toLocaleString('en-IN'));
+  st('fpT',   gv('iDTE'));
+  st('fpSig', gv('iIV').toFixed(2));
+  /* Full recalculate — syncPrem() inside will update iPrem */
+  calculate();
+}
+
+function nudge(id, d) {
+  const e = el(id);
+  e.value = (parseFloat(e.value) || 0) + d;
+  onInput();
+}
+
+function setType(t) {
+  A.type = t;
+  el('tCE').classList.toggle('active',   t === 'call');
+  el('tPE').classList.toggle('active',   t === 'put');
+  el('tBoth').classList.toggle('active', t === 'both');
+  A.premManual = false;    // switching CE/PE resets auto-fill for the new type
+  calculate();
+}
+
+function selectUL(btn) {
+  document.querySelectorAll('.ul-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const spot  = parseFloat(btn.dataset.spot);
+  const lot   = parseFloat(btn.dataset.lot);
+  const step  = parseFloat(btn.dataset.step) || 50;
+  const scrip = parseInt(btn.dataset.scrip)  || 0;
+  A.step       = step;
+  A.scrip      = scrip;
+  A.premManual = false;
+  if (spot > 0) {
+    const newK = Math.round(spot / step) * step;
+    el('iSpot').value   = spot;
+    el('iStrike').value = newK;
+    el('iLotSz').value  = lot;
+    el('sdVal').textContent   = newK.toLocaleString('en-IN');
+    el('sdBadge').textContent = 'ATM';
+    el('sdBadge').className   = 'sd-badge atm';
+    const T = Math.max(1, gv('iDTE')) / 365;
+    _writing = true;
+    const futEl = document.getElementById('iFut');
+    if (futEl) futEl.value = (spot * Math.exp(R * T)).toFixed(2);
+    _writing = false;
+    updateBasis();
+    if (btn.dataset.ivh) { _writing=true; el('iIVHigh').value = btn.dataset.ivh; _writing=false; }
+    if (btn.dataset.ivl) { _writing=true; el('iIVLow').value  = btn.dataset.ivl; _writing=false; }
+  }
+  /* Load expiries for this underlying from backend */
+  if (scrip > 0) loadExpiries(scrip);
+  else {
+    el('liveExpiry').innerHTML = '<option value="">Not supported via API</option>';
+    el('liveLoadBtn').disabled = true;
+  }
+  onInput();
+}
+
+function applyPreset(name) {
+  const sp   = gv('iSpot') || 25000;
+  const atm  = Math.round(sp / A.step) * A.step;
+  const map  = {
+    atm    : { K: atm,              iv: 14, dte: 21 },
+    otm5   : { K: atm + 5 * A.step, iv: 12, dte: 21 },
+    itm5   : { K: atm - 5 * A.step, iv: 17, dte: 21 },
+    weekly : { K: atm,              iv: 14, dte:  7 },
+    monthly: { K: atm,              iv: 14, dte: 30 },
+    highiv : { K: atm,              iv: 40, dte: 21 },
+    lowiv  : { K: atm,              iv:  8, dte: 21 },
+  };
+  const p = map[name]; if (!p) return;
+  el('iStrike').value = p.K;
+  el('iIV').value     = p.iv;
+  el('iDTE').value    = p.dte;
+  A.premManual = false;
+  onInput();
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.ctab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-body').forEach(p => p.classList.remove('active'));
+  if (name === 'maxpain') { setTimeout(onMpTabOpen, 0); }
+  btn.classList.add('active');
+  el('tab-' + name).classList.add('active');
+  setTimeout(() => [cErosion, cTheta, cPL, cStrat].forEach(c => c && c.resize()), 50);
+}
+
+/* ── SECTION 15: Keyboard Shortcuts ─────────────────────────────────
+   F5         = Calculate / Refresh
+   F1/F2/F3   = Switch to NIFTY / BANKNIFTY / FINNIFTY
+   Alt+↑/↓    = Nudge spot price ±1 strike step
+   Alt+→/←    = Nudge DTE +1/−1 day
+   Escape     = Close strike dropdown
+─────────────────────────────────────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'F5')             { e.preventDefault(); calculate(); }
+  if (e.key === 'F1')             { e.preventDefault(); document.querySelector('[data-ul="NIFTY 50"]').click(); }
+  if (e.key === 'F2')             { e.preventDefault(); document.querySelector('[data-ul="BANKNIFTY"]').click(); }
+  if (e.key === 'F3')             { e.preventDefault(); document.querySelector('[data-ul="FINNIFTY"]').click(); }
+  if (e.altKey && e.key === 'ArrowUp')    { e.preventDefault(); nudge('iSpot',  A.step); }
+  if (e.altKey && e.key === 'ArrowDown')  { e.preventDefault(); nudge('iSpot', -A.step); }
+  if (e.altKey && e.key === 'ArrowRight') { e.preventDefault(); nudge('iDTE',  1); }
+  if (e.altKey && e.key === 'ArrowLeft')  { e.preventDefault(); nudge('iDTE', -1); }
+  if (e.key === 'Escape')         { closeSD(); }
+});
+
+/* ── SECTION 16: Boot ────────────────────────────────────────────────
+   Initialize trigger display, then run first calculation.
+   syncPrem() inside calculate() auto-fills iPrem on load.
+─────────────────────────────────────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', () => {
+  const K = gv('iStrike'), sp = gv('iSpot');
+  el('sdVal').textContent   = K.toLocaleString('en-IN');
+  el('sdBadge').textContent = 'ATM';
+  el('sdBadge').className   = 'sd-badge atm';
+  /* Auto-compute futures */
+  const T0 = Math.max(1, gv('iDTE')) / 365;
+  _writing = true;
+  const futEl = document.getElementById('iFut');
+  if (futEl) futEl.value = (sp * Math.exp(R * T0)).toFixed(2);
+  _writing = false;
+  updateBasis();
+  calculate();
+});
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   PRO ENHANCEMENTS — CLEAN INTEGRATION (no function patching/overriding)
+   All new standalone functions only. Existing functions modified above.
+══════════════════════════════════════════════════════════════════════ */
+
+/* §A  THETA SCALE — returns multiplier for calendar→trading day θ */
+function tScale() { return A.thetaBasis === 'trd' ? 365/252 : 1; }
+
+/* §B  IV SKEW — linear interpolation: put-wing → ATM → call-wing */
+function getSkewIV(K, S, atm, ivP, ivC, use) {
+  if (!use) return atm;
+  const p = (K - S) / S * 100;
+  if (Math.abs(p) < 0.05) return atm;
+  if (p < 0) { const t = Math.min(1, Math.abs(p) / 5); return atm + t * (ivP - atm); }
+  else        { const t = Math.min(1, p / 5);           return atm + t * (ivC - atm); }
+}
+
+/* §C  FUTURES AUTO-COMPUTE */
+function autoFutures() {
+  const S = gv('iSpot'), T = Math.max(1, gv('iDTE')) / 365;
+  _writing = true;
+  document.getElementById('iFut').value = (S * Math.exp(R * T)).toFixed(2);
+  _writing = false;
+  updateBasis(); onInput();
+}
+
+function onFutInput() {
+  if (_writing) return;
+  updateBasis(); calculate();
+}
+
+function updateBasis() {
+  const S = gv('iSpot'), F = gv('iFut');
+  if (!S || !F) return;
+  const b = F - S;
+  const bs = el('sBasis');
+  if (bs) {
+    bs.textContent = 'basis ' + (b >= 0 ? '+' : '') + b.toFixed(1);
+    bs.style.color = b > 2 ? 'var(--green)' : b < -2 ? 'var(--red)' : 'var(--t4)';
+  }
+  const fpF = el('fpF'); if (fpF) fpF.textContent = F.toFixed(2);
+  const aB = el('alertBasis');
+  if (aB) {
+    if (Math.abs(b) > 10) {
+      el('alertBasisMsg').textContent = b < 0
+        ? 'Futures ₹' + Math.abs(b).toFixed(0) + ' below spot — PEs priced lower (Black-76 matches market).'
+        : 'Futures ₹' + b.toFixed(0) + ' above spot — slight CE premium vs standard BSM.';
+      aB.classList.add('show');
+    } else { aB.classList.remove('show'); }
+  }
+}
+
+/* §D  WEEKEND DETECTOR */
+function checkWeekend() {
+  const dow = new Date().getDay(), dte = Math.max(1, gv('iDTE'));
+  const show = ((dow === 4 || dow === 5) && dte <= 7) || (dte >= 2 && dte <= 5);
+  const aW = el('alertWeekend'); if (!aW) return;
+  aW.classList.toggle('show', show);
+  if (show) {
+    const trd = Math.ceil(dte * 252 / 365);
+    el('alertWeekendMsg').textContent =
+      'Weekend in DTE window: ' + dte + ' cal days ≈ ' + trd + ' trading sessions. ' +
+      (A.thetaBasis === 'cal' ? 'Consider switching to Trd /252.' : 'Trading-day mode active ✓');
+  }
+}
+
+/* §E  STRATEGY DEFINITIONS */
+const STRAT_DEFS = {
+  single     : { name:'Single Leg',          desc:'Direct directional play. Unlimited upside (calls) or high leverage (puts).' },
+  bull_cs    : { name:'Bull Call Spread',     desc:'Long lower call + Short higher call. Capped profit and loss. Best for moderate bullish view.' },
+  bear_ps    : { name:'Bear Put Spread',      desc:'Long higher put + Short lower put. Defined-risk bearish play. Cheaper than naked put.' },
+  straddle   : { name:'Long Straddle',        desc:'Long ATM call + Put. Profits from any large move. Best when IV is low before a major event.' },
+  strangle   : { name:'Long Strangle',        desc:'Long OTM call + OTM put. Cheaper than straddle; needs a larger move to profit.' },
+  iron_condor: { name:'Iron Condor (Credit)', desc:'Short OTM call spread + Short OTM put spread. Net credit; profits from range-bound market.' },
+};
+
+/* §F  BUILD LEGS */
+function buildLegs(i) {
+  const K = i.K, W = (gv('iWidth') || 5) * A.step;
+  const mk = K2 => {
+    const useSkew = A.skewMode === 'skew';
+    const ivP = gv('iIVPut') || i.iv, ivC = gv('iIVCall') || i.iv;
+    const iv2 = getSkewIV(K2, i.S, i.iv, ivP, ivC, useSkew);
+    return { res: bsm(i.S, K2, i.T, R, iv2/100, Q), iv: iv2, K: K2 };
+  };
+  switch (A.strategy) {
+    case 'single': {
+      const { res, iv } = mk(K), t = A.type;
+      if (t === 'both') return [
+        { label:'Long Call', dir:1, type:'call', K, res, iv },
+        { label:'Long Put',  dir:1, type:'put',  K, res, iv },
+      ];
+      return [{ label: t === 'call' ? 'Long Call' : 'Long Put', dir:1, type:t, K, res, iv }];
+    }
+    case 'bull_cs': { const a=mk(K),b=mk(K+W); return [{ label:'Long Call',  dir:1,  type:'call', K,   res:a.res, iv:a.iv },{ label:'Short Call', dir:-1, type:'call', K:K+W, res:b.res, iv:b.iv }]; }
+    case 'bear_ps': { const a=mk(K),b=mk(K-W); return [{ label:'Long Put',   dir:1,  type:'put',  K,   res:a.res, iv:a.iv },{ label:'Short Put',  dir:-1, type:'put',  K:K-W, res:b.res, iv:b.iv }]; }
+    case 'straddle':{ const{res,iv}=mk(K); return [{ label:'Long Call', dir:1, type:'call', K, res, iv },{ label:'Long Put', dir:1, type:'put', K, res, iv }]; }
+    case 'strangle':{ const a=mk(K+W),b=mk(K-W); return [{ label:'Long OTM Call', dir:1, type:'call', K:K+W, res:a.res, iv:a.iv },{ label:'Long OTM Put', dir:1, type:'put', K:K-W, res:b.res, iv:b.iv }]; }
+    case 'iron_condor': {
+      const a=mk(K+W),b=mk(K+2*W),c=mk(K-W),d=mk(K-2*W);
+      return [
+        { label:'Short Call', dir:-1, type:'call', K:K+W,   res:a.res, iv:a.iv },
+        { label:'Long Call',  dir:1,  type:'call', K:K+2*W, res:b.res, iv:b.iv },
+        { label:'Short Put',  dir:-1, type:'put',  K:K-W,   res:c.res, iv:c.iv },
+        { label:'Long Put',   dir:1,  type:'put',  K:K-2*W, res:d.res, iv:d.iv },
+      ];
+    }
+  }
+  return [];
+}
+
+/* §G  STRATEGY PAYOFF */
+function stratPayoff(spot, legs) {
+  return legs.reduce((s, lg) => {
+    if (!lg.res) return s;
+    const intr = lg.type === 'call' ? Math.max(0, spot - lg.K) : Math.max(0, lg.K - spot);
+    const prem = lg.type === 'call' ? lg.res.call : lg.res.put;
+    return s + lg.dir * (intr - prem);
+  }, 0);
+}
+
+/* §H  DRAW STRATEGY — position Greeks, leg cards, payoff chart */
+
+/* Compute analytical breakevens per strategy */
+function computeBEs(legs, strategy, netPrem) {
+  // netPrem > 0 = debit, < 0 = credit
+  const np = netPrem;
+  const leg = (dir, type) => legs.find(l => l.dir === dir && l.type === type);
+  switch (strategy) {
+    case 'single': {
+      const l = legs[0]; if (!l) return [];
+      return l.type === 'call' ? [l.K + np] : [l.K - np];
+    }
+    case 'bull_cs': return [legs[0] ? legs[0].K + np : 0];
+    case 'bear_ps': return [legs[0] ? legs[0].K - np : 0];  // K_hi - debit
+    case 'straddle': return legs[0] ? [legs[0].K + np, legs[0].K - np] : [];
+    case 'strangle': {
+      const lc = leg(1,'call'), lp = leg(1,'put');
+      return lc && lp ? [lc.K + np, lp.K - np] : [];
+    }
+    case 'iron_condor': {
+      const nc = -np;  // net credit (positive)
+      const sc = leg(-1,'call'), sp = leg(-1,'put');
+      return sc && sp ? [sc.K + nc, sp.K - nc] : [];
+    }
+  }
+  return [];
+}
+
+/* Detect whether a strategy has unlimited profit or loss */
+function stratLimits(strategy, type) {
+  const unlimitedProfit = strategy === 'straddle' || strategy === 'strangle' ||
+    (strategy === 'single' && (type === 'call' || type === 'both'));
+  const unlimitedLoss   = false; // all strategies here are defined-risk
+  return { unlimitedProfit, unlimitedLoss };
+}
+
+function drawStrategy(i, legs) {
+  if (!legs || !legs.length) return;
+  const def   = STRAT_DEFS[A.strategy] || STRAT_DEFS.single;
+  const qty   = i.lots * i.lot, ts = tScale();
+  const lot   = i.lot;
+
+  /* Net premium per unit (positive = debit, negative = credit) */
+  const netPrem = legs.reduce((s, lg) => {
+    if (!lg.res) return s;
+    return s + lg.dir * (lg.type === 'call' ? lg.res.call : lg.res.put);
+  }, 0);
+  const isCredit = netPrem < 0;
+  const absNet   = Math.abs(netPrem);
+
+  /* ── Strategy header ── */
+  const spName = el('spName'); if (spName) spName.textContent = def.name;
+  const spDesc = el('spDesc'); if (spDesc) spDesc.textContent = def.desc;
+  const sB = el('spBadges');
+  if (sB) {
+    const dc = isCredit ? 'var(--green)' : 'var(--red)';
+    sB.innerHTML = `<span class="badge" style="background:${isCredit?'rgba(34,197,94,.12)':'rgba(239,68,68,.1)'};border:1px solid ${dc};color:${dc};font-size:.52rem;padding:.14rem .36rem;border-radius:4px">${isCredit?'Credit ↓':'Debit ↑'}</span>`;
+  }
+  /* Net badge: debit/credit per unit + total position */
+  const spNB = el('spNetBadge');
+  const unitLabel = (A.strategy === 'straddle' || A.strategy === 'strangle') ? '/pair' : '/unit';
+  if (spNB) spNB.textContent = (isCredit ? '₹' + absNet.toFixed(2) + unitLabel + ' credit' : '₹' + absNet.toFixed(2) + unitLabel + ' debit') +
+    '  ·  pos ₹' + (absNet * qty).toFixed(0);
+
+  /* ── Position Greeks (qty-scaled = whole position) ── */
+  let nDelta=0, nTheta=0, nVega=0;
+  let perUnitGamma = 0, legCount = 0;
+  legs.forEach(lg => {
+    if (!lg.res) return;
+    nDelta += lg.dir * (lg.type === 'call' ? lg.res.delta_c : lg.res.delta_p) * qty;
+    nTheta += lg.dir * (lg.type === 'call' ? lg.res.theta_c : lg.res.theta_p) * ts * qty;
+    nVega  += lg.dir * lg.res.vega  * qty;
+    /* For gamma: show per-unit (not scaled by qty) — more meaningful for Greeks intuition */
+    perUnitGamma += lg.dir * lg.res.gamma;
+    legCount++;
+  });
+
+  /* Net Delta — whole position, colour-coded */
+  const pgDe = el('pgDe');
+  if (pgDe) {
+    pgDe.textContent = nDelta.toFixed(2);
+    pgDe.style.color = nDelta > 0.5 ? 'var(--green)' : nDelta < -0.5 ? 'var(--red)' : 'var(--t2)';
+  }
+
+  /* Net Theta — show with cal/trading basis label */
+  const pgThSb = el('pgThSb');
+  if (pgThSb) pgThSb.textContent = ts > 1 ? 'trd-day basis' : 'cal-day basis';
+  st('pgTh', fRs(nTheta, 2) + '/d');
+
+  st('pgVe',  fRs(nVega, 2) + '/1%σ');
+
+  /* Gamma — per-unit (summed across legs), more intuitive than position-level */
+  st('pgGa', perUnitGamma.toFixed(4));
+
+  /* Delta-hedge in futures:
+     nDelta = total position delta in underlying units (lots × lotSize × unit_delta)
+     To hedge: trade -nDelta underlying units via futures
+     In lot terms: -nDelta / lotSize futures lots  */
+  const hedgeUnits = -nDelta;
+  const hedgeLots  = hedgeUnits / lot;
+  const pgHedge = el('pgHedge');
+  const pgHedgeSb = el('pgHedgeSb');
+  if (Math.abs(nDelta) > 0.05) {
+    if (pgHedge)   pgHedge.textContent = (hedgeUnits > 0 ? '+' : '') + hedgeUnits.toFixed(1) + ' units';
+    if (pgHedgeSb) pgHedgeSb.textContent = '~' + (Math.abs(hedgeLots) < 0.01 ? '<0.01' : hedgeLots.toFixed(2)) + ' fut-lots';
+  } else {
+    if (pgHedge)   pgHedge.textContent = 'Δ-neutral';
+    if (pgHedgeSb) pgHedgeSb.textContent = 'no hedge needed';
+  }
+
+  /* ── Leg cards ── */
+  const lc = el('legCards');
+  if (lc) {
+    lc.innerHTML = '';
+    lc.style.gridTemplateColumns = 'repeat(' + Math.min(legs.length, 4) + ',1fr)';
+    legs.forEach(lg => {
+      if (!lg.res) return;
+      const prem  = lg.type === 'call' ? lg.res.call  : lg.res.put;
+      const delta = lg.dir  * (lg.type === 'call' ? lg.res.delta_c : lg.res.delta_p);
+      const theta = lg.dir  * (lg.type === 'call' ? lg.res.theta_c : lg.res.theta_p) * ts;
+      const vega  = lg.dir  * lg.res.vega;
+      const moneyPct = (lg.K - i.S) / i.S * 100;
+      let moneyLabel = Math.abs(moneyPct) < 0.15 ? 'ATM'
+        : moneyPct < 0 ? 'ITM ' + Math.abs(moneyPct).toFixed(1) + '%'
+        : 'OTM +' + moneyPct.toFixed(1) + '%';
+      /* For puts: moneyness is inverted */
+      if (lg.type === 'put') {
+        const pd = (i.S - lg.K) / i.S * 100;
+        moneyLabel = Math.abs(pd) < 0.15 ? 'ATM'
+          : pd < 0 ? 'OTM +' + Math.abs(pd).toFixed(1) + '%'
+          : 'ITM ' + pd.toFixed(1) + '%';
+      }
+      const d = document.createElement('div');
+      d.className = 'leg-card ' + (lg.dir > 0 ? 'long' : 'short');
+      d.innerHTML =
+        '<div class="leg-dir ' + (lg.dir > 0 ? 'long' : 'short') + '">' +
+        (lg.dir > 0 ? '▲ LONG' : '▼ SHORT') + ' ' + lg.type.toUpperCase() +
+        ' <span style="font-weight:400;font-size:.48rem;color:var(--t3);text-transform:none;letter-spacing:0">' + moneyLabel + '</span></div>' +
+        '<div class="leg-row">' +
+        '<div><div class="lk">Strike</div><div class="lv">₹' + lg.K.toLocaleString('en-IN') + '</div></div>' +
+        '<div><div class="lk">' + (lg.dir > 0 ? 'Premium' : 'Credit') + '</div><div class="lv" style="color:' + (lg.dir > 0 ? 'var(--red)' : 'var(--green)') + '">' + (lg.dir > 0 ? '−' : '+') + '₹' + prem.toFixed(2) + '</div></div>' +
+        '<div><div class="lk">Delta</div><div class="lv" style="color:' + (delta >= 0 ? 'var(--blue)' : 'var(--orange)') + '">' + (delta >= 0 ? '+' : '') + delta.toFixed(3) + '</div></div>' +
+        '<div><div class="lk">Theta/d</div><div class="lv" style="color:' + (theta >= 0 ? 'var(--green)' : 'var(--orange)') + '">' + (theta >= 0 ? '+' : '') + theta.toFixed(3) + '</div></div>' +
+        '<div><div class="lk">Vega/1%σ</div><div class="lv" style="color:' + (vega >= 0 ? 'var(--cyan)' : 'var(--t3)') + '">' + (vega >= 0 ? '+' : '') + vega.toFixed(3) + '</div></div>' +
+        '<div><div class="lk">IV used</div><div class="lv">' + lg.iv.toFixed(1) + '%</div></div>' +
+        '</div>';
+      lc.appendChild(d);
+    });
+  }
+
+  /* ── Compute payoff data (wide range) ── */
+  const rng    = i.S * 0.20;
+  const labels = [], payoffs = [];
+  let maxP = -Infinity, minP = Infinity;
+  for (let n = 0; n <= 200; n++) {
+    const s = (i.S - rng) + rng * 2 * n / 200;
+    labels.push('₹' + Math.round(s).toLocaleString('en-IN'));
+    const v = stratPayoff(s, legs) * qty;
+    payoffs.push(v);
+    if (v > maxP) maxP = v;
+    if (v < minP) minP = v;
+  }
+
+  /* Check if profit is truly unlimited (extend scan to ±40%) */
+  const { unlimitedProfit } = stratLimits(A.strategy, A.type);
+  const farUp = stratPayoff(i.S * 1.5, legs) * qty;
+  const farDn = stratPayoff(i.S * 0.6, legs) * qty;
+  const isUnlimitedProfit = unlimitedProfit || farUp > maxP * 1.5;
+
+  const lossAbs = Math.abs(minP);
+  const rrNum = isUnlimitedProfit ? '∞' : maxP.toFixed(0);
+  const rr    = lossAbs > 0.01 ? (isUnlimitedProfit ? '∞:1' : (maxP / lossAbs).toFixed(2) + ':1') : '∞:0';
+
+  /* ── Analytical breakevens ── */
+  const BEs = computeBEs(legs, A.strategy, netPrem);
+
+  /* ── Strategy Metrics grid ── */
+  const mc = el('stratMetrics');
+  if (mc) {
+    mc.innerHTML = '';
+    const items = [
+      {
+        lb: 'Net ' + (isCredit ? 'Credit' : 'Debit'),
+        vl: '₹' + absNet.toFixed(2),
+        sb: 'per ' + ((A.strategy === 'straddle' || A.strategy === 'strangle') ? 'pair' : 'unit') + ' · ₹' + (absNet * qty).toFixed(0) + ' pos',
+        c:  isCredit ? 'var(--green)' : 'var(--red)'
+      },
+      {
+        lb: 'Max Profit',
+        vl: isUnlimitedProfit ? 'Unlimited' : '₹' + maxP.toFixed(0),
+        sb: isUnlimitedProfit ? 'uncapped upside' : 'total position',
+        c:  'var(--green)'
+      },
+      {
+        lb: 'Max Loss',
+        vl: '₹' + lossAbs.toFixed(0),
+        sb: 'total position',
+        c:  'var(--red)'
+      },
+      {
+        lb: 'Reward:Risk',
+        vl: rr,
+        sb: 'profit ÷ risk',
+        c:  'var(--cyan)'
+      },
+
+    ];
+    items.forEach(it => {
+      const d = document.createElement('div');
+      d.className = 'sm-card';
+      d.innerHTML = '<div class="sm-lb">' + it.lb + '</div><div class="sm-vl" style="color:' + it.c + '">' + it.vl + '</div><div class="sm-sb">' + it.sb + '</div>';
+      mc.appendChild(d);
+    });
+  }  /* close if(mc) */
+
+  /* ── Payoff chart with BE markers and spot indicator ── */
+  const seg2 = { borderColor: c2 => c2.p0.parsed.y >= 0 ? 'rgba(34,197,94,.85)' : 'rgba(239,68,68,.78)' };
+  const datasets = [{
+    label: 'P&L at Expiry',
+    data: payoffs, borderWidth: 2.5, pointRadius: 0, tension: .28,
+    borderColor: isCredit ? 'rgba(34,197,94,.9)' : 'rgba(59,130,246,.9)',
+    backgroundColor: isCredit ? 'rgba(34,197,94,.05)' : 'rgba(59,130,246,.05)',
+    fill: true, segment: seg2
+  }];
+
+  /* Add spot price vertical indicator as a spike dataset */
+  const spotIdx  = Math.round((i.S - (i.S - rng)) / (rng * 2) * 200);
+  const spotLine = payoffs.map((_, idx) => idx === spotIdx ? maxP + Math.abs(minP) : null);
+  datasets.push({
+    label: 'Current Spot ₹' + i.S.toLocaleString('en-IN'),
+    data: spotLine, borderWidth: 1.5, pointRadius: 0, tension: 0,
+    borderColor: 'rgba(234,179,8,.45)', borderDash: [4, 4],
+    backgroundColor: 'transparent', spanGaps: false
+  });
+
+  /* Add BE vertical spikes */
+  BEs.forEach((be, bidx) => {
+    const beIdx = Math.round((be - (i.S - rng)) / (rng * 2) * 200);
+    if (beIdx < 0 || beIdx > 200) return;
+    const beLine = payoffs.map((_, idx) => idx === beIdx ? maxP + Math.abs(minP) : null);
+    datasets.push({
+      label: 'BE ₹' + be.toFixed(0),
+      data: beLine, borderWidth: 1.2, pointRadius: 0, tension: 0,
+      borderColor: 'rgba(168,85,247,.55)', borderDash: [3, 3],
+      backgroundColor: 'transparent', spanGaps: false
+    });
+  });
+
+  if (cStrat) { cStrat.destroy(); cStrat = null; }
+  cStrat = new Chart(el('cStrat').getContext('2d'), {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      ...mkOpts(false),
+      plugins: {
+        ...mkOpts(false).plugins,
+        legend: {
+          position: 'top',
+          labels: {
+            filter: item => !item.text.startsWith('BE '),
+            color: '#5A6780', font: { family: "'DM Sans'", size: 9 }, boxWidth: 10, padding: 8
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { color:'#5A6780', font:{family:"'DM Mono'",size:9}, maxTicksLimit:10 }, grid: { color:'rgba(255,255,255,.04)' } },
+        y: {
+          ticks: {
+            color: c2 => c2.tick.value >= 0 ? 'rgba(34,197,94,.8)' : 'rgba(239,68,68,.8)',
+            font: {family:"'DM Mono'",size:9},
+            callback: v => '₹' + v.toFixed(0)
+          },
+          grid: { color: c2 => c2.tick.value === 0 ? 'rgba(255,255,255,.22)' : 'rgba(255,255,255,.04)' }
+        }
+      }
+    }
+  });
+
+  /* ── Breakeven strip (single instance, ID-managed) ── */
+  const oldBe = document.getElementById('beStrip');
+  if (oldBe) oldBe.remove();
+  if (BEs.length && mc) {
+    const beDiv = document.createElement('div');
+    beDiv.id = 'beStrip';
+    beDiv.style.cssText = 'margin-top:.42rem;padding:.36rem .54rem;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap';
+    beDiv.innerHTML = '<span style="font-size:.52rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);flex-shrink:0;margin-right:.2rem">Breakeven' + (BEs.length > 1 ? 's' : '') + '</span>' +
+      BEs.map(be => {
+        const pct = ((be - i.S) / i.S * 100);
+        const col = pct >= 0 ? 'var(--green)' : 'var(--red)';
+        return '<span style="font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--yellow)">₹' + Math.round(be).toLocaleString('en-IN') + '</span>' +
+               '<span style="font-size:.5rem;color:' + col + ';white-space:nowrap">' + (pct >= 0 ? '+' : '') + pct.toFixed(2) + '% from spot</span>';
+      }).join('<span style="color:var(--bd2);margin:0 .3rem;font-size:.7rem">·</span>');
+    mc.after(beDiv);
+  }
+}
+
+/* §I  UI HANDLERS FOR NEW CONTROLS */
+function setSkewMode(m) {
+  A.skewMode = m;
+  const f = el('tSkewFlat'), s = el('tSkewOn');
+  if (f) f.className = 'tgl-btn' + (m === 'flat' ? ' on' : '');
+  if (s) s.className = 'tgl-btn' + (m === 'skew' ? ' on' : '');
+  const si = el('skewInputs'); if (si) si.style.display = m === 'skew' ? 'block' : 'none';
+  onInput();
+}
+
+function setThetaBasis(b) {
+  A.thetaBasis = b;
+  const c = el('tThetaCal'), t = el('tThetaTrd');
+  if (c) c.className = 'tgl-btn' + (b === 'cal' ? ' on' : '');
+  if (t) t.className = 'tgl-btn' + (b === 'trd' ? ' on-orange' : '');
+  checkWeekend(); onInput();
+}
+
+function setStrat(btn) {
+  document.querySelectorAll('.strat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  A.strategy = btn.dataset.strat;
+  const isMulti = A.strategy !== 'single';
+  const dST = el('divSingleType'); if (dST) dST.style.display = isMulti ? 'none' : 'block';
+  const dW  = el('divWidth');      if (dW)  dW.style.display  = isMulti ? 'block' : 'none';
+  A.premManual = false;
+  calculate();
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   FEATURE PACK 2 — IV RANK · STRATEGY COMPARE · POSITION TRACKER
+   All standalone functions, zero interference with existing code.
+══════════════════════════════════════════════════════════════════════ */
+
+/* §J  IV RANK / PERCENTILE ──────────────────────────────────────────
+   IV Rank   = (currentIV − 52wLow) / (52wHigh − 52wLow) × 100
+   IV Signal = Buy premium (Rank<30) | Neutral (30-70) | Sell (>70)
+   Gauge fills left→right in green→yellow→red.
+───────────────────────────────────────────────────────────────────── */
+function buildIVRank(i) {
+  const ivH = gv('iIVHigh'), ivL = gv('iIVLow'), iv = i.iv;
+  const mIVR = el('mIVR'), mIVSig = el('mIVSig'), mIVRSb = el('mIVRSb'), mIVSigSb = el('mIVSigSb');
+  if (!ivH || !ivL || ivH <= ivL) {
+    if (mIVR) mIVR.textContent = '—';
+    if (mIVSig) { mIVSig.textContent = 'Set range'; mIVSig.style.color = 'var(--t3)'; }
+    return;
+  }
+  const rank = Math.min(100, Math.max(0, (iv - ivL) / (ivH - ivL) * 100));
+  const pct  = Math.min(100, Math.max(0, (iv - ivL) / (ivH - ivL) * 100));
+
+  if (mIVR) { mIVR.textContent = rank.toFixed(0) + '%'; }
+  if (mIVRSb) mIVRSb.textContent = ivL.toFixed(0) + '–' + ivH.toFixed(0) + '% range';
+
+  let sig, sigColor, gaugeColor;
+  if (rank < 30) {
+    sig = 'Buy Prem'; sigColor = 'var(--green)'; gaugeColor = '#22C55E';
+  } else if (rank > 70) {
+    sig = 'Sell Prem'; sigColor = 'var(--red)'; gaugeColor = '#EF4444';
+  } else {
+    sig = 'Neutral'; sigColor = 'var(--yellow)'; gaugeColor = '#EAB308';
+  }
+  if (mIVSig) { mIVSig.textContent = sig; mIVSig.style.color = sigColor; }
+  if (mIVSigSb) mIVSigSb.textContent = 'IV Rank ' + rank.toFixed(0) + '%';
+
+  /* Update inline gauge in input panel */
+  const fill = el('ivrFill'); if (fill) { fill.style.width = pct + '%'; fill.style.background = gaugeColor; }
+  const reg  = el('ivrRegime');
+  if (reg) {
+    reg.textContent = sig;
+    reg.className = 'ivr-regime ' + (rank < 30 ? 'ivr-buy' : rank > 70 ? 'ivr-sell' : 'ivr-neutral');
+  }
+  const ll = el('ivrLowLbl'); if (ll) ll.textContent = 'Low: ' + ivL.toFixed(0) + '%';
+  const hl = el('ivrHighLbl'); if (hl) hl.textContent = 'High: ' + ivH.toFixed(0) + '%';
+
+  /* Update Compare tab IV badge */
+  const cib = el('cmpIVRBadge');
+  if (cib) {
+    cib.innerHTML = '<span class="badge" style="background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3);color:var(--yellow);font-size:.58rem;padding:.14rem .44rem;border-radius:20px">σ Rank ' + rank.toFixed(0) + '% · ' + sig + '</span>';
+  }
+  return { rank, sig };
+}
+
+function toggleIVRank() {
+  const el2 = el('ivRankInputs');
+  if (!el2) return;
+  const open = el2.style.display !== 'none';
+  el2.style.display = open ? 'none' : 'block';
+  el('ivRankToggle').textContent = open ? 'Set ▾' : 'Hide ▴';
+  if (!open) buildIVRank(getInputs());
+}
+
+
+/* §K  STRATEGY COMPARISON ───────────────────────────────────────────
+   Builds a full comparison table of all 5 strategies at current inputs.
+   Highlights recommended structure based on IV regime and bias.
+   Metric columns: Net | MaxProfit | MaxLoss | PoP | θ/day | R:R
+───────────────────────────────────────────────────────────────────── */
+const CMP_STRATS = [
+  { id:'single_call', name:'Long Call',        bias:['bull'],        desc:'Unlimited upside. Full premium at risk.' },
+  { id:'single_put',  name:'Long Put',         bias:['bear'],        desc:'Profits as spot falls below BE.' },
+  { id:'bull_cs',     name:'Bull Call Spread', bias:['bull'],        desc:'Capped profit + loss. Cheaper than naked call.' },
+  { id:'bear_ps',     name:'Bear Put Spread',  bias:['bear'],        desc:'Defined-risk bearish. Cheaper than naked put.' },
+  { id:'straddle',    name:'Long Straddle',    bias:['bull','bear','neut'], desc:'Profits from any large move. High premium cost.' },
+  { id:'strangle',    name:'Long Strangle',    bias:['bull','bear','neut'], desc:'Cheaper than straddle; needs bigger move.' },
+  { id:'iron_condor', name:'Iron Condor',      bias:['neut'],        desc:'Collect credit. Profits if spot stays in range.' },
+];
+
+let A_cmpBias = 'bull';
+
+function setCmpBias(bias, btn) {
+  A_cmpBias = bias;
+  ['bBull','bBear','bNeut'].forEach(id => {
+    const b = el(id); if (b) b.className = 'bias-btn';
+  });
+  if (btn) btn.className = 'bias-btn active-' + (bias === 'bull' ? 'bull' : bias === 'bear' ? 'bear' : 'neut');
+  buildCompare(A.lastBSM || getInputs());
+}
+
+function buildCompare(i) {
+  const wrap = el('cmpTableWrap'); if (!wrap) return;
+  if (!i || !i.S || !i.iv) { wrap.innerHTML = '<div class="cmp-empty">Run the BSM Calculator first</div>'; return; }
+
+  const S = i.S, iv = i.iv, T = i.T || (i.dte / 365), K = i.K;
+  const W = (gv('iWidth') || 5) * A.step;
+  const lot = Math.max(1, gv('iLotSz')), lots = Math.max(1, gv('iLots')), qty = lots * lot;
+
+  /* BSM at key strikes */
+  const ivP = A.skewMode === 'skew' ? (gv('iIVPut') || iv) : iv;
+  const ivC = A.skewMode === 'skew' ? (gv('iIVCall') || iv) : iv;
+  function bsmAt(K2) {
+    const iv2 = getSkewIV(K2, S, iv, ivP, ivC, A.skewMode === 'skew');
+    return bsm(S, K2, T, R, iv2/100, Q);
+  }
+
+  /* IV rank for signal */
+  const ivH = gv('iIVHigh'), ivL2 = gv('iIVLow');
+  let rank = -1;
+  if (ivH > ivL2) rank = Math.min(100, Math.max(0, (iv - ivL2) / (ivH - ivL2) * 100));
+
+  /* Helper: compute strategy metrics */
+  function cmpMetrics(stratId) {
+    let legs = [];
+    const rK = bsmAt(K), rKpW = bsmAt(K+W), rKmW = bsmAt(K-W), rKp2W = bsmAt(K+2*W), rKm2W = bsmAt(K-2*W);
+    if (!rK) return null;
+
+    switch (stratId) {
+      case 'single_call': legs=[{dir:1,type:'call',K,res:rK}]; break;
+      case 'single_put':  legs=[{dir:1,type:'put', K,res:rK}]; break;
+      case 'bull_cs':     legs=[{dir:1,type:'call',K,res:rK},{dir:-1,type:'call',K:K+W,res:rKpW}]; break;
+      case 'bear_ps':     legs=[{dir:1,type:'put', K,res:rK},{dir:-1,type:'put', K:K-W,res:rKmW}]; break;
+      case 'straddle':    legs=[{dir:1,type:'call',K,res:rK},{dir:1,type:'put',K,res:rK}]; break;
+      case 'strangle':    legs=[{dir:1,type:'call',K:K+W,res:rKpW},{dir:1,type:'put',K:K-W,res:rKmW}]; break;
+      case 'iron_condor': legs=[{dir:-1,type:'call',K:K+W,res:rKpW},{dir:1,type:'call',K:K+2*W,res:rKp2W},
+                                {dir:-1,type:'put', K:K-W,res:rKmW},{dir:1,type:'put', K:K-2*W,res:rKm2W}]; break;
+    }
+    if (legs.some(l => !l.res)) return null;
+
+    const netPrem = legs.reduce((s,l) => s + l.dir*(l.type==='call'?l.res.call:l.res.put), 0);
+    const isCredit = netPrem < 0;
+    const absNet   = Math.abs(netPrem);
+    const ts = tScale();
+
+    /* Position Greeks */
+    const nTheta = legs.reduce((s,l) => s + l.dir*(l.type==='call'?l.res.theta_c:l.res.theta_p)*ts*qty, 0);
+
+    /* Payoff scan ±20% */
+    function pay(spot) {
+      return legs.reduce((s,l) => s + l.dir*(l.type==='call'?Math.max(0,spot-l.K):Math.max(0,l.K-spot))
+                                     - l.dir*(l.type==='call'?l.res.call:l.res.put), 0) * qty;
+    }
+    const rng = S * 0.20;
+    let maxP = -Infinity, minP = Infinity;
+    for (let n = 0; n <= 200; n++) {
+      const v = pay(S - rng + rng * 2 * n / 200);
+      if (v > maxP) maxP = v; if (v < minP) minP = v;
+    }
+    const farUp = pay(S * 1.5);
+    const isUnlim = stratId === 'single_call' || stratId === 'straddle' || stratId === 'strangle' || farUp > maxP * 1.5;
+
+    /* PoP */
+    const Fval = gv('iFut') > 0 ? gv('iFut') : S * Math.exp(R * T);
+    let pop = 0;
+    const sigma = iv/100, sqT = Math.sqrt(T);
+    const beK_main = isCredit
+      ? (stratId.startsWith('single_put') ? K - absNet : K + absNet)
+      : (stratId === 'single_call' ? K + absNet : netPrem);  // simplified
+    // Use analytical breakevens from computeBEs
+    const BEs = computeBEs(legs, stratId === 'single_call' || stratId === 'single_put'
+      ? (stratId === 'single_call' ? 'single' : 'single') : stratId, netPrem);
+    if (BEs.length > 0) {
+      // PoP = prob all BEs breached in our favour
+      const mainBE = stratId === 'single_call' || stratId === 'bull_cs' ? BEs[0]
+                   : stratId === 'single_put'  || stratId === 'bear_ps' ? BEs[0]
+                   : BEs.length === 2 ? Math.min(BEs[0], BEs[1]) : BEs[0];
+      if (mainBE > 0 && T > 0 && sigma > 0) {
+        const dbe = (Math.log(Fval / mainBE) - 0.5 * sigma * sigma * T) / (sigma * sqT);
+        if      (stratId === 'single_call' || stratId === 'bull_cs') pop = Phi(dbe)  * 100;
+        else if (stratId === 'single_put'  || stratId === 'bear_ps') pop = Phi(-dbe) * 100;
+        else if (stratId === 'iron_condor') {
+          const be1 = BEs[0], be2 = BEs[1];
+          const d1b = (Math.log(Fval/be1)-0.5*sigma*sigma*T)/(sigma*sqT);
+          const d2b = (Math.log(Fval/be2)-0.5*sigma*sigma*T)/(sigma*sqT);
+          pop = (Phi(d1b) - Phi(d2b)) * 100;  // prob between both BEs
+        } else {
+          // straddle/strangle: need S to move past at least one BE
+          pop = (1 - (Phi((Math.log(Fval/BEs[0])-0.5*sigma*sigma*T)/(sigma*sqT))
+                    - Phi((Math.log(Fval/BEs[1])-0.5*sigma*sigma*T)/(sigma*sqT)))) * 100;
+        }
+      }
+    }
+    pop = Math.min(100, Math.max(0, pop));
+
+    const lossAbs = Math.abs(minP);
+    const rr = lossAbs > 0.01 ? (isUnlim ? '∞:1' : (maxP/lossAbs).toFixed(2)+':1') : '∞:0';
+
+    return { netPrem, isCredit, absNet, nTheta, maxP, minP, lossAbs, isUnlim, pop, rr, BEs };
+  }
+
+  /* Build table */
+  let html = '<div class="cmp-table-wrap"><table class="cmp-table"><thead><tr>' +
+    '<th>Strategy</th><th>Net / unit</th><th>Max Profit</th><th>Max Loss</th>' +
+    '<th>PoP</th><th>θ / day</th><th>R:R</th><th>Best for</th></tr></thead><tbody>';
+
+  /* Determine best strategy for current bias + IV regime */
+  function isBest(stratObj) {
+    if (!stratObj.bias.includes(A_cmpBias)) return false;
+    if (rank < 0) return false; // no IV range set
+    if (A_cmpBias === 'neut') {
+      // neutral: if IV rank high → iron condor, else straddle/strangle
+      if (stratObj.id === 'iron_condor' && rank >= 50) return true;
+      if ((stratObj.id === 'straddle' || stratObj.id === 'strangle') && rank < 50) return true;
+    } else {
+      // directional: if IV rank low → buy outright; if IV rank high → spread
+      if (A_cmpBias === 'bull') {
+        if (stratObj.id === 'single_call' && rank < 35) return true;
+        if (stratObj.id === 'bull_cs' && rank >= 35) return true;
+      } else if (A_cmpBias === 'bear') {
+        if (stratObj.id === 'single_put' && rank < 35) return true;
+        if (stratObj.id === 'bear_ps' && rank >= 35) return true;
+      }
+    }
+    return false;
+  }
+
+  let bestCount = 0;
+  CMP_STRATS.forEach(s => {
+    const m = cmpMetrics(s.id); if (!m) return;
+    const best = isBest(s);
+    if (best) bestCount++;
+
+    const inBias = s.bias.includes(A_cmpBias);
+    const rowStyle = best ? ' class="cmp-best"' : '';
+    const dimStyle = !inBias ? ' style="opacity:.45"' : '';
+
+    const netStr = m.isCredit
+      ? '<span style="color:var(--green)">+₹' + m.absNet.toFixed(2) + '</span>'
+      : '<span style="color:var(--red)">−₹' + m.absNet.toFixed(2) + '</span>';
+    const maxPStr = m.isUnlim
+      ? '<span style="color:var(--green)">Unlimited</span>'
+      : '<span style="color:var(--green)">₹' + Math.max(0,m.maxP).toFixed(0) + '</span>';
+    const maxLStr = '<span style="color:var(--red)">₹' + m.lossAbs.toFixed(0) + '</span>';
+    const popStr  = '<span style="color:' + (m.pop>50?'var(--green)':m.pop>35?'var(--yellow)':'var(--red)') + '">' + m.pop.toFixed(0) + '%</span>';
+    const thStr   = '<span style="color:var(--orange)">' + m.nTheta.toFixed(0) + '/d</span>';
+    const rrStr   = '<span style="color:var(--cyan)">' + m.rr + '</span>';
+    const bestBadge = best ? '<span class="cmp-badge-best">★ Best match</span>' : '';
+    const biasIcons = s.bias.map(b => b==='bull'?'📈':b==='bear'?'📉':'↔').join(' ');
+
+    html += '<tr' + rowStyle + dimStyle + '>' +
+      '<td><span style="font-weight:600">' + s.name + bestBadge + '</span>' +
+      '<br><span style="font-size:.5rem;color:var(--t3)">' + s.desc + '</span></td>' +
+      '<td>' + netStr + '</td>' +
+      '<td>' + maxPStr + '</td>' +
+      '<td>' + maxLStr + '</td>' +
+      '<td>' + popStr  + '</td>' +
+      '<td>' + thStr   + '</td>' +
+      '<td>' + rrStr   + '</td>' +
+      '<td style="font-size:.56rem;color:var(--t3)">' + biasIcons + '</td>' +
+      '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  wrap.innerHTML = html;
+
+  /* Note */
+  const note = el('cmpNote'); if (note) {
+    let noteText = 'All values computed at current IV ' + iv.toFixed(1) + '%, DTE ' + i.dte + 'd, K=₹' + K.toLocaleString('en-IN') + ', qty=' + qty + '.';
+    if (rank >= 0) noteText += ' IV Rank ' + rank.toFixed(0) + '% → ' + (rank<30?'low IV: favour buying premium. IV expansion gives extra tailwind.':rank>70?'high IV: favour selling premium. IV contraction amplifies credit gain.':'mid IV: spreads offer good risk/reward. Avoid expensive outright buys.');
+    noteText += ' Grey rows fall outside selected bias. ★ = recommended for current IV regime + bias.';
+    note.textContent = noteText;
+    note.style.display = 'block';
+  }
+}
+
+
+/* §L  POSITION P&L TRACKER ─────────────────────────────────────────
+   Trader enters: strike, type, direction, premium paid, lots, entry DTE, entry IV.
+   Platform computes: current P&L vs entry, Greeks on live position,
+   theta already decayed, how much DTE consumed, breakeven vs current spot.
+   All math via BSM — no external data needed.
+───────────────────────────────────────────────────────────────────── */
+let POS = { dir:'long', type:'call' };  // position state
+
+function setPosDir(d, btn) {
+  POS.dir = d;
+  ['ptLong','ptShort'].forEach(id => { const b = el(id); if(b) b.className='pos-type-btn'; });
+  if (btn) btn.className = 'pos-type-btn ' + (d==='long'?'active-call':'active-put');
+}
+
+function setPosType(t, btn) {
+  POS.type = t;
+  ['ptCall','ptPut'].forEach(id => { const b = el(id); if(b) b.className='pos-type-btn'; });
+  if (btn) btn.className = 'pos-type-btn ' + (t==='call'?'active-call':'active-put');
+}
+
+function posAutoFill() {
+  /* Pull current calculator inputs into position form */
+  const i = getInputs();
+  _writing = true;
+  el('ptStrike').value    = i.K;
+  el('ptEntrySpot').value = i.S;
+  el('ptEntryDTE').value  = i.dte;
+  el('ptEntryIV').value   = i.iv;
+  el('ptLots').value      = i.lots;
+  _writing = false;
+  /* Also set the type from current selection */
+  const t = A.type === 'put' ? 'put' : 'call';
+  POS.type = t;
+  ['ptCall','ptPut'].forEach(id => { const b = el(id); if(b) b.className='pos-type-btn'; });
+  const tb = el(t==='call'?'ptCall':'ptPut'); if (tb) tb.className = 'pos-type-btn active-' + t;
+
+  /* Auto-fill premium from last BSM result */
+  if (A.lastBSM) {
+    const entryPx = t === 'call' ? A.lastBSM.call : A.lastBSM.put;
+    _writing = true; el('ptPrem').value = entryPx.toFixed(2); _writing = false;
+  }
+}
+
+function calcPosition() {
+  const area = el('posResultArea'); if (!area) return;
+
+  /* Read inputs */
+  const K_ent    = parseFloat(el('ptStrike').value) || 0;
+  const prem_ent = parseFloat(el('ptPrem').value)   || 0;
+  const lots     = Math.max(1, parseFloat(el('ptLots').value) || 1);
+  const lot      = Math.max(1, gv('iLotSz'));
+  const qty      = lots * lot;
+  const dte_ent  = parseFloat(el('ptEntryDTE').value) || 1;
+  const iv_ent   = parseFloat(el('ptEntryIV').value)  || gv('iIV');
+  const dir      = POS.dir;   // 'long' | 'short'
+  const type     = POS.type;  // 'call' | 'put'
+  const dirMult  = dir === 'long' ? 1 : -1;
+
+  if (!K_ent || !prem_ent || !iv_ent) {
+    area.innerHTML = '<div class="pos-empty">Please fill in all entry fields</div>'; return;
+  }
+
+  /* Current market state from calculator */
+  const S_now   = gv('iSpot');
+  const dte_now = gv('iDTE');    // current DTE remaining
+  const iv_now  = gv('iIV');
+  if (!S_now || !dte_now) {
+    area.innerHTML = '<div class="pos-empty">Run the BSM Calculator first to set current spot and DTE</div>'; return;
+  }
+
+  /* Entry state */
+  const S_ent    = parseFloat(el('ptEntrySpot').value) || S_now;
+
+  /* Entry BSM — use entry spot, entry DTE, entry IV */
+  const T_ent = dte_ent / 365;
+  const res_ent = bsm(S_ent, K_ent, T_ent, R, iv_ent/100, Q);
+  if (!res_ent) { area.innerHTML = '<div class="pos-empty">BSM calculation failed — check inputs</div>'; return; }
+
+  /* Current BSM (same spot, same strike, current DTE + current IV) */
+  const T_now = dte_now / 365;
+  const res_now = bsm(S_now, K_ent, T_now, R, iv_now/100, Q);
+  if (!res_now) { area.innerHTML = '<div class="pos-empty">Current BSM failed</div>'; return; }
+
+  /* Prices */
+  const px_ent = type === 'call' ? res_ent.call : res_ent.put;
+  const px_now = type === 'call' ? res_now.call : res_now.put;
+
+  /* P&L — for long: (currentPx - entryPx)*qty; short: (entryPx - currentPx)*qty */
+  const pnl_unit    = dirMult * (px_now - prem_ent);
+  const pnl_total   = pnl_unit * qty;
+  const pnl_pct     = prem_ent > 0 ? pnl_unit / prem_ent * 100 : 0;
+
+  /* Theta decayed since entry (in ₹) */
+  const dte_elapsed = Math.max(0, dte_ent - dte_now);
+  const th_entry    = type === 'call' ? res_ent.theta_c : res_ent.theta_p;
+  /* Approximate theta decayed using entry theta × days elapsed */
+  const theta_decayed_unit  = Math.abs(th_entry) * dte_elapsed;
+  const theta_decayed_total = theta_decayed_unit * qty;
+  /* Current theta on position */
+  const th_now   = type === 'call' ? res_now.theta_c : res_now.theta_p;
+  const th_pos   = dirMult * th_now * qty;
+  const ts       = tScale();
+  const th_daily = dirMult * th_now * ts;
+
+  /* Current position Greeks */
+  const de_now = type === 'call' ? res_now.delta_c : res_now.delta_p;
+  const de_pos  = dirMult * de_now * qty;
+  const ga_pos  = dirMult * res_now.gamma;
+  const ve_pos  = dirMult * res_now.vega * qty;
+
+  /* Breakeven */
+  const be = type === 'call' ? K_ent + prem_ent : K_ent - prem_ent;
+  const be_pct = (be - S_now) / S_now * 100;
+
+  /* Max loss (for long = premium paid total; for short = unlimited/spread) */
+  const maxLoss_long  = prem_ent * qty;
+  const maxLoss_short = 9999999;  // unlimited for naked — we'll note this
+
+  /* P&L % of max risk */
+  const pnlVsRisk = dir === 'long' ? (pnl_total / maxLoss_long * 100) : null;
+
+  /* TV remaining */
+  const intrinsic_now = type === 'call' ? Math.max(0, S_now - K_ent) : Math.max(0, K_ent - S_now);
+  const tv_now = Math.max(0, px_now - intrinsic_now);
+  const tv_ent = Math.max(0, prem_ent - (type === 'call' ? Math.max(0, S_now - K_ent) : Math.max(0, K_ent - S_now)));
+  const tv_decayed_pct = tv_ent > 0 ? Math.min(100, (tv_ent - tv_now) / tv_ent * 100) : 0;
+
+  /* ── Render ── */
+  const isPnlPos = pnl_total >= 0;
+  const pnlClass = isPnlPos ? 'profit' : 'loss';
+
+  const dirBadge = '<span class="pos-direction-badge ' + (dir==='long'?'pos-long':'pos-short') + '">' + dir.toUpperCase() + ' ' + type.toUpperCase() + '</span>';
+
+  /* Pre-compute conditional HTML snippets to avoid nested quotes inside template literals */
+  const riskPctHtml = (dir==='long' && pnlVsRisk !== null)
+    ? '<div class="pos-pnl-stat">% of Risk: <span class="pos-stat-val" style="color:' + (isPnlPos?'var(--green)':'var(--red)') + '">' + (isPnlPos?'+':'') + pnlVsRisk.toFixed(1) + '%</span></div>'
+    : '';
+
+  area.innerHTML = `
+    <div class="pos-pnl-banner">
+      <div>
+        <div style="font-size:.55rem;color:var(--t3);margin-bottom:.14rem">Total Position P&L · ${dirBadge}</div>
+        <div class="pos-pnl-main ${pnlClass}">${isPnlPos?'+':''}₹${Math.abs(pnl_total).toLocaleString('en-IN',{maximumFractionDigits:0})}</div>
+        <div class="pos-pnl-sub">₹${pnl_unit.toFixed(2)}/unit · ${pnl_pct.toFixed(1)}% · ${qty.toLocaleString()} units</div>
+      </div>
+      <div class="pos-pnl-stats">
+        <div class="pos-pnl-stat">Entry px: <span class="pos-stat-val">₹${prem_ent.toFixed(2)}</span></div>
+        <div class="pos-pnl-stat">Entry spot: <span class="pos-stat-val">₹${S_ent.toLocaleString('en-IN')}</span></div>
+        <div class="pos-pnl-stat">Now: <span class="pos-stat-val">₹${px_now.toFixed(2)}</span></div>
+        <div class="pos-pnl-stat">Δ/unit: <span class="pos-stat-val" style="color:${isPnlPos?'var(--green)':'var(--red)'}">₹${pnl_unit.toFixed(2)}</span></div>
+        ${riskPctHtml}
+      </div>
+    </div>
+
+    <div class="pos-grid">
+      <div class="pos-card">
+        <div class="pos-card-lbl">Breakeven</div>
+        <div class="pos-card-val" style="color:var(--yellow)">₹${Math.round(be).toLocaleString('en-IN')}</div>
+        <div class="pos-card-sub">${be_pct>=0?'+':''}${be_pct.toFixed(2)}% from spot</div>
+      </div>
+      <div class="pos-card">
+        <div class="pos-card-lbl">DTE Consumed</div>
+        <div class="pos-card-val" style="color:var(--orange)">${dte_elapsed}d</div>
+        <div class="pos-card-sub">of ${dte_ent}d entry · ${dte_now}d left</div>
+      </div>
+      <div class="pos-card">
+        <div class="pos-card-lbl">θ Decayed (est.)</div>
+        <div class="pos-card-val" style="color:var(--red)">₹${theta_decayed_total.toFixed(0)}</div>
+        <div class="pos-card-sub">₹${theta_decayed_unit.toFixed(2)}/unit since entry</div>
+      </div>
+      <div class="pos-card">
+        <div class="pos-card-lbl">θ Now / day</div>
+        <div class="pos-card-val" style="color:var(--orange)">${th_daily>=0?'+':''}₹${(th_daily*qty).toFixed(2)}</div>
+        <div class="pos-card-sub">pos · ${fRs(th_daily,2)}/unit</div>
+      </div>
+      <div class="pos-card">
+        <div class="pos-card-lbl">Net Δ (pos)</div>
+        <div class="pos-card-val" style="color:var(--blue)">${de_pos>=0?'+':''}${de_pos.toFixed(0)}</div>
+        <div class="pos-card-sub">₹/₹1 spot move</div>
+      </div>
+      <div class="pos-card">
+        <div class="pos-card-lbl">Net Vega (pos)</div>
+        <div class="pos-card-val" style="color:var(--cyan)">${ve_pos>=0?'+':''}₹${Math.abs(ve_pos).toFixed(0)}</div>
+        <div class="pos-card-sub">per 1% IV move</div>
+      </div>
+      <div class="pos-card">
+        <div class="pos-card-lbl">TV Remaining</div>
+        <div class="pos-card-val" style="color:var(--purple)">₹${tv_now.toFixed(2)}</div>
+        <div class="pos-card-sub">intrinsic ₹${intrinsic_now.toFixed(2)}</div>
+      </div>
+      <div class="pos-card">
+        <div class="pos-card-lbl">IV at Entry</div>
+        <div class="pos-card-val" style="color:var(--yellow)">${iv_ent.toFixed(1)}%</div>
+        <div class="pos-card-sub">now ${iv_now.toFixed(1)}% · Δ ${(iv_now-iv_ent>=0?'+':'')+(iv_now-iv_ent).toFixed(1)}%</div>
+      </div>
+    </div>
+
+    <div class="pos-decay-bar-wrap">
+      <div class="pos-decay-title">Time Value Decayed Since Entry</div>
+      <div class="pos-decay-track"><div class="pos-decay-fill" style="width:${tv_decayed_pct.toFixed(0)}%"></div></div>
+      <div class="pos-decay-labels">
+        <span>Entry (${dte_ent}d)</span>
+        <span>${tv_decayed_pct.toFixed(0)}% TV decayed</span>
+        <span>Expiry</span>
+      </div>
+    </div>
+  `;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MAX PAIN CALCULATOR
+   Algorithm: for each candidate expiry price (each entered strike),
+   compute total option pain = CE_OI*max(0,price-K) + PE_OI*max(0,K-price)
+   Min total pain = Max Pain price
+   ═══════════════════════════════════════════════════════════════════════ */
+
+let mpChartOI   = null;
+let mpChartPain = null;
+let mpStrikesCache = [];
+
+function mpSync() {
+  const i = getInputs();
+  if (!i || !i.S) return;
+  _writing = true;
+  el('mpCentre').value = Math.round(i.S / A.step) * A.step;
+  el('mpStep').value   = A.step;
+  _writing = false;
+  mpGenStrikes();
+}
+
+function mpGenStrikes() {
+  const centre = parseFloat(el('mpCentre').value) || 25000;
+  const step   = parseFloat(el('mpStep').value)   || 50;
+  const range  = Math.min(20, Math.max(2, parseInt(el('mpRange').value) || 8));
+  const spot   = gv('iSpot') || centre;
+  const prevMap = {};
+  mpStrikesCache.forEach(r => { prevMap[r.K] = { ce: r.ce, pe: r.pe }; });
+  const strikes = [];
+  for (let n = -range; n <= range; n++) strikes.push(centre + n * step);
+  mpStrikesCache = strikes.map(K => ({ K, ce: prevMap[K]?prevMap[K].ce:0, pe: prevMap[K]?prevMap[K].pe:0 }));
+  const atmK = Math.round(spot / step) * step;
+  renderMpTable(spot, atmK);
+}
+
+function mpComputePains(strikes) {
+  return strikes.map(candidate => {
+    let pain = 0;
+    strikes.forEach(row => {
+      pain += row.ce * Math.max(0, candidate.K - row.K);
+      pain += row.pe * Math.max(0, row.K - candidate.K);
+    });
+    return { K: candidate.K, pain };
+  });
+}
+
+function renderMpTable(spot, atmK) {
+  const tbody = el('mpTbody'); if (!tbody) return;
+  spot = spot || gv('iSpot') || parseFloat(el('mpCentre').value);
+  const step = parseFloat(el('mpStep').value) || 50;
+  atmK = atmK || Math.round(spot / step) * step;
+  const totCE = mpStrikesCache.reduce((s,r)=>s+r.ce,0) || 1;
+  const totPE = mpStrikesCache.reduce((s,r)=>s+r.pe,0) || 1;
+  const pains = mpComputePains(mpStrikesCache);
+  const minPain = Math.min(...pains.map(p=>p.pain));
+  tbody.innerHTML = mpStrikesCache.map((row, idx) => {
+    const isATM = row.K === atmK;
+    const isMP  = pains.length > 0 && Math.abs(pains[idx].pain - minPain) < 0.01 && (totCE+totPE) > 2;
+    const rowCls = isMP ? 'mp-maxpain' : isATM ? 'mp-atm' : '';
+    const badge  = isMP ? '<span class="mp-mp-badge">MAX PAIN</span>' : isATM ? '<span class="mp-atm-badge">ATM</span>' : '';
+    const net = row.pe - row.ce;
+    return '<tr class="'+rowCls+'">' +
+      '<td><span class="mp-strike-lbl">\u20b9'+row.K.toLocaleString('en-IN')+'</span>'+badge+'</td>' +
+      '<td><input type="number" min="0" step="100" value="'+row.ce+'" oninput="mpUpdateOI('+idx+',\'ce\',this.value)" /></td>' +
+      '<td><input type="number" min="0" step="100" value="'+row.pe+'" oninput="mpUpdateOI('+idx+',\'pe\',this.value)" /></td>' +
+      '<td style="color:var(--red)">'+(row.ce>0?(row.ce/totCE*100).toFixed(1)+'%':'--')+'</td>' +
+      '<td style="color:var(--green)">'+(row.pe>0?(row.pe/totPE*100).toFixed(1)+'%':'--')+'</td>' +
+      '<td style="color:'+(net>0?'var(--green)':net<0?'var(--red)':'var(--t3)')+'">'+
+        (net===0?'--':(net>0?'+':'')+net.toLocaleString())+'</td>' +
+      '<td style="color:var(--t3);font-size:.58rem">'+(pains.length>0?Math.round(pains[idx].pain).toLocaleString():'--')+'</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function mpUpdateOI(idx, field, val) {
+  if (mpStrikesCache[idx]) {
+    mpStrikesCache[idx][field] = parseFloat(val) || 0;
+    const spot = gv('iSpot') || parseFloat(el('mpCentre').value);
+    const step = parseFloat(el('mpStep').value) || 50;
+    renderMpTable(spot, Math.round(spot/step)*step);
+  }
+}
+
+function mpCalculate() {
+  const pains = mpComputePains(mpStrikesCache);
+  if (!pains.length) return;
+  const spot = gv('iSpot') || parseFloat(el('mpCentre').value);
+  const step = parseFloat(el('mpStep').value) || 50;
+  const totCE = mpStrikesCache.reduce((s,r)=>s+r.ce,0);
+  const totPE = mpStrikesCache.reduce((s,r)=>s+r.pe,0);
+  if (totCE + totPE === 0) {
+    const nt = el('mpNote'); nt.style.display='block';
+    nt.textContent='Enter OI values in the table first, then click Calculate.'; return;
+  }
+  let minPain = Infinity, mpStrike = pains[0].K;
+  pains.forEach(p => { if (p.pain < minPain) { minPain = p.pain; mpStrike = p.K; } });
+  const pcr    = totCE > 0 ? totPE / totCE : 0;
+  const mpDist = spot > 0 ? (mpStrike - spot) / spot * 100 : 0;
+  const pcrSig = pcr > 1.3 ? 'Bullish (heavy put writing)' : pcr < 0.7 ? 'Bearish (heavy call writing)' : 'Neutral OI balance';
+  const mpSig  = Math.abs(mpDist) < 1 ? 'Near current spot' :
+    mpDist > 0 ? 'Max pain '+mpDist.toFixed(1)+'% above spot' : 'Max pain '+Math.abs(mpDist).toFixed(1)+'% below spot';
+  const atmK = Math.round(spot/step)*step;
+  const cards = el('mpCards');
+  cards.innerHTML =
+    '<div class="mp-result-card highlight">' +
+      '<div class="mp-result-lbl">Max Pain Strike</div>' +
+      '<div class="mp-result-val" style="color:var(--yellow)">\u20b9'+mpStrike.toLocaleString('en-IN')+'</div>' +
+      '<div class="mp-result-sub">'+mpSig+'</div></div>' +
+    '<div class="mp-result-card">' +
+      '<div class="mp-result-lbl">Put-Call Ratio (PCR)</div>' +
+      '<div class="mp-result-val" style="color:'+(pcr>1?'var(--green)':pcr<0.8?'var(--red)':'var(--yellow)')+'">'+pcr.toFixed(2)+'</div>' +
+      '<div class="mp-result-sub">'+pcrSig+'</div></div>' +
+    '<div class="mp-result-card">' +
+      '<div class="mp-result-lbl">Total CE OI</div>' +
+      '<div class="mp-result-val" style="color:var(--red)">'+totCE.toLocaleString()+'</div>' +
+      '<div class="mp-result-sub">Call writers\u2019 exposure</div></div>' +
+    '<div class="mp-result-card">' +
+      '<div class="mp-result-lbl">Total PE OI</div>' +
+      '<div class="mp-result-val" style="color:var(--green)">'+totPE.toLocaleString()+'</div>' +
+      '<div class="mp-result-sub">Put writers\u2019 exposure</div></div>';
+  el('mpResultsWrap').style.display = 'block';
+  renderMpTable(spot, atmK);
+  /* OI Distribution chart */
+  el('mpChartWrap').style.display = 'block';
+  const labels   = mpStrikesCache.map(r => '\u20b9'+r.K.toLocaleString('en-IN'));
+  const ceData   = mpStrikesCache.map(r => r.ce);
+  const peData   = mpStrikesCache.map(r => r.pe);
+  const mpIdx    = mpStrikesCache.findIndex(r => r.K === mpStrike);
+  if (mpChartOI) { mpChartOI.destroy(); mpChartOI=null; }
+  mpChartOI = new Chart(el('mpOIChart').getContext('2d'), {
+    type:'bar',
+    data:{ labels, datasets:[
+      { label:'CE OI (Calls)', data:ceData, backgroundColor:ceData.map((_,i)=>i===mpIdx?'rgba(234,179,8,.85)':'rgba(239,68,68,.55)'), borderRadius:3, order:1 },
+      { label:'PE OI (Puts)',  data:peData, backgroundColor:peData.map((_,i)=>i===mpIdx?'rgba(234,179,8,.45)':'rgba(34,197,94,.45)'),  borderRadius:3, order:2 }
+    ]},
+    options:{ responsive:true, animation:false,
+      plugins:{ legend:{ labels:{ color:'#A0ABBB', font:{family:"'DM Mono'",size:10}, boxWidth:12 } },
+        tooltip:{ callbacks:{ afterTitle: ctx => ctx[0].dataIndex===mpIdx?'\u2605 MAX PAIN STRIKE':'' } } },
+      scales:{ x:{ ticks:{color:'#5A6780',font:{family:"'DM Mono'",size:8},maxRotation:45}, grid:{color:'rgba(255,255,255,.04)'} },
+               y:{ ticks:{color:'#5A6780',font:{family:"'DM Mono'",size:9},callback:v=>v>=1000?Math.round(v/1000)+'K':v}, grid:{color:'rgba(255,255,255,.06)'} } } }
+  });
+  /* Pain curve chart */
+  el('mpPainChartWrap').style.display = 'block';
+  const painVals = pains.map(p=>p.pain);
+  const minPainIdx = painVals.indexOf(Math.min(...painVals));
+  if (mpChartPain) { mpChartPain.destroy(); mpChartPain=null; }
+  mpChartPain = new Chart(el('mpPainChart').getContext('2d'), {
+    type:'line',
+    data:{ labels, datasets:[{ label:'Total Option Pain', data:painVals,
+      borderColor:'rgba(99,102,241,.8)', backgroundColor:'rgba(99,102,241,.07)',
+      pointBackgroundColor:painVals.map((_,i)=>i===minPainIdx?'rgba(234,179,8,1)':'rgba(99,102,241,.6)'),
+      pointRadius:painVals.map((_,i)=>i===minPainIdx?8:3),
+      borderWidth:2, fill:true, tension:0.3 }]},
+    options:{ responsive:true, animation:false,
+      plugins:{ legend:{display:false},
+        tooltip:{ callbacks:{ afterTitle:ctx=>ctx[0].dataIndex===minPainIdx?'\u2605 MAX PAIN \u2014 writers collect most here':'',
+          label:ctx=>' Pain: '+Math.round(ctx.raw).toLocaleString() } } },
+      scales:{ x:{ ticks:{color:'#5A6780',font:{family:"'DM Mono'",size:8},maxRotation:45}, grid:{color:'rgba(255,255,255,.04)'} },
+               y:{ ticks:{color:'#5A6780',font:{family:"'DM Mono'",size:9},
+                    callback:v=>v>=1e6?Math.round(v/1e6)+'M':v>=1000?Math.round(v/1000)+'K':v}, grid:{color:'rgba(255,255,255,.06)'} } } }
+  });
+  /* Note */
+  const nt = el('mpNote'); nt.style.display='block';
+  nt.innerHTML = '<strong>Max Pain \u20b9'+mpStrike.toLocaleString('en-IN')+'</strong> \u2014 At this expiry price, option writers (institutions) collect the maximum net premium. ' +
+    'Expiry gravitates here due to writer delta-hedging. ' +
+    '<strong>PCR '+pcr.toFixed(2)+':</strong> '+(pcr>1.3?'Heavy put writing signals institutional downside protection \u2014 bullish tilt.':pcr<0.7?'Heavy call writing signals sellers expect upside cap.':'Balanced OI.')+' ' +
+    'Distance: '+(mpDist>0?'+':'')+mpDist.toFixed(1)+'% from current spot. <em>Max pain is a gravitational signal, not a guarantee.</em>';
+}
+
+function onMpTabOpen() {
+  if (mpStrikesCache.length === 0) {
+    const i = getInputs();
+    if (i && i.S) {
+      _writing=true; el('mpCentre').value=Math.round(i.S/A.step)*A.step; el('mpStep').value=A.step; _writing=false;
+    }
+    mpGenStrikes();
+  }
+}
+
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   §N  LIVE DATA ENGINE  — Dhan backend integration
+   ═══════════════════════════════════════════════════════════════════════
+   Architecture:
+     loadExpiries(scrip)  → populates expiry <select>
+     loadLiveChain()      → fetches chain, injects into calculator
+     applyLiveChain(data) → wires spot, IV, DTE, OI into all panels
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const BACKEND = 'https://options-premium-erosion-calculator.onrender.com';
+let _liveChain   = null;   // last fetched chain response
+let _liveLoading = false;
+
+/* ── Status helpers ─────────────────────────────────────────────────── */
+function liveSetStatus(state, text) {
+  const dot  = el('liveStatusDot');
+  const txt  = el('liveStatusText');
+  if (!dot || !txt) return;
+  dot.className = 'live-status-dot ' + state;   // green | amber | red
+  txt.textContent = text;
+}
+
+function liveSetOffline(msg) {
+  liveSetStatus('red', msg || 'Backend offline');
+  const note = el('liveOfflineNote');
+  if (note) note.classList.add('visible');
+  const tb = el('topbarLiveBadge');
+  if (tb) tb.style.color = 'var(--t3)';
+}
+
+function liveSetOnline() {
+  const note = el('liveOfflineNote');
+  if (note) note.classList.remove('visible');
+  const tb = el('topbarLiveBadge');
+  if (tb) { tb.innerHTML = '<div class="live-dot"></div>Live Data'; tb.style.color = 'var(--green)'; }
+}
+
+/* ── Fetch expiry list and populate <select> ────────────────────────── */
+async function loadExpiries(scrip) {
+  const sel = el('liveExpiry');
+  const btn = el('liveLoadBtn');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Loading…</option>';
+  if (btn) btn.disabled = true;
+  liveSetStatus('amber', 'Fetching expiries…');
+  try {
+    const resp = await fetch(`${BACKEND}/api/expiries?scrip=${scrip}`);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const expiries = data.expiries || [];
+    if (!expiries.length) throw new Error('No expiries returned');
+
+    /* Build options — label upcoming weekly/monthly */
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    sel.innerHTML = expiries.map(exp => {
+      const d    = new Date(exp);
+      const dte  = Math.round((d - today) / 86400000);
+      const lbl  = exp + '  (' + dte + 'd)';
+      return `<option value="${exp}">${lbl}</option>`;
+    }).join('');
+
+    /* Default: nearest expiry with DTE >= 1 */
+    const nearest = expiries.find(e => {
+      const dte = Math.round((new Date(e) - today) / 86400000);
+      return dte >= 0;
+    });
+    if (nearest) sel.value = nearest;
+
+    if (btn) btn.disabled = false;
+    liveSetStatus('green', 'Ready — ' + expiries.length + ' expiries');
+    liveSetOnline();
+  } catch(err) {
+    sel.innerHTML = '<option value="">Error loading expiries</option>';
+    liveSetOffline('Cannot reach backend');
+    console.error('[Live] loadExpiries:', err);
+  }
+}
+
+function onExpiryChange() {
+  const btn = el('liveLoadBtn');
+  if (btn) btn.disabled = !el('liveExpiry').value;
+}
+
+/* ── Fetch option chain and apply to calculator ─────────────────────── */
+async function loadLiveChain() {
+  if (_liveLoading) return;
+  const expiry = el('liveExpiry')?.value;
+  if (!expiry) return;
+  const scrip  = A.scrip || 13;
+  const btn    = el('liveLoadBtn');
+
+  _liveLoading = true;
+  if (btn) { btn.disabled = true; btn.textContent = 'Loading…'; }
+  liveSetStatus('amber', 'Fetching chain…');
+
+  try {
+    const resp = await fetch(`${BACKEND}/api/option-chain?scrip=${scrip}&expiry=${expiry}`);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    if (!data.chain || !data.spot) throw new Error('Invalid chain response');
+
+    _liveChain = data;
+    applyLiveChain(data);
+    liveSetStatus('green', 'Live · ' + data.chain.length + ' strikes · ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}));
+
+    /* Show badges */
+    const sb = el('liveSpotBadge');
+    if (sb) { sb.textContent = '₹' + data.spot.toLocaleString('en-IN',{maximumFractionDigits:2}); sb.style.display='inline-block'; }
+    const db = el('liveDteBadge');
+    if (db) { db.textContent = data.dte + 'd to expiry'; db.style.display='inline-block'; }
+    const cb = el('liveChainBadge');
+    if (cb) cb.classList.add('visible');
+    const rb = el('liveRefreshBtn');
+    if (rb) rb.classList.add('visible');
+
+  } catch(err) {
+    liveSetOffline('Chain load failed');
+    console.error('[Live] loadLiveChain:', err);
+  } finally {
+    _liveLoading = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Load Live';
+    }
+  }
+}
+
+/* ── Apply live chain data to every panel in the calculator ─────────── */
+function applyLiveChain(data) {
+  const spot    = data.spot;
+  const dte     = data.dte  || 1;
+  const lot     = data.lot  || gv('iLotSz');
+  const step    = data.step || A.step;
+  const chain   = data.chain;
+
+  /* 1 ── Update spot, DTE, lot size ─────────────────────────────────── */
+  _writing = true;
+  el('iSpot').value  = spot.toFixed(2);
+  el('iDTE').value   = dte;
+  el('iLotSz').value = lot;
+  _writing = false;
+  A.step = step;
+
+  /* ATM strike = nearest strike in chain to spot */
+  const atmRow = chain.reduce((best, row) =>
+    Math.abs(row.strike - spot) < Math.abs(best.strike - spot) ? row : best
+  , chain[0]);
+  const atmK = atmRow.strike;
+
+  /* 2 ── Set IV from ATM chain row (use CE IV as primary) ───────────── */
+  const atmIV = atmRow.ce?.iv || atmRow.pe?.iv || gv('iIV');
+  _writing = true;
+  el('iIV').value     = atmIV.toFixed(2);
+  el('iStrike').value = atmK;
+  el('sdVal').textContent   = atmK.toLocaleString('en-IN');
+  el('sdBadge').textContent = 'ATM';
+  el('sdBadge').className   = 'sd-badge atm';
+  _writing = false;
+  A.premManual = false;
+
+  /* 3 ── Update IV skew inputs if OTM data available ────────────────── */
+  const otmPutRow  = chain.find(r => r.strike < atmK - step && r.pe?.iv);
+  const otmCallRow = chain.find(r => r.strike > atmK + step && r.ce?.iv);
+  if (otmPutRow?.pe?.iv) { _writing=true; el('iIVPut').value  = otmPutRow.pe.iv.toFixed(2); _writing=false; }
+  if (otmCallRow?.ce?.iv){ _writing=true; el('iIVCall').value = otmCallRow.ce.iv.toFixed(2); _writing=false; }
+
+  /* 4 ── Recalculate BSM with live inputs ───────────────────────────── */
+  calculate();
+
+  /* 5 ── Inject live prices into Option Chain tab ────────────────────── */
+  injectLiveChain(chain, spot, atmK);
+
+  /* 6 ── Auto-populate Max Pain with live OI ─────────────────────────── */
+  injectLiveMaxPain(chain, spot, step);
+
+  /* 7 ── Update topbar underlying price display ───────────────────────── */
+  const activeTab = document.querySelector('.ul-tab.active');
+  if (activeTab) {
+    const priceEl = activeTab.querySelector('.ul-tab-price');
+    if (priceEl) priceEl.textContent = '₹' + spot.toLocaleString('en-IN',{maximumFractionDigits:0});
+  }
+}
+
+/* ── Inject into Option Chain tab ───────────────────────────────────── */
+function injectLiveChain(chain, spot, atmK) {
+  /* Build a lookup map for fast access */
+  const chainMap = {};
+  chain.forEach(row => { chainMap[row.strike] = row; });
+
+  /* Walk the existing rendered chain rows and update them */
+  const tbody = el('chainTbody');
+  if (!tbody) return;
+  const rows = tbody.querySelectorAll('tr[data-strike]');
+  rows.forEach(tr => {
+    const K   = parseFloat(tr.dataset.strike);
+    const row = chainMap[K];
+    if (!row) return;
+    const isATM = K === atmK;
+    if (isATM) {
+      tr.classList.add('chain-atm');
+    } else {
+      tr.classList.remove('chain-atm');
+    }
+    /* Update live price cells if they exist */
+    const cells = tr.querySelectorAll('[data-live]');
+    cells.forEach(cell => {
+      const field = cell.dataset.live;
+      const side  = cell.dataset.side;  // 'ce' or 'pe'
+      const legData = row[side];
+      if (!legData) return;
+      switch(field) {
+        case 'ltp': cell.textContent = legData.ltp != null ? '₹'+legData.ltp.toFixed(2) : '—'; break;
+        case 'iv':  cell.textContent = legData.iv  != null ? legData.iv.toFixed(1)+'%'   : '—'; break;
+        case 'oi':  cell.textContent = legData.oi  != null ? fmtOI(legData.oi)            : '—'; break;
+        case 'bid': cell.textContent = legData.bid != null ? '₹'+legData.bid.toFixed(2)  : '—'; break;
+        case 'ask': cell.textContent = legData.ask != null ? '₹'+legData.ask.toFixed(2)  : '—'; break;
+      }
+    });
+  });
+
+  /* If no data-live cells yet, do a full chain rebuild */
+  if (!rows.length) calculate();
+}
+
+/* ── Auto-populate Max Pain from live OI ───────────────────────────── */
+function injectLiveMaxPain(chain, spot, step) {
+  mpStrikesCache = chain.map(row => ({
+    K:  row.strike,
+    ce: row.ce?.oi || 0,
+    pe: row.pe?.oi || 0,
+  }));
+  /* Update centre + step in the UI controls */
+  const atmK = Math.round(spot / step) * step;
+  _writing = true;
+  el('mpCentre').value = atmK;
+  el('mpStep').value   = step;
+  _writing = false;
+  /* Re-render the table */
+  renderMpTable(spot, atmK);
+  /* Auto-calculate if we have OI data */
+  const hasOI = mpStrikesCache.some(r => r.ce > 0 || r.pe > 0);
+  if (hasOI) mpCalculate();
+}
+
+/* ── Format OI number (compact) ─────────────────────────────────────── */
+function fmtOI(n) {
+  if (!n && n !== 0) return '—';
+  if (n >= 1e7) return (n/1e7).toFixed(1)+'Cr';
+  if (n >= 1e5) return (n/1e5).toFixed(1)+'L';
+  if (n >= 1e3) return (n/1e3).toFixed(1)+'K';
+  return n.toString();
+}
+
+/* ── Init on page load ─────────────────────────────────────────────── */
+(async function initLive() {
+  /* Ping backend */
+  try {
+    const r = await fetch(`${BACKEND}/health`);
+    if (r.ok) {
+      liveSetOnline();
+      liveSetStatus('green', 'Backend online');
+      /* Load expiries for NIFTY (default active tab) */
+      await loadExpiries(13);
+    } else {
+      liveSetOffline('Backend returned ' + r.status);
+    }
+  } catch(e) {
+    liveSetOffline('Cannot reach backend');
+  }
+})();
+
+
+</script>
+</body>
+</html>
