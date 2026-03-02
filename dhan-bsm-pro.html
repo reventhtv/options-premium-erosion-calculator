@@ -2307,9 +2307,13 @@ function buildSensitivity(i) {
     const isCurr = off === 0;
     const row    = document.createElement('div');
     row.className = 'sens-row' + (isCurr ? ' curr' : '');
+    /* For current row, show live LTP if available */
+    const lv = isCurr ? _liveMap[i.K] : null;
+    const ceVal = (lv?.ce_ltp) ? lv.ce_ltp.toFixed(2) + '<span style="font-size:.52rem;color:var(--green);margin-left:.15rem">⬤</span>' : r2.call.toFixed(2);
+    const peVal = (lv?.pe_ltp) ? lv.pe_ltp.toFixed(2) + '<span style="font-size:.52rem;color:var(--green);margin-left:.15rem">⬤</span>' : r2.put.toFixed(2);
     row.innerHTML = `<span class="skey" style="${isCurr?'color:var(--blue);font-weight:600;':''}">σ = ${iv2.toFixed(1)}% ${off !== 0 ? '('+( off > 0 ? '+':'')+off+'%)' : '← current'}</span>
-      <span class="sce">CE ₹${r2.call.toFixed(2)}</span>
-      <span class="spe">PE ₹${r2.put.toFixed(2)}</span>`;
+      <span class="sce">CE ₹${ceVal}</span>
+      <span class="spe">PE ₹${peVal}</span>`;
     ivBody.appendChild(row);
   });
 
@@ -2325,9 +2329,12 @@ function buildSensitivity(i) {
     const isCurr = off === 0;
     const row    = document.createElement('div');
     row.className = 'sens-row' + (isCurr ? ' curr' : '');
+    const lv2 = isCurr ? _liveMap[i.K] : null;
+    const ceV2 = (lv2?.ce_ltp) ? lv2.ce_ltp.toFixed(2) + '<span style="font-size:.52rem;color:var(--green);margin-left:.15rem">⬤</span>' : r2.call.toFixed(2);
+    const peV2 = (lv2?.pe_ltp) ? lv2.pe_ltp.toFixed(2) + '<span style="font-size:.52rem;color:var(--green);margin-left:.15rem">⬤</span>' : r2.put.toFixed(2);
     row.innerHTML = `<span class="skey" style="${isCurr?'color:var(--blue);font-weight:600;':''}">T = ${d2}d ${off !== 0 ? '('+(off > 0 ? '+':'')+off+'d)' : '← current'}</span>
-      <span class="sce">CE ₹${r2.call.toFixed(2)}</span>
-      <span class="spe">PE ₹${r2.put.toFixed(2)}</span>`;
+      <span class="sce">CE ₹${ceV2}</span>
+      <span class="spe">PE ₹${peV2}</span>`;
     dteBody.appendChild(row);
   });
 }
@@ -3120,12 +3127,20 @@ function buildCompare(i) {
   const W = (gv('iWidth') || 5) * A.step;
   const lot = Math.max(1, gv('iLotSz')), lots = Math.max(1, gv('iLots')), qty = lots * lot;
 
-  /* BSM at key strikes */
+  /* BSM at key strikes — inject live LTP as premium override for display */
   const ivP = A.skewMode === 'skew' ? (gv('iIVPut') || iv) : iv;
   const ivC = A.skewMode === 'skew' ? (gv('iIVCall') || iv) : iv;
   function bsmAt(K2) {
     const iv2 = getSkewIV(K2, S, iv, ivP, ivC, A.skewMode === 'skew');
-    return bsm(S, K2, T, R, iv2/100, Q);
+    const res  = bsm(S, K2, T, R, iv2/100, Q);
+    if (!res) return res;
+    /* Override call/put with live LTP when available for this strike */
+    const lv = _liveMap[K2];
+    if (lv) {
+      if (lv.ce_ltp) res.call = lv.ce_ltp;
+      if (lv.pe_ltp) res.put  = lv.pe_ltp;
+    }
+    return res;
   }
 
   /* IV rank for signal */
@@ -3279,10 +3294,8 @@ function buildCompare(i) {
 
   /* Note */
   const note = el('cmpNote'); if (note) {
-    let noteText = 'All values computed at current IV ' + iv.toFixed(1) + '%, DTE ' + i.dte + 'd, K=₹' + K.toLocaleString('en-IN') + ', qty=' + qty + '.';
-    if (rank >= 0) noteText += ' IV Rank ' + rank.toFixed(0) + '% → ' + (rank<30?'low IV: favour buying premium. IV expansion gives extra tailwind.':rank>70?'high IV: favour selling premium. IV contraction amplifies credit gain.':'mid IV: spreads offer good risk/reward. Avoid expensive outright buys.');
-    noteText += ' Grey rows fall outside selected bias. ★ = recommended for current IV regime + bias.';
-    note.textContent = noteText;
+    const rankTip = rank < 0 ? '' : rank < 30 ? ' · Low IV: favour buying' : rank > 70 ? ' · High IV: favour selling' : ' · Mid IV: spreads offer best R/R';
+    note.textContent = 'IV ' + iv.toFixed(1) + '% (Rank ' + (rank>=0?rank.toFixed(0)+'%':'—') + ')' + rankTip + ' · K=₹' + K.toLocaleString('en-IN') + ' · DTE ' + i.dte + 'd · ★ = best fit for regime + bias';
     note.style.display = 'block';
   }
 }
@@ -3309,24 +3322,32 @@ function setPosType(t, btn) {
 }
 
 function posAutoFill() {
-  /* Pull current calculator inputs into position form */
   const i = getInputs();
+  const K = i.K;
+
+  /* Use live spot if available — more accurate than possibly-stale input field */
+  const liveSpot = _liveChain?.spot ?? i.S;
+
   _writing = true;
-  el('ptStrike').value    = i.K;
-  el('ptEntrySpot').value = i.S;
+  el('ptStrike').value    = K;
+  el('ptEntrySpot').value = liveSpot.toFixed ? liveSpot.toFixed(2) : liveSpot;
   el('ptEntryDTE').value  = i.dte;
   el('ptEntryIV').value   = i.iv;
   el('ptLots').value      = i.lots;
   _writing = false;
-  /* Also set the type from current selection */
+
+  /* Set position type from current selection */
   const t = A.type === 'put' ? 'put' : 'call';
   POS.type = t;
   ['ptCall','ptPut'].forEach(id => { const b = el(id); if(b) b.className='pos-type-btn'; });
   const tb = el(t==='call'?'ptCall':'ptPut'); if (tb) tb.className = 'pos-type-btn active-' + t;
 
-  /* Auto-fill premium from last BSM result */
-  if (A.lastBSM) {
-    const entryPx = t === 'call' ? A.lastBSM.call : A.lastBSM.put;
+  /* Use live LTP if available for this strike, else BSM */
+  const liveLeg = _liveMap[K];
+  const livePx  = t === 'call' ? liveLeg?.ce_ltp : liveLeg?.pe_ltp;
+  const bsmPx   = A.lastBSM ? (t === 'call' ? A.lastBSM.call : A.lastBSM.put) : null;
+  const entryPx = livePx ?? bsmPx;
+  if (entryPx != null) {
     _writing = true; el('ptPrem').value = entryPx.toFixed(2); _writing = false;
   }
 }
@@ -3449,49 +3470,29 @@ function calcPosition() {
         <div class="pos-card-sub">${be_pct>=0?'+':''}${be_pct.toFixed(2)}% from spot</div>
       </div>
       <div class="pos-card">
-        <div class="pos-card-lbl">DTE Consumed</div>
-        <div class="pos-card-val" style="color:var(--orange)">${dte_elapsed}d</div>
-        <div class="pos-card-sub">of ${dte_ent}d entry · ${dte_now}d left</div>
+        <div class="pos-card-lbl">θ / day (position)</div>
+        <div class="pos-card-val" style="color:var(--orange)">${th_daily>=0?'+':''}₹${(th_daily*qty).toFixed(0)}</div>
+        <div class="pos-card-sub">${fRs(th_daily,2)}/unit · ${dte_now}d left</div>
       </div>
       <div class="pos-card">
-        <div class="pos-card-lbl">θ Decayed (est.)</div>
-        <div class="pos-card-val" style="color:var(--red)">₹${theta_decayed_total.toFixed(0)}</div>
-        <div class="pos-card-sub">₹${theta_decayed_unit.toFixed(2)}/unit since entry</div>
+        <div class="pos-card-lbl">Net Delta</div>
+        <div class="pos-card-val" style="color:var(--blue)">${de_pos>=0?'+':''}${de_pos.toFixed(1)}</div>
+        <div class="pos-card-sub">₹${(de_pos*1).toFixed(0)} per ₹1 spot</div>
       </div>
       <div class="pos-card">
-        <div class="pos-card-lbl">θ Now / day</div>
-        <div class="pos-card-val" style="color:var(--orange)">${th_daily>=0?'+':''}₹${(th_daily*qty).toFixed(2)}</div>
-        <div class="pos-card-sub">pos · ${fRs(th_daily,2)}/unit</div>
-      </div>
-      <div class="pos-card">
-        <div class="pos-card-lbl">Net Δ (pos)</div>
-        <div class="pos-card-val" style="color:var(--blue)">${de_pos>=0?'+':''}${de_pos.toFixed(0)}</div>
-        <div class="pos-card-sub">₹/₹1 spot move</div>
-      </div>
-      <div class="pos-card">
-        <div class="pos-card-lbl">Net Vega (pos)</div>
+        <div class="pos-card-lbl">Net Vega</div>
         <div class="pos-card-val" style="color:var(--cyan)">${ve_pos>=0?'+':''}₹${Math.abs(ve_pos).toFixed(0)}</div>
-        <div class="pos-card-sub">per 1% IV move</div>
+        <div class="pos-card-sub">per 1% IV move · ${qty} units</div>
       </div>
       <div class="pos-card">
-        <div class="pos-card-lbl">TV Remaining</div>
+        <div class="pos-card-lbl">Time Value Left</div>
         <div class="pos-card-val" style="color:var(--purple)">₹${tv_now.toFixed(2)}</div>
-        <div class="pos-card-sub">intrinsic ₹${intrinsic_now.toFixed(2)}</div>
+        <div class="pos-card-sub">intrinsic ₹${intrinsic_now.toFixed(2)} · ${dte_elapsed>0?dte_elapsed+'d elapsed':'just entered'}</div>
       </div>
       <div class="pos-card">
-        <div class="pos-card-lbl">IV at Entry</div>
-        <div class="pos-card-val" style="color:var(--yellow)">${iv_ent.toFixed(1)}%</div>
-        <div class="pos-card-sub">now ${iv_now.toFixed(1)}% · Δ ${(iv_now-iv_ent>=0?'+':'')+(iv_now-iv_ent).toFixed(1)}%</div>
-      </div>
-    </div>
-
-    <div class="pos-decay-bar-wrap">
-      <div class="pos-decay-title">Time Value Decayed Since Entry</div>
-      <div class="pos-decay-track"><div class="pos-decay-fill" style="width:${tv_decayed_pct.toFixed(0)}%"></div></div>
-      <div class="pos-decay-labels">
-        <span>Entry (${dte_ent}d)</span>
-        <span>${tv_decayed_pct.toFixed(0)}% TV decayed</span>
-        <span>Expiry</span>
+        <div class="pos-card-lbl">IV Change</div>
+        <div class="pos-card-val" style="color:${iv_now>iv_ent?'var(--red)':'var(--green)'}">${(iv_now-iv_ent>=0?'+':'')+(iv_now-iv_ent).toFixed(1)}%</div>
+        <div class="pos-card-sub">entry ${iv_ent.toFixed(1)}% → now ${iv_now.toFixed(1)}%</div>
       </div>
     </div>
   `;
