@@ -217,9 +217,62 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 .em-sub{font-size:.53rem;color:var(--t3);margin-top:.07rem}
 
 /* Option chain */
-.chain-sec{padding:.95rem 1.2rem}
-.chain-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.78rem}
-.chain-wrap{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rlg);overflow:hidden}
+.chain-sec{padding:.6rem 0}
+.chain-hdr{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1rem .5rem;flex-wrap:wrap;gap:.4rem}
+.chain-wrap{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rlg);overflow:auto;max-height:calc(100vh - 280px)}
+/* Live chain specific */
+.lc-meta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.lc-badge{font-size:.55rem;font-weight:700;padding:.1rem .35rem;border-radius:20px;letter-spacing:.04em;text-transform:uppercase}
+.lc-badge.live{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.lc-badge.bsm{background:rgba(59,130,246,.1);color:var(--blue);border:1px solid rgba(59,130,246,.25)}
+.lc-badge.expiry{background:rgba(234,179,8,.1);color:var(--yellow);border:1px solid rgba(234,179,8,.2)}
+.lc-filter{display:flex;gap:.3rem;align-items:center}
+.lc-filter-btn{font-size:.6rem;padding:.15rem .4rem;border-radius:var(--rsm);border:1px solid var(--bd2);background:var(--bg4);color:var(--t2);cursor:pointer;transition:all .12s}
+.lc-filter-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+/* Chain table */
+.lc-table{width:100%;border-collapse:collapse;font-size:.66rem}
+.lc-table thead th{padding:.36rem .5rem;font-size:.55rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);border-bottom:2px solid var(--bd);white-space:nowrap;text-align:right;position:sticky;top:0;background:var(--bg2);z-index:2}
+.lc-table thead th.lc-strike-hdr{text-align:center;background:rgba(59,130,246,.06);color:var(--blue)}
+.lc-table thead th.lc-ce{color:var(--blue)}
+.lc-table thead th.lc-pe{color:var(--red)}
+.lc-table thead th.lc-sep{border-left:1px solid var(--bd2)}
+.lc-table tbody td{padding:.32rem .5rem;border-bottom:1px solid rgba(36,40,54,.4);text-align:right;font-family:var(--mono);white-space:nowrap;vertical-align:middle}
+.lc-table tbody tr:hover td{background:var(--bg3)}
+/* ATM row */
+.lc-table tbody tr.lc-atm td{background:rgba(59,130,246,.04)}
+.lc-table tbody tr.lc-atm:hover td{background:rgba(59,130,246,.09)}
+.lc-table tbody tr.lc-atm td.lc-strike-col{background:rgba(59,130,246,.12)}
+/* Strike centre column */
+.lc-strike-col{text-align:center!important;background:var(--bg3);position:sticky;border-left:1px solid var(--bd2);border-right:1px solid var(--bd2);font-family:var(--mono);font-weight:700;font-size:.72rem;color:var(--t1)}
+/* OI bar */
+.oi-bar-wrap{display:flex;align-items:center;gap:.28rem;justify-content:flex-end}
+.oi-bar{height:4px;border-radius:2px;min-width:2px;max-width:52px}
+.oi-bar.ce{background:rgba(59,130,246,.6)}
+.oi-bar.pe{background:rgba(239,68,68,.6)}
+.oi-chg{font-size:.52rem}
+.oi-chg.up{color:var(--green)}.oi-chg.dn{color:var(--red)}
+/* Bid/Ask spread cell */
+.ba-wrap{display:flex;flex-direction:column;line-height:1.2;align-items:flex-end}
+.ba-bid{color:var(--green);font-size:.6rem}
+.ba-ask{color:var(--red);font-size:.6rem}
+/* LTP highlight */
+.ltp-ce{color:var(--blue);font-weight:700}
+.ltp-pe{color:var(--red);font-weight:700}
+.ltp-atm{color:var(--t1)!important;font-weight:800!important}
+/* ITM shading */
+.lc-table tbody tr.lc-itm-ce td.lc-ce-zone{background:rgba(59,130,246,.03)}
+.lc-table tbody tr.lc-itm-pe td.lc-pe-zone{background:rgba(239,68,68,.03)}
+/* Chain summary bar */
+.chain-summary{display:flex;gap:1.2rem;padding:.5rem 1rem;background:var(--bg3);border-top:1px solid var(--bd);font-size:.6rem;flex-wrap:wrap}
+.cs-item{display:flex;flex-direction:column;gap:.06rem}
+.cs-lbl{color:var(--t3);font-size:.54rem;text-transform:uppercase;letter-spacing:.05em}
+.cs-val{font-family:var(--mono);font-weight:700;color:var(--t1)}
+.cs-val.bull{color:var(--green)}.cs-val.bear{color:var(--red)}.cs-val.neu{color:var(--yellow)}
+/* Empty / loading states */
+.chain-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;gap:.7rem;color:var(--t3)}
+.chain-spinner{width:24px;height:24px;border:2px solid var(--bd2);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.chain-no-data{text-align:center;padding:2.5rem 1rem;color:var(--t3);font-size:.7rem}
 table{width:100%;border-collapse:collapse;font-size:.71rem}
 thead th{font-size:.56rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);padding:.52rem .78rem;text-align:right;background:var(--bg3);border-bottom:1px solid var(--bd);white-space:nowrap}
 thead th:first-child{text-align:left}
@@ -922,7 +975,7 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
       <button class="ctab active" onclick="switchTab('erosion',this)">📉 Erosion</button>
       <button class="ctab"        onclick="switchTab('pl',this)">📊 P&amp;L Profile</button>
       <button class="ctab"        onclick="switchTab('strategy',this)">🏗 Strategy</button>
-      <button class="ctab"        onclick="switchTab('chain',this)">⛓ Option Chain</button>
+      <button class="ctab"        onclick="switchTab('chain',this)">📊 Option Chain</button>
       <button class="ctab"        onclick="switchTab('scenarios',this)">🎯 Scenarios</button>
       <button class="ctab"        onclick="switchTab('sensitivity',this)">🌡 Sensitivity</button>
       <button class="ctab"        onclick="switchTab('compare',this)">⚖ Compare</button>
@@ -1036,36 +1089,49 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
     <!-- TAB: Chain -->
     <div class="tab-body" id="tab-chain">
       <div class="chain-sec">
+        <!-- Header -->
         <div class="chain-hdr">
-          <div>
-            <div style="font-size:.76rem;font-weight:600">BSM Option Chain — ±6 strikes around selected strike</div>
-            <div style="font-size:.6rem;color:var(--t3);margin-top:.1rem">All Greeks per unit per day. θ shown negative (decay).</div>
+          <div class="lc-meta">
+            <span style="font-size:.76rem;font-weight:600" id="lcTitle">Option Chain</span>
+            <span class="lc-badge bsm" id="lcModeBadge">BSM Mode</span>
+            <span class="lc-badge expiry" id="lcExpiryBadge" style="display:none"></span>
+            <span class="lc-badge live" id="lcLiveBadge" style="display:none">● Live</span>
           </div>
-          <div style="display:flex;gap:.48rem;align-items:center">
+          <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+            <!-- Strike filter -->
+            <div class="lc-filter">
+              <span style="font-size:.56rem;color:var(--t3)">Strikes:</span>
+              <button class="lc-filter-btn" onclick="lcSetStrikes(10,this)">±10</button>
+              <button class="lc-filter-btn active" onclick="lcSetStrikes(0,this)">All</button>
+            </div>
             <span class="badge badge-blue" id="bATM">ATM: ₹—</span>
-            <button class="btn btn-ghost" style="font-size:.62rem;padding:.26rem .52rem" onclick="calculate()">Refresh</button>
+            <button class="btn btn-ghost" style="font-size:.62rem;padding:.26rem .52rem" id="lcRefreshBtn" onclick="lcRefresh()">↺ Refresh</button>
           </div>
         </div>
-        <div class="chain-wrap">
-          <table>
-            <thead><tr>
-              <th>Strike</th>
-              <th class="ccall">CE ₹</th>
-              <th class="cth">θ Call</th>
-              <th class="cde">Δ Call</th>
-              <th class="cga">Γ</th>
-              <th class="cve">ν Vega</th>
-              <th class="cput">PE ₹</th>
-              <th class="cth">θ Put</th>
-              <th class="cde">Δ Put</th>
-              <th class="cyiv">IV%</th>
-              <th>C−P</th>
-              <th>Parity</th>
-            </tr></thead>
-            <tbody id="chainBody">
-              <tr><td colspan="12"><div class="empty-msg">Click <strong style="color:var(--blue)">Run BSM Calculator</strong> to generate chain</div></td></tr>
-            </tbody>
+
+        <!-- Table wrapper -->
+        <div class="chain-wrap" id="lcWrap">
+          <div class="chain-no-data" id="lcEmpty">
+            Load live data using <strong style="color:var(--green)">Load Live</strong> in the panel above,<br>
+            or click <strong style="color:var(--blue)">Run BSM Calculator</strong> for theoretical values.
+          </div>
+          <table class="lc-table" id="lcTable" style="display:none">
+            <thead id="lcHead"></thead>
+            <tbody id="lcBody"></tbody>
           </table>
+        </div>
+
+        <!-- Summary bar -->
+        <div class="chain-summary" id="lcSummary" style="display:none">
+          <div class="cs-item"><div class="cs-lbl">Spot</div><div class="cs-val" id="csSpot">—</div></div>
+          <div class="cs-item"><div class="cs-lbl">ATM IV</div><div class="cs-val" id="csATMIV">—</div></div>
+          <div class="cs-item"><div class="cs-lbl">PCR</div><div class="cs-val" id="csPCR">—</div></div>
+          <div class="cs-item"><div class="cs-lbl">Max Pain</div><div class="cs-val" id="csMaxPain">—</div></div>
+          <div class="cs-item"><div class="cs-lbl">Total CE OI</div><div class="cs-val" id="csTotalCEOI">—</div></div>
+          <div class="cs-item"><div class="cs-lbl">Total PE OI</div><div class="cs-val" id="csTotalPEOI">—</div></div>
+          <div class="cs-item"><div class="cs-lbl">OI Signal</div><div class="cs-val" id="csOISignal">—</div></div>
+          <div class="cs-item"><div class="cs-lbl">Strikes</div><div class="cs-val" id="csStrikes">—</div></div>
+          <div class="cs-item"><div class="cs-lbl">Updated</div><div class="cs-val" id="csUpdated">—</div></div>
         </div>
       </div>
     </div>
@@ -1872,43 +1938,288 @@ function mkOpts(reverseX) {
    exchanges and Bloomberg quote them. θ shown negative (erosion).
    Parity check: |C − P − (S·e^(−qT) − K·e^(−rT))| < 0.50 = valid.
 ─────────────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════
+   §LC  LIVE OPTION CHAIN ENGINE
+   Priority: Live Dhan data → fallback BSM if no live data
+   ═══════════════════════════════════════════════════════════════════ */
+
+let _lcChain    = null;   // current rendered chain rows
+let _lcNStrikes = 0;      // 0 = all strikes, N = ±N around ATM
+let _lcIsLive   = false;  // true when showing real Dhan data
+let _maxOI      = 1;      // for OI bar scaling
+
+/* called from calculate() — route to live or BSM */
 function buildChain(i) {
-  const atm  = Math.round(i.K / A.step) * A.step;
-  const body = el('chainBody');
-  body.innerHTML = '';
+  if (_liveChain && _liveChain.chain && _liveChain.chain.length) {
+    lcBuildLive(_liveChain, i);
+  } else {
+    lcBuildBSM(i);
+  }
+}
 
-  for (let n = -6; n <= 6; n++) {
-    const K  = atm + n * A.step;
-    const r2 = bsm(i.S, K, i.T, i.r, i.sigma, i.q);
-    if (!r2) continue;
+/* ── Refresh button ─────────────────────────────────────────────── */
+async function lcRefresh() {
+  if (_liveChain) {
+    /* Re-fetch from backend */
+    await loadLiveChain();
+  } else {
+    calculate();
+  }
+}
 
-    const isATM  = Math.abs(K - atm) < A.step * 0.5;
-    const useSkew = A.skewMode === 'skew';
-    const ivP = gv('iIVPut') || i.iv, ivC = gv('iIVCall') || i.iv;
-    const iv2 = getSkewIV(K, i.S, i.iv, ivP, ivC, useSkew);
-    const r2s = iv2 !== i.iv ? bsm(i.S, K, i.T, i.r, iv2/100, i.q) : r2;
-    const ts  = tScale();
-    const fwd    = i.S * Math.exp(-i.q * i.T) - K * Math.exp(-i.r * i.T);
-    const parity = Math.abs((r2s.call - r2s.put) - fwd);
+/* ── Strike filter ──────────────────────────────────────────────── */
+function lcSetStrikes(n, btn) {
+  document.querySelectorAll('.lc-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _lcNStrikes = n;
+  buildChain(A.lastBSM || {S: gv('iSpot'), K: gv('iStrike'), T: gv('iDTE')/365,
+    r: R, sigma: gv('iIV')/100, q: Q, iv: gv('iIV'), dte: gv('iDTE'),
+    lot: gv('iLotSz'), lots: gv('iLots')});
+}
 
-    const tr     = document.createElement('tr');
-    if (isATM) tr.className = 'atmrow';
+/* ── Format helpers ─────────────────────────────────────────────── */
+function lcFmtOI(n) {
+  if (!n && n !== 0) return '—';
+  if (n >= 1e7) return (n/1e7).toFixed(2) + 'Cr';
+  if (n >= 1e5) return (n/1e5).toFixed(2) + 'L';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+  return n.toLocaleString('en-IN');
+}
+function lcFmtVol(n) {
+  if (!n) return '—';
+  if (n >= 1e7) return (n/1e7).toFixed(1) + 'Cr';
+  if (n >= 1e5) return (n/1e5).toFixed(1) + 'L';
+  if (n >= 1e3) return (n/1e3).toFixed(0) + 'K';
+  return n.toString();
+}
+function lcOIBar(oi, max, cls) {
+  const pct = Math.min(52, Math.round((oi / max) * 52));
+  return `<div class="oi-bar ${cls}" style="width:${pct}px"></div>`;
+}
+function lcOIChg(cur, prev) {
+  if (!cur || !prev) return '';
+  const d = cur - prev;
+  if (Math.abs(d) < 100) return '';
+  const cls = d > 0 ? 'up' : 'dn';
+  const lbl = d > 0 ? '+' + lcFmtOI(d) : lcFmtOI(d);
+  return `<span class="oi-chg ${cls}">${lbl}</span>`;
+}
+
+/* ══ LIVE CHAIN BUILDER ════════════════════════════════════════════ */
+function lcBuildLive(data, bsmInputs) {
+  _lcIsLive = true;
+  const chain  = data.chain;
+  const spot   = data.spot;
+  const expiry = data.expiry;
+  const dte    = data.dte;
+
+  /* Filter strikes if requested */
+  let rows = chain;
+  if (_lcNStrikes > 0) {
+    const atmI = chain.reduce((bi, r, i) =>
+      Math.abs(r.strike - spot) < Math.abs(chain[bi].strike - spot) ? i : bi, 0);
+    rows = chain.slice(Math.max(0, atmI - _lcNStrikes), atmI + _lcNStrikes + 1);
+  }
+
+  /* Compute max OI for bar scaling */
+  _maxOI = rows.reduce((m, r) => Math.max(m, r.ce?.oi||0, r.pe?.oi||0), 1);
+
+  /* Totals for summary */
+  const totCEOI  = rows.reduce((s, r) => s + (r.ce?.oi||0), 0);
+  const totPEOI  = rows.reduce((s, r) => s + (r.pe?.oi||0), 0);
+  const pcr      = totCEOI > 0 ? totPEOI / totCEOI : 0;
+
+  /* Max pain */
+  let mpK = rows[0]?.strike, mpMin = Infinity;
+  rows.forEach(candidate => {
+    const pain = rows.reduce((sum, r) => {
+      return sum
+        + (r.ce?.oi||0) * Math.max(0, candidate.strike - r.strike)
+        + (r.pe?.oi||0) * Math.max(0, r.strike - candidate.strike);
+    }, 0);
+    if (pain < mpMin) { mpMin = pain; mpK = candidate.strike; }
+  });
+
+  /* ATM row */
+  const atmRow = rows.reduce((best, r) =>
+    Math.abs(r.strike - spot) < Math.abs(best.strike - spot) ? r : best, rows[0]);
+  const atmK  = atmRow?.strike;
+  const atmIV = atmRow?.ce?.iv ?? atmRow?.pe?.iv ?? 0;
+
+  /* Update badges */
+  el('lcModeBadge').textContent = '● Live';
+  el('lcModeBadge').className   = 'lc-badge live';
+  el('lcTitle').textContent     = `${data.name} Option Chain`;
+  const eb = el('lcExpiryBadge');
+  eb.textContent = expiry + ' · ' + dte + 'd';
+  eb.style.display = 'inline-block';
+  el('lcLiveBadge').style.display = 'inline-block';
+
+  /* Build thead */
+  el('lcHead').innerHTML = `<tr>
+    <th class="lc-ce" style="text-align:right">OI</th>
+    <th class="lc-ce" style="text-align:right">Chg OI</th>
+    <th class="lc-ce" style="text-align:right">Volume</th>
+    <th class="lc-ce" style="text-align:right">IV%</th>
+    <th class="lc-ce" style="text-align:right">Δ</th>
+    <th class="lc-ce" style="text-align:right">θ/day</th>
+    <th class="lc-ce" style="text-align:right">Bid</th>
+    <th class="lc-ce" style="text-align:right">LTP ▲</th>
+    <th class="lc-ce" style="text-align:right">Ask</th>
+    <th class="lc-strike-hdr">Strike</th>
+    <th class="lc-pe lc-sep" style="text-align:left">Bid</th>
+    <th class="lc-pe" style="text-align:left">LTP ▼</th>
+    <th class="lc-pe" style="text-align:left">Ask</th>
+    <th class="lc-pe" style="text-align:left">θ/day</th>
+    <th class="lc-pe" style="text-align:left">Δ</th>
+    <th class="lc-pe" style="text-align:left">IV%</th>
+    <th class="lc-pe" style="text-align:left">Volume</th>
+    <th class="lc-pe" style="text-align:left">Chg OI</th>
+    <th class="lc-pe" style="text-align:left">OI</th>
+  </tr>`;
+
+  /* Build tbody */
+  const tbody = el('lcBody');
+  tbody.innerHTML = '';
+
+  rows.forEach(row => {
+    const K    = row.strike;
+    const ce   = row.ce;
+    const pe   = row.pe;
+    const isATM = K === atmK;
+    const isITMce = K < spot;   // call is ITM when strike < spot
+    const isITMpe = K > spot;   // put is ITM when strike > spot
+
+    const tr = document.createElement('tr');
+    tr.className = isATM ? 'lc-atm' : (isITMce ? 'lc-itm-ce' : 'lc-itm-pe');
+
+    /* CE cells */
+    const ceOIbar  = ce?.oi  ? lcOIBar(ce.oi,  _maxOI, 'ce') : '';
+    const peOIbar  = pe?.oi  ? lcOIBar(pe.oi,  _maxOI, 'pe') : '';
+    const ceOIchg  = lcOIChg(ce?.oi, ce?.prev_oi);
+    const peOIchg  = lcOIChg(pe?.oi, pe?.prev_oi);
 
     tr.innerHTML = `
-      <td><span class="sklbl">${K.toLocaleString('en-IN')}</span>${isATM ? '<span class="atm-pill">ATM</span>' : ''}</td>
-      <td class="ccall">${r2s.call.toFixed(2)}</td>
-      <td class="cth">${(r2s.theta_c * ts).toFixed(2)}</td>
-      <td class="cde">${r2s.delta_c.toFixed(2)}</td>
-      <td class="cga">${r2s.gamma.toFixed(3)}</td>
-      <td class="cve">${r2s.vega.toFixed(2)}</td>
-      <td class="cput">${r2s.put.toFixed(2)}</td>
-      <td class="cth">${(r2s.theta_p * ts).toFixed(2)}</td>
-      <td class="cde">${r2s.delta_p.toFixed(2)}</td>
-      <td class="cyiv">${iv2.toFixed(1)}%</td>
-      <td>${(r2s.call - r2s.put).toFixed(2)}</td>
-      <td class="${parity < 0.5 ? 'cok' : 'cerr'}">${parity < 0.5 ? '✓' : '±' + parity.toFixed(2)}</td>`;
-    body.appendChild(tr);
+      <td class="lc-ce-zone">
+        <div class="oi-bar-wrap">${ceOIbar}<span>${lcFmtOI(ce?.oi)}</span></div>
+      </td>
+      <td class="lc-ce-zone">${ceOIchg || '—'}</td>
+      <td class="lc-ce-zone">${lcFmtVol(ce?.volume)}</td>
+      <td class="lc-ce-zone" style="color:var(--yellow)">${ce?.iv != null ? ce.iv.toFixed(2)+'%' : '—'}</td>
+      <td class="lc-ce-zone" style="color:var(--blue)">${ce?.delta != null ? ce.delta.toFixed(3) : '—'}</td>
+      <td class="lc-ce-zone" style="color:var(--orange)">${ce?.theta != null ? ce.theta.toFixed(2) : '—'}</td>
+      <td class="lc-ce-zone" style="color:var(--green);font-size:.6rem">${ce?.bid != null ? ce.bid.toFixed(2) : '—'}</td>
+      <td class="lc-ce-zone ltp-ce${isATM?' ltp-atm':''}">${ce?.ltp != null ? ce.ltp.toFixed(2) : '—'}</td>
+      <td class="lc-ce-zone" style="color:var(--red);font-size:.6rem">${ce?.ask != null ? ce.ask.toFixed(2) : '—'}</td>
+
+      <td class="lc-strike-col">
+        ${K.toLocaleString('en-IN')}${isATM ? '<br><span class="atm-pill">ATM</span>' : ''}
+        ${K === mpK ? '<br><span class="atm-pill" style="background:rgba(234,179,8,.15);color:var(--yellow);border-color:rgba(234,179,8,.4)">MAX PAIN</span>' : ''}
+      </td>
+
+      <td class="lc-pe-zone lc-sep" style="color:var(--green);font-size:.6rem">${pe?.bid != null ? pe.bid.toFixed(2) : '—'}</td>
+      <td class="lc-pe-zone ltp-pe${isATM?' ltp-atm':''}">${pe?.ltp != null ? pe.ltp.toFixed(2) : '—'}</td>
+      <td class="lc-pe-zone" style="color:var(--red);font-size:.6rem">${pe?.ask != null ? pe.ask.toFixed(2) : '—'}</td>
+      <td class="lc-pe-zone" style="color:var(--orange)">${pe?.theta != null ? pe.theta.toFixed(2) : '—'}</td>
+      <td class="lc-pe-zone" style="color:var(--blue)">${pe?.delta != null ? pe.delta.toFixed(3) : '—'}</td>
+      <td class="lc-pe-zone" style="color:var(--yellow)">${pe?.iv != null ? pe.iv.toFixed(2)+'%' : '—'}</td>
+      <td class="lc-pe-zone">${lcFmtVol(pe?.volume)}</td>
+      <td class="lc-pe-zone">${peOIchg || '—'}</td>
+      <td class="lc-pe-zone">
+        <div class="oi-bar-wrap" style="flex-direction:row-reverse">${peOIbar}<span>${lcFmtOI(pe?.oi)}</span></div>
+      </td>`;
+
+    tbody.appendChild(tr);
+  });
+
+  /* Show table, hide empty */
+  el('lcTable').style.display = 'table';
+  el('lcEmpty').style.display = 'none';
+
+  /* Summary bar */
+  const pcrCls = pcr > 1.3 ? 'bull' : pcr < 0.7 ? 'bear' : 'neu';
+  const oiSig  = pcr > 1.3 ? '🟢 Bullish' : pcr < 0.7 ? '🔴 Bearish' : '🟡 Neutral';
+  el('csSpot').textContent    = '₹' + spot.toLocaleString('en-IN', {maximumFractionDigits:2});
+  el('csATMIV').textContent   = atmIV.toFixed(2) + '%';
+  el('csPCR').textContent     = pcr.toFixed(2);
+  el('csPCR').className       = 'cs-val ' + pcrCls;
+  el('csMaxPain').textContent = '₹' + mpK.toLocaleString('en-IN');
+  el('csTotalCEOI').textContent = lcFmtOI(totCEOI);
+  el('csTotalPEOI').textContent = lcFmtOI(totPEOI);
+  el('csOISignal').textContent  = oiSig;
+  el('csOISignal').className    = 'cs-val ' + pcrCls;
+  el('csStrikes').textContent   = rows.length + ' strikes';
+  el('csUpdated').textContent   = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  el('lcSummary').style.display = 'flex';
+}
+
+/* ══ BSM FALLBACK CHAIN (when no live data) ════════════════════════ */
+function lcBuildBSM(i) {
+  _lcIsLive = false;
+  const atm  = Math.round((i.S || gv('iSpot')) / A.step) * A.step;
+  const S    = i.S || gv('iSpot');
+  const T    = i.T || gv('iDTE')/365;
+  const sig  = i.sigma || gv('iIV')/100;
+  const ts   = tScale();
+
+  el('lcModeBadge').textContent = 'BSM';
+  el('lcModeBadge').className   = 'lc-badge bsm';
+  el('lcTitle').textContent     = 'Option Chain — BSM Theoretical';
+  el('lcExpiryBadge').style.display = 'none';
+  el('lcLiveBadge').style.display   = 'none';
+
+  /* BSM uses simple 13-col layout */
+  el('lcHead').innerHTML = `<tr>
+    <th>Strike</th>
+    <th class="lc-ce">CE ₹</th>
+    <th class="lc-ce">θ Call</th>
+    <th class="lc-ce">Δ Call</th>
+    <th class="lc-ce">Γ</th>
+    <th class="lc-ce">Vega</th>
+    <th class="lc-pe">PE ₹</th>
+    <th class="lc-pe">θ Put</th>
+    <th class="lc-pe">Δ Put</th>
+    <th style="color:var(--yellow)">IV%</th>
+    <th>C−P</th>
+    <th>Parity</th>
+  </tr>`;
+
+  const tbody = el('lcBody');
+  tbody.innerHTML = '';
+
+  const nRange = _lcNStrikes > 0 ? _lcNStrikes : 8;
+  for (let n = -nRange; n <= nRange; n++) {
+    const K   = atm + n * A.step;
+    const r2  = bsm(S, K, T, R, sig, Q);
+    if (!r2) continue;
+    const isATM = K === atm;
+    const useSkew = A.skewMode === 'skew';
+    const ivP = gv('iIVPut') || i.iv, ivC = gv('iIVCall') || i.iv;
+    const iv2 = getSkewIV(K, S, i.iv || gv('iIV'), ivP, ivC, useSkew);
+    const r2s = iv2 !== (i.iv||gv('iIV')) ? bsm(S, K, T, R, iv2/100, Q) : r2;
+    const fwd    = S * Math.exp(-Q * T) - K * Math.exp(-R * T);
+    const parity = Math.abs((r2s.call - r2s.put) - fwd);
+    const tr = document.createElement('tr');
+    if (isATM) tr.className = 'lc-atm';
+    tr.innerHTML = `
+      <td class="lc-strike-col">${K.toLocaleString('en-IN')}${isATM?'<br><span class="atm-pill">ATM</span>':''}</td>
+      <td class="lc-ce" style="font-weight:600">${r2s.call.toFixed(2)}</td>
+      <td style="color:var(--orange)">${(r2s.theta_c*ts).toFixed(2)}</td>
+      <td style="color:var(--blue)">${r2s.delta_c.toFixed(3)}</td>
+      <td style="color:var(--purple)">${r2s.gamma.toFixed(4)}</td>
+      <td style="color:var(--cyan)">${r2s.vega.toFixed(2)}</td>
+      <td class="lc-pe" style="font-weight:600">${r2s.put.toFixed(2)}</td>
+      <td style="color:var(--orange)">${(r2s.theta_p*ts).toFixed(2)}</td>
+      <td style="color:var(--blue)">${r2s.delta_p.toFixed(3)}</td>
+      <td style="color:var(--yellow)">${iv2.toFixed(1)}%</td>
+      <td>${(r2s.call-r2s.put).toFixed(2)}</td>
+      <td class="${parity<0.5?'cok':'cerr'}">${parity<0.5?'✓':'±'+parity.toFixed(2)}</td>`;
+    tbody.appendChild(tr);
   }
+
+  el('lcTable').style.display = 'table';
+  el('lcEmpty').style.display = 'none';
+  el('lcSummary').style.display = 'none';
 }
 
 /* ── SECTION 11: Scenario Analysis ──────────────────────────────────
@@ -3537,8 +3848,10 @@ function applyLiveChain(data) {
   /* 4 ── Recalculate BSM with live inputs ───────────────────────────── */
   calculate();
 
-  /* 5 ── Inject live prices into Option Chain tab ────────────────────── */
-  injectLiveChain(chain, spot, atmK);
+  /* 5 ── Build full live option chain table ───────────────────────────── */
+  /* _liveChain is already set above — buildChain() will route to lcBuildLive */
+  buildChain(A.lastBSM || {S:spot, K:atmK, T:dte/365, r:R, sigma:atmIV/100, q:Q,
+    iv:atmIV, dte:dte, lot:lot, lots:gv('iLots')});
 
   /* 6 ── Auto-populate Max Pain with live OI ─────────────────────────── */
   injectLiveMaxPain(chain, spot, step);
@@ -3551,45 +3864,10 @@ function applyLiveChain(data) {
   }
 }
 
-/* ── Inject into Option Chain tab ───────────────────────────────────── */
+/* ── Inject into Option Chain tab — calls live builder directly ──────── */
 function injectLiveChain(chain, spot, atmK) {
-  /* Build a lookup map for fast access */
-  const chainMap = {};
-  chain.forEach(row => { chainMap[row.strike] = row; });
-
-  /* Walk the existing rendered chain rows and update them */
-  const tbody = el('chainTbody');
-  if (!tbody) return;
-  const rows = tbody.querySelectorAll('tr[data-strike]');
-  rows.forEach(tr => {
-    const K   = parseFloat(tr.dataset.strike);
-    const row = chainMap[K];
-    if (!row) return;
-    const isATM = K === atmK;
-    if (isATM) {
-      tr.classList.add('chain-atm');
-    } else {
-      tr.classList.remove('chain-atm');
-    }
-    /* Update live price cells if they exist */
-    const cells = tr.querySelectorAll('[data-live]');
-    cells.forEach(cell => {
-      const field = cell.dataset.live;
-      const side  = cell.dataset.side;  // 'ce' or 'pe'
-      const legData = row[side];
-      if (!legData) return;
-      switch(field) {
-        case 'ltp': cell.textContent = legData.ltp != null ? '₹'+legData.ltp.toFixed(2) : '—'; break;
-        case 'iv':  cell.textContent = legData.iv  != null ? legData.iv.toFixed(1)+'%'   : '—'; break;
-        case 'oi':  cell.textContent = legData.oi  != null ? fmtOI(legData.oi)            : '—'; break;
-        case 'bid': cell.textContent = legData.bid != null ? '₹'+legData.bid.toFixed(2)  : '—'; break;
-        case 'ask': cell.textContent = legData.ask != null ? '₹'+legData.ask.toFixed(2)  : '—'; break;
-      }
-    });
-  });
-
-  /* If no data-live cells yet, do a full chain rebuild */
-  if (!rows.length) calculate();
+  /* lcBuildLive is called via buildChain() → applyLiveChain sets _liveChain first */
+  /* This is now a no-op — buildChain() routes automatically based on _liveChain */
 }
 
 /* ── Auto-populate Max Pain from live OI ───────────────────────────── */
