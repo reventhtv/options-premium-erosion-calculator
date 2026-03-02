@@ -1979,18 +1979,18 @@ function lcSetStrikes(n, btn) {
 
 /* ── Format helpers ─────────────────────────────────────────────── */
 function lcFmtOI(n) {
-  if (!n && n !== 0) return '—';
+  if (!n) return '—';            // handles null, undefined, 0 all → '—'
   if (n >= 1e7) return (n/1e7).toFixed(2) + 'Cr';
   if (n >= 1e5) return (n/1e5).toFixed(2) + 'L';
   if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
   return n.toLocaleString('en-IN');
 }
 function lcFmtVol(n) {
-  if (!n) return '—';
+  if (!n) return '—';            // handles null, undefined, 0
   if (n >= 1e7) return (n/1e7).toFixed(1) + 'Cr';
   if (n >= 1e5) return (n/1e5).toFixed(1) + 'L';
   if (n >= 1e3) return (n/1e3).toFixed(0) + 'K';
-  return n.toString();
+  return n.toLocaleString('en-IN');
 }
 function lcOIBar(oi, max, cls) {
   const pct = Math.min(52, Math.round((oi / max) * 52));
@@ -2086,6 +2086,12 @@ function lcBuildLive(data, bsmInputs) {
     const K    = row.strike;
     const ce   = row.ce;
     const pe   = row.pe;
+
+    /* Skip completely dead strikes — both legs have zero LTP and zero OI */
+    const ceAlive = ce && (ce.ltp || ce.oi || ce.iv);
+    const peAlive = pe && (pe.ltp || pe.oi || pe.iv);
+    if (!ceAlive && !peAlive) return;
+
     const isATM = K === atmK;
     const isITMce = K < spot;   // call is ITM when strike < spot
     const isITMpe = K > spot;   // put is ITM when strike > spot
@@ -2105,24 +2111,24 @@ function lcBuildLive(data, bsmInputs) {
       </td>
       <td class="lc-ce-zone">${ceOIchg || '—'}</td>
       <td class="lc-ce-zone">${lcFmtVol(ce?.volume)}</td>
-      <td class="lc-ce-zone" style="color:var(--yellow)">${ce?.iv != null ? ce.iv.toFixed(2)+'%' : '—'}</td>
-      <td class="lc-ce-zone" style="color:var(--blue)">${ce?.delta != null ? ce.delta.toFixed(3) : '—'}</td>
-      <td class="lc-ce-zone" style="color:var(--orange)">${ce?.theta != null ? ce.theta.toFixed(2) : '—'}</td>
-      <td class="lc-ce-zone" style="color:var(--green);font-size:.6rem">${ce?.bid != null ? ce.bid.toFixed(2) : '—'}</td>
-      <td class="lc-ce-zone ltp-ce${isATM?' ltp-atm':''}">${ce?.ltp != null ? ce.ltp.toFixed(2) : '—'}</td>
-      <td class="lc-ce-zone" style="color:var(--red);font-size:.6rem">${ce?.ask != null ? ce.ask.toFixed(2) : '—'}</td>
+      <td class="lc-ce-zone" style="color:var(--yellow)">${ce?.iv ? ce.iv.toFixed(2)+'%' : '—'}</td>
+      <td class="lc-ce-zone" style="color:var(--blue)">${ce?.delta ? ce.delta.toFixed(3) : '—'}</td>
+      <td class="lc-ce-zone" style="color:var(--orange)">${ce?.theta ? ce.theta.toFixed(2) : '—'}</td>
+      <td class="lc-ce-zone" style="color:var(--green);font-size:.6rem">${ce?.bid ? ce.bid.toFixed(2) : '—'}</td>
+      <td class="lc-ce-zone ltp-ce${isATM?' ltp-atm':''}">${ce?.ltp ? ce.ltp.toFixed(2) : '—'}</td>
+      <td class="lc-ce-zone" style="color:var(--red);font-size:.6rem">${ce?.ask ? ce.ask.toFixed(2) : '—'}</td>
 
       <td class="lc-strike-col">
         ${K.toLocaleString('en-IN')}${isATM ? '<br><span class="atm-pill">ATM</span>' : ''}
         ${K === mpK ? '<br><span class="atm-pill" style="background:rgba(234,179,8,.15);color:var(--yellow);border-color:rgba(234,179,8,.4)">MAX PAIN</span>' : ''}
       </td>
 
-      <td class="lc-pe-zone lc-sep" style="color:var(--green);font-size:.6rem">${pe?.bid != null ? pe.bid.toFixed(2) : '—'}</td>
-      <td class="lc-pe-zone ltp-pe${isATM?' ltp-atm':''}">${pe?.ltp != null ? pe.ltp.toFixed(2) : '—'}</td>
-      <td class="lc-pe-zone" style="color:var(--red);font-size:.6rem">${pe?.ask != null ? pe.ask.toFixed(2) : '—'}</td>
-      <td class="lc-pe-zone" style="color:var(--orange)">${pe?.theta != null ? pe.theta.toFixed(2) : '—'}</td>
-      <td class="lc-pe-zone" style="color:var(--blue)">${pe?.delta != null ? pe.delta.toFixed(3) : '—'}</td>
-      <td class="lc-pe-zone" style="color:var(--yellow)">${pe?.iv != null ? pe.iv.toFixed(2)+'%' : '—'}</td>
+      <td class="lc-pe-zone lc-sep" style="color:var(--green);font-size:.6rem">${pe?.bid ? pe.bid.toFixed(2) : '—'}</td>
+      <td class="lc-pe-zone ltp-pe${isATM?' ltp-atm':''}">${pe?.ltp ? pe.ltp.toFixed(2) : '—'}</td>
+      <td class="lc-pe-zone" style="color:var(--red);font-size:.6rem">${pe?.ask ? pe.ask.toFixed(2) : '—'}</td>
+      <td class="lc-pe-zone" style="color:var(--orange)">${pe?.theta ? pe.theta.toFixed(2) : '—'}</td>
+      <td class="lc-pe-zone" style="color:var(--blue)">${pe?.delta ? pe.delta.toFixed(3) : '—'}</td>
+      <td class="lc-pe-zone" style="color:var(--yellow)">${pe?.iv ? pe.iv.toFixed(2)+'%' : '—'}</td>
       <td class="lc-pe-zone">${lcFmtVol(pe?.volume)}</td>
       <td class="lc-pe-zone">${peOIchg || '—'}</td>
       <td class="lc-pe-zone">
@@ -3802,7 +3808,13 @@ function applyLiveChain(data) {
   _writing = true;
   el('iSpot').value  = spot.toFixed(2);
   el('iDTE').value   = dte;
-  el('iLotSz').value = lot;
+  /* Only apply backend lot if user hasn't customised it.
+     The frontend ul-tab data-lot is the source of truth for lot size.
+     Backend may lag behind regulatory lot size changes. */
+  const currentLot = gv('iLotSz');
+  if (!currentLot || currentLot <= 0) {
+    el('iLotSz').value = lot;
+  }
   _writing = false;
   A.step = step;
 
