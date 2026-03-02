@@ -44,7 +44,7 @@ ALLOWED_ORIGINS = [
 # ── Supported Underlyings ────────────────────────────────────────────────
 # SecurityID → (name, segment, lot_size, step)
 UNDERLYINGS = {
-    13:    {"name": "NIFTY",     "segment": "IDX_I", "lot": 75,  "step": 50},
+    13:    {"name": "NIFTY",     "segment": "IDX_I", "lot": 65,  "step": 50},
     25:    {"name": "BANKNIFTY", "segment": "IDX_I", "lot": 30,  "step": 100},
     14366: {"name": "FINNIFTY",  "segment": "IDX_I", "lot": 40,  "step": 50},
     442:   {"name": "SENSEX",    "segment": "IDX_I", "lot": 20,  "step": 100},
