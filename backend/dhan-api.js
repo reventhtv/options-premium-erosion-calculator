@@ -17,7 +17,7 @@ const DhanAPI = (() => {
   // ── Config ────────────────────────────────────────────────────────────
   // Change this to your deployed backend URL when live.
   // During local dev it should be http://localhost:8000
-  const BASE_URL = 'https://YOUR-BACKEND.onrender.com';   // ← update after deploy
+  const BASE_URL = 'https://options-premium-erosion-calculator.onrender.com';   // ← update after deploy
 
   // Supported underlyings — mirrors the backend UNDERLYINGS dict
   const UNDERLYINGS = [
