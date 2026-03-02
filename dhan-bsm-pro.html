@@ -3502,21 +3502,73 @@ function fmtOI(n) {
 }
 
 /* ── Init on page load ─────────────────────────────────────────────── */
-(async function initLive() {
-  /* Ping backend */
+async function fetchWithTimeout(url, ms) {
+  const ctrl = new AbortController();
+  const tid  = setTimeout(() => ctrl.abort(), ms);
   try {
-    const r = await fetch(`${BACKEND}/health`);
-    if (r.ok) {
-      liveSetOnline();
-      liveSetStatus('green', 'Backend online');
-      /* Load expiries for NIFTY (default active tab) */
-      await loadExpiries(13);
-    } else {
-      liveSetOffline('Backend returned ' + r.status);
+    const r = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(tid);
+    return r;
+  } catch(e) {
+    clearTimeout(tid);
+    throw e;
+  }
+}
+
+(async function initLive() {
+  liveSetStatus('amber', 'Connecting…');
+
+  /* Step 1: ping health with retry for Render cold start */
+  let backendAlive = false;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const r = await fetchWithTimeout(`${BACKEND}/health`, 15000);
+      if (r.ok) { backendAlive = true; break; }
+      liveSetStatus('amber', `Attempt ${attempt}: HTTP ${r.status}`);
+    } catch(e) {
+      const msg = e.name === 'AbortError'
+        ? `Attempt ${attempt}: Render waking up… (${attempt * 15}s)`
+        : `Attempt ${attempt}: ${e.message}`;
+      liveSetStatus('amber', msg);
+      if (attempt < 3) await new Promise(res => setTimeout(res, 8000));
+    }
+  }
+
+  if (!backendAlive) {
+    liveSetOffline('Cannot reach backend — BSM-only mode');
+    console.warn('[Live] Backend unreachable at', BACKEND);
+    return;
+  }
+
+  /* Step 2: verify Dhan token is valid */
+  liveSetStatus('amber', 'Checking Dhan token…');
+  try {
+    const tr = await fetchWithTimeout(`${BACKEND}/api/token-check`, 12000);
+    const td = await tr.json();
+    if (!td.valid) {
+      if (td.reason === 'TOKEN_EXPIRED') {
+        liveSetStatus('red', '⚠ Token expired — regenerate on DhanHQ');
+        const note = el('liveOfflineNote');
+        if (note) {
+          note.textContent = '⚠ Dhan token expired. Go to DhanHQ → Generate new token → update DHAN_ACCESS_TOKEN in Render dashboard.';
+          note.classList.add('visible');
+          note.style.color = 'var(--yellow)';
+        }
+      } else {
+        liveSetStatus('red', 'Token invalid: ' + (td.reason || 'unknown'));
+      }
+      console.error('[Live] Token check failed:', td);
+      return;
     }
   } catch(e) {
-    liveSetOffline('Cannot reach backend');
+    /* token-check failed — try loading expiries anyway */
+    console.warn('[Live] token-check error, proceeding:', e.message);
   }
+
+  /* Step 3: load expiries */
+  liveSetOnline();
+  liveSetStatus('green', 'Backend online');
+  await loadExpiries(13);
 })();
 
 

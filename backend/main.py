@@ -31,12 +31,14 @@ DHAN_ACCESS_TOKEN = os.getenv("DHAN_ACCESS_TOKEN", "")
 DHAN_CLIENT_ID    = os.getenv("DHAN_CLIENT_ID", "")
 DHAN_BASE_URL     = "https://api.dhan.co/v2"
 
-# Allowed frontend origins  — add your GitHub Pages URL here
+# Allowed frontend origins
 ALLOWED_ORIGINS = [
     "https://reventhtv.github.io",
     "http://localhost:3000",
-    "http://127.0.0.1:5500",   # VS Code Live Server
+    "http://127.0.0.1:5500",
     "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "null",   # local file:// opened directly in browser
 ]
 
 # ── Supported Underlyings ────────────────────────────────────────────────
@@ -100,17 +102,64 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=["*"],          # open for now — tighten after confirming live
     allow_credentials=False,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
 # ── Routes ────────────────────────────────────────────────────────────────
 
+@app.get("/")
+def root():
+    return {
+        "service": "Dhan Options Backend",
+        "status":  "online",
+        "endpoints": ["/health", "/api/instruments", "/api/expiries", "/api/option-chain", "/api/spot", "/docs"]
+    }
+
+
 @app.get("/health")
 def health():
-    return {"status": "ok", "timestamp": time.time()}
+    token_configured = bool(DHAN_ACCESS_TOKEN and DHAN_CLIENT_ID)
+    return {
+        "status": "ok",
+        "timestamp": time.time(),
+        "token_configured": token_configured,
+        "client_id": DHAN_CLIENT_ID if DHAN_CLIENT_ID else "NOT SET",
+    }
+
+
+@app.get("/api/token-check")
+async def token_check():
+    """Quick auth check — verifies token is valid without hitting rate limits."""
+    if not DHAN_ACCESS_TOKEN or not DHAN_CLIENT_ID:
+        return {"valid": False, "reason": "Token or Client ID not set in environment"}
+    try:
+        body = {"UnderlyingScrip": 13, "UnderlyingSeg": "IDX_I"}
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.post(
+                f"{DHAN_BASE_URL}/optionchain/expirylist",
+                json=body,
+                headers={
+                    "Content-Type": "application/json",
+                    "access-token": DHAN_ACCESS_TOKEN,
+                    "client-id": DHAN_CLIENT_ID,
+                }
+            )
+        if resp.status_code == 200:
+            return {"valid": True, "client_id": DHAN_CLIENT_ID}
+        elif resp.status_code == 401:
+            return {
+                "valid": False,
+                "reason": "TOKEN_EXPIRED",
+                "message": "Regenerate token on DhanHQ and update DHAN_ACCESS_TOKEN in Render dashboard",
+                "client_id": DHAN_CLIENT_ID,
+            }
+        else:
+            return {"valid": False, "reason": f"Dhan returned HTTP {resp.status_code}"}
+    except Exception as e:
+        return {"valid": False, "reason": str(e)}
 
 
 @app.get("/api/instruments")
