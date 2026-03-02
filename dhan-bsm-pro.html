@@ -408,6 +408,15 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
 .pos-long{background:rgba(34,197,94,.12);color:var(--green)}
 .pos-short{background:rgba(239,68,68,.12);color:var(--red)}
 
+/* ── LIVE LTP vs FAIR VALUE ────────────────────────────────────── */
+.ph-live-ltp{font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--green);
+  background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);
+  border-radius:var(--rsm);padding:.06rem .3rem;margin-right:.18rem}
+.ph-fair{font-family:var(--mono);font-size:.62rem;color:var(--t3)}
+.ph-spread{font-size:.57rem;color:var(--yellow);font-weight:600}
+.ph-spread.over{color:var(--orange)}
+.ph-spread.under{color:var(--cyan)}
+
 /* ── LIVE DATA PANEL ─────────────────────────────────────────────────── */
 .live-panel{background:var(--bg3);border-bottom:1px solid var(--bd);padding:.45rem 1.2rem;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;flex-shrink:0}
 .live-panel-lbl{font-size:.58rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);white-space:nowrap}
@@ -803,13 +812,21 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
       <div class="ph-blk">
         <div class="ph-lbl">Call CE Premium</div>
         <div class="ph-val call" id="oCallPx">₹—</div>
-        <div class="ph-sub">Intrinsic: <strong id="oCallIntr">—</strong> &nbsp;Extrinsic: <strong id="oCallExtr">—</strong></div>
+        <div class="ph-sub">
+          <span id="oCallLTPWrap" style="display:none"><span class="ph-live-ltp" id="oCallLTP">—</span><span class="ph-spread" id="oCallSpread"></span>&nbsp;·&nbsp;</span>
+          <span id="oCallFairWrap" style="display:none"><span class="ph-fair">BSM Fair: <strong id="oCallFair">—</strong></span>&nbsp;·&nbsp;</span>
+          Intr: <strong id="oCallIntr">—</strong>&nbsp;Extr: <strong id="oCallExtr">—</strong>
+        </div>
       </div>
       <div class="ph-div"></div>
       <div class="ph-blk">
         <div class="ph-lbl">Put PE Premium</div>
         <div class="ph-val put" id="oPutPx">₹—</div>
-        <div class="ph-sub">Intrinsic: <strong id="oPutIntr">—</strong> &nbsp;Extrinsic: <strong id="oPutExtr">—</strong></div>
+        <div class="ph-sub">
+          <span id="oPutLTPWrap" style="display:none"><span class="ph-live-ltp" id="oPutLTP">—</span><span class="ph-spread" id="oPutSpread"></span>&nbsp;·&nbsp;</span>
+          <span id="oPutFairWrap" style="display:none"><span class="ph-fair">BSM Fair: <strong id="oPutFair">—</strong></span>&nbsp;·&nbsp;</span>
+          Intr: <strong id="oPutIntr">—</strong>&nbsp;Extr: <strong id="oPutExtr">—</strong>
+        </div>
       </div>
       <div class="ph-div"></div>
       <div class="ph-blk">
@@ -1441,13 +1458,23 @@ let _writing = false;  // guard: prevents programmatic .value write from trigger
 function syncPrem(res) {
   if (A.premManual) return;  // trader has locked a custom price — respect it
 
-  const price = A.type === 'call' ? res.call
-              : A.type === 'put'  ? res.put
-              : res.call + res.put;   // Both = total straddle cost
+  /* Use live LTP if available for this strike, else BSM */
+  const K       = gv('iStrike');
+  const liveLeg = _liveMap[K];
+  let price;
+  if (liveLeg) {
+    price = A.type === 'call' ? (liveLeg.ce_ltp ?? res.call)
+          : A.type === 'put'  ? (liveLeg.pe_ltp ?? res.put)
+          : ((liveLeg.ce_ltp ?? res.call) + (liveLeg.pe_ltp ?? res.put));
+  } else {
+    price = A.type === 'call' ? res.call
+          : A.type === 'put'  ? res.put
+          : res.call + res.put;
+  }
 
-  _writing = true;                    // arm the guard
+  _writing = true;
   el('iPrem').value = price.toFixed(2);
-  _writing = false;                   // disarm
+  _writing = false;
 
   /* Visual feedback */
   el('autoBadge').classList.add('on');
@@ -1500,13 +1527,57 @@ function calculate() {
   st('fpNd2', f2(res.Nd2, 4));
   st('fpnd1', f2(res.nd1, 4));
 
-  /* ── Price header ── */
-  st('oCallPx',   '₹' + res.call.toFixed(2));
-  st('oPutPx',    '₹' + res.put.toFixed(2));
+  /* ── Price header — use live LTP if available, else BSM ── */
+  const K_now   = i.K;
+  const liveLeg = _liveMap[K_now];
+  const ceLTP   = liveLeg?.ce_ltp ?? null;
+  const peLTP   = liveLeg?.pe_ltp ?? null;
+
+  /* Main displayed premium = live LTP (if available) else BSM */
+  const dispCall = ceLTP !== null ? ceLTP : res.call;
+  const dispPut  = peLTP !== null ? peLTP : res.put;
+
+  st('oCallPx', '₹' + dispCall.toFixed(2));
+  st('oPutPx',  '₹' + dispPut.toFixed(2));
   st('oCallIntr', '₹' + callIntr.toFixed(2));
-  st('oCallExtr', '₹' + Math.max(0, res.call - callIntr).toFixed(2));
+  st('oCallExtr', '₹' + Math.max(0, dispCall - callIntr).toFixed(2));
   st('oPutIntr',  '₹' + putIntr.toFixed(2));
-  st('oPutExtr',  '₹' + Math.max(0, res.put  - putIntr).toFixed(2));
+  st('oPutExtr',  '₹' + Math.max(0, dispPut  - putIntr).toFixed(2));
+
+  /* Show live LTP badge + BSM fair value when live data is present */
+  if (ceLTP !== null) {
+    const cSpread = ceLTP - res.call;
+    const cwrap = el('oCallLTPWrap'), cfw = el('oCallFairWrap');
+    if (cwrap) cwrap.style.display = 'inline';
+    if (cfw)   cfw.style.display   = 'inline';
+    st('oCallLTP',  'LTP ₹' + ceLTP.toFixed(2));
+    st('oCallFair', '₹' + res.call.toFixed(2));
+    const csp = el('oCallSpread');
+    if (csp) {
+      csp.textContent = (cSpread >= 0 ? '+' : '') + cSpread.toFixed(2);
+      csp.className = 'ph-spread ' + (cSpread > 0.5 ? 'over' : cSpread < -0.5 ? 'under' : '');
+    }
+  } else {
+    const cw = el('oCallLTPWrap'); if (cw) cw.style.display = 'none';
+    const cf = el('oCallFairWrap'); if (cf) cf.style.display = 'none';
+  }
+
+  if (peLTP !== null) {
+    const pSpread = peLTP - res.put;
+    const pwrap = el('oPutLTPWrap'), pfw = el('oPutFairWrap');
+    if (pwrap) pwrap.style.display = 'inline';
+    if (pfw)   pfw.style.display   = 'inline';
+    st('oPutLTP',  'LTP ₹' + peLTP.toFixed(2));
+    st('oPutFair', '₹' + res.put.toFixed(2));
+    const psp = el('oPutSpread');
+    if (psp) {
+      psp.textContent = (pSpread >= 0 ? '+' : '') + pSpread.toFixed(2);
+      psp.className = 'ph-spread ' + (pSpread > 0.5 ? 'over' : pSpread < -0.5 ? 'under' : '');
+    }
+  } else {
+    const pw = el('oPutLTPWrap'); if (pw) pw.style.display = 'none';
+    const pf = el('oPutFairWrap'); if (pf) pf.style.display = 'none';
+  }
 
   /* Breakeven = Strike ± paid (what was actually paid, now correctly synced) */
   st('oCallBE',   '₹' + (i.K + paid).toFixed(2));
@@ -1969,13 +2040,20 @@ function buildSDRows() {
     row.className = 'sd-row' + (isATM ? ' atmr' : '') + (K === cur ? ' sel' : '');
     row.dataset.k = K;
     row.style.gridTemplateColumns = '1.6fr 1fr .82fr .82fr 1fr .82fr .64fr';
+    const liveK  = _liveMap[K];
+    const ceDisp = liveK?.ce_ltp != null
+      ? '<span style="color:var(--green);font-weight:700">' + liveK.ce_ltp.toFixed(2) + '</span><span style="color:var(--t4);font-size:.5rem"> f' + r2sd.call.toFixed(1) + '</span>'
+      : r2sd.call.toFixed(2);
+    const peDisp = liveK?.pe_ltp != null
+      ? '<span style="color:var(--green);font-weight:700">' + liveK.pe_ltp.toFixed(2) + '</span><span style="color:var(--t4);font-size:.5rem"> f' + r2sd.put.toFixed(1) + '</span>'
+      : r2sd.put.toFixed(2);
     row.innerHTML = `
       <div class="sdc"><span class="sdn">${K.toLocaleString('en-IN')}</span>${isATM ? '<span class="sdatm">ATM</span>' : ''}
         <span class="sd-badge ${mC}" style="margin-left:.22rem;font-size:.44rem">${mL}</span></div>
-      <div class="sdc sdce">${r2sd.call.toFixed(2)}</div>
+      <div class="sdc sdce">${ceDisp}</div>
       <div class="sdc sddc">${r2sd.delta_c.toFixed(2)}</div>
       <div class="sdc sdth">${(r2sd.theta_c * tsSD).toFixed(2)}</div>
-      <div class="sdc sdpe">${r2sd.put.toFixed(2)}</div>
+      <div class="sdc sdpe">${peDisp}</div>
       <div class="sdc sddp">${r2sd.delta_p.toFixed(2)}</div>
       <div class="sdc" style="color:var(--green);font-weight:600">${popSD}</div>`;
     row.addEventListener('click', () => pickStrike(K));
@@ -2005,7 +2083,13 @@ function syncSDTrigger(K, sp, res) {
   else                      { mL = 'OTM ' + pd.toFixed(1) + '%'; mC = 'otm'; }
   const b = el('sdBadge');
   b.textContent = mL; b.className = 'sd-badge ' + mC;
-  if (res) el('sdPreview').textContent = 'CE ₹' + res.call.toFixed(2) + '  ·  PE ₹' + res.put.toFixed(2) + '  ·  Δ ' + res.delta_c.toFixed(2);
+  if (res) {
+    const K_sd   = gv('iStrike');
+    const lv     = _liveMap[K_sd];
+    const ceShow = lv?.ce_ltp != null ? lv.ce_ltp.toFixed(2) + ' ⬤' : res.call.toFixed(2);
+    const peShow = lv?.pe_ltp != null ? lv.pe_ltp.toFixed(2) + ' ⬤' : res.put.toFixed(2);
+    el('sdPreview').textContent = 'CE ₹' + ceShow + '  ·  PE ₹' + peShow + '  ·  Δ ' + res.delta_c.toFixed(2);
+  }
 }
 
 function toggleSD(e) { e.stopPropagation(); A.sdOpen ? closeSD() : openSD(); }
@@ -2041,6 +2125,25 @@ function setType(t) {
   calculate();
 }
 
+
+/* ── Update strike dropdown to reflect live LTPs from chain ─────────── */
+function updateStrikeDropdownLTP(chain, spot, atmK) {
+  /* Store step from chain spacing */
+  if (chain.length >= 2) {
+    const inferredStep = chain[1].strike - chain[0].strike;
+    if (inferredStep > 0) A.step = inferredStep;
+  }
+  /* Update the displayed CE/PE prices next to selected strike */
+  const liveK = _liveMap[atmK];
+  if (!liveK) return;
+  const ceTxt = liveK.ce_ltp != null ? '₹' + liveK.ce_ltp.toFixed(2) : '—';
+  const peTxt = liveK.pe_ltp != null ? '₹' + liveK.pe_ltp.toFixed(2) : '—';
+  /* Update the small CE/PE labels under the strike selector */
+  const sdCE = document.querySelector('.sd-sub-ce');
+  const sdPE = document.querySelector('.sd-sub-pe');
+  if (sdCE) sdCE.textContent = 'CE ' + ceTxt;
+  if (sdPE) sdPE.textContent = 'PE ' + peTxt;
+}
 function selectUL(btn) {
   document.querySelectorAll('.ul-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -3259,6 +3362,7 @@ function onMpTabOpen() {
 const BACKEND = 'https://options-premium-erosion-calculator.onrender.com';
 let _liveChain   = null;   // last fetched chain response
 let _liveLoading = false;
+let _liveMap     = {};    // strike → {ce_ltp, pe_ltp} for instant lookup
 
 /* ── Status helpers ─────────────────────────────────────────────────── */
 function liveSetStatus(state, text) {
@@ -3397,6 +3501,19 @@ function applyLiveChain(data) {
   , chain[0]);
   const atmK = atmRow.strike;
 
+  /* 1b ── Build global live LTP lookup map ────────────────────────────── */
+  _liveMap = {};
+  chain.forEach(row => {
+    _liveMap[row.strike] = {
+      ce_ltp: row.ce?.ltp ?? null,
+      pe_ltp: row.pe?.ltp ?? null,
+      ce_iv:  row.ce?.iv  ?? null,
+      pe_iv:  row.pe?.iv  ?? null,
+      ce_oi:  row.ce?.oi  ?? null,
+      pe_oi:  row.pe?.oi  ?? null,
+    };
+  });
+
   /* 2 ── Set IV from ATM chain row (use CE IV as primary) ───────────── */
   const atmIV = atmRow.ce?.iv || atmRow.pe?.iv || gv('iIV');
   _writing = true;
@@ -3407,6 +3524,9 @@ function applyLiveChain(data) {
   el('sdBadge').className   = 'sd-badge atm';
   _writing = false;
   A.premManual = false;
+
+  /* 2b ── Update strike dropdown to show live LTPs ─────────────────── */
+  updateStrikeDropdownLTP(chain, spot, atmK);
 
   /* 3 ── Update IV skew inputs if OTM data available ────────────────── */
   const otmPutRow  = chain.find(r => r.strike < atmK - step && r.pe?.iv);
