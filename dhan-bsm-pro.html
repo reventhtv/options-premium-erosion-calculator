@@ -1095,14 +1095,16 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
             <span style="font-size:.76rem;font-weight:600" id="lcTitle">Option Chain</span>
             <span class="lc-badge bsm" id="lcModeBadge">BSM Mode</span>
             <span class="lc-badge expiry" id="lcExpiryBadge" style="display:none"></span>
-            <span class="lc-badge live" id="lcLiveBadge" style="display:none">● Live</span>
+<!-- lcLiveBadge removed — lcModeBadge already shows Live status -->
           </div>
           <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
             <!-- Strike filter -->
             <div class="lc-filter">
               <span style="font-size:.56rem;color:var(--t3)">Strikes:</span>
-              <button class="lc-filter-btn" onclick="lcSetStrikes(10,this)">±10</button>
-              <button class="lc-filter-btn active" onclick="lcSetStrikes(0,this)">All</button>
+              <button class="lc-filter-btn" onclick="lcSetStrikes(5,this)">±5</button>
+              <button class="lc-filter-btn active" onclick="lcSetStrikes(10,this)">±10</button>
+              <button class="lc-filter-btn" onclick="lcSetStrikes(15,this)">±15</button>
+              <button class="lc-filter-btn" onclick="lcSetStrikes(0,this)">All</button>
             </div>
             <span class="badge badge-blue" id="bATM">ATM: ₹—</span>
             <button class="btn btn-ghost" style="font-size:.62rem;padding:.26rem .52rem" id="lcRefreshBtn" onclick="lcRefresh()">↺ Refresh</button>
@@ -1944,7 +1946,7 @@ function mkOpts(reverseX) {
    ═══════════════════════════════════════════════════════════════════ */
 
 let _lcChain    = null;   // current rendered chain rows
-let _lcNStrikes = 0;      // 0 = all strikes, N = ±N around ATM
+let _lcNStrikes = 10;     // default ±10 around ATM; 0 = all active
 let _lcIsLive   = false;  // true when showing real Dhan data
 let _maxOI      = 1;      // for OI bar scaling
 
@@ -1970,11 +1972,15 @@ async function lcRefresh() {
 /* ── Strike filter ──────────────────────────────────────────────── */
 function lcSetStrikes(n, btn) {
   document.querySelectorAll('.lc-filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   _lcNStrikes = n;
-  buildChain(A.lastBSM || {S: gv('iSpot'), K: gv('iStrike'), T: gv('iDTE')/365,
-    r: R, sigma: gv('iIV')/100, q: Q, iv: gv('iIV'), dte: gv('iDTE'),
-    lot: gv('iLotSz'), lots: gv('iLots')});
+  if (_liveChain && _liveChain.chain) {
+    lcBuildLive(_liveChain, A.lastBSM);
+  } else {
+    buildChain(A.lastBSM || {S: gv('iSpot'), K: gv('iStrike'), T: gv('iDTE')/365,
+      r: R, sigma: gv('iIV')/100, q: Q, iv: gv('iIV'), dte: gv('iDTE'),
+      lot: gv('iLotSz'), lots: gv('iLots')});
+  }
 }
 
 /* ── Format helpers ─────────────────────────────────────────────── */
@@ -2053,12 +2059,10 @@ function lcBuildLive(data, bsmInputs) {
   const eb = el('lcExpiryBadge');
   eb.textContent = expiry + ' · ' + dte + 'd';
   eb.style.display = 'inline-block';
-  el('lcLiveBadge').style.display = 'inline-block';
 
   /* Build thead */
   el('lcHead').innerHTML = `<tr>
     <th class="lc-ce" style="text-align:right">OI</th>
-    <th class="lc-ce" style="text-align:right">Chg OI</th>
     <th class="lc-ce" style="text-align:right">Volume</th>
     <th class="lc-ce" style="text-align:right">IV%</th>
     <th class="lc-ce" style="text-align:right">Δ</th>
@@ -2074,7 +2078,6 @@ function lcBuildLive(data, bsmInputs) {
     <th class="lc-pe" style="text-align:left">Δ</th>
     <th class="lc-pe" style="text-align:left">IV%</th>
     <th class="lc-pe" style="text-align:left">Volume</th>
-    <th class="lc-pe" style="text-align:left">Chg OI</th>
     <th class="lc-pe" style="text-align:left">OI</th>
   </tr>`;
 
@@ -2087,10 +2090,12 @@ function lcBuildLive(data, bsmInputs) {
     const ce   = row.ce;
     const pe   = row.pe;
 
-    /* Skip completely dead strikes — both legs have zero LTP and zero OI */
-    const ceAlive = ce && (ce.ltp || ce.oi || ce.iv);
-    const peAlive = pe && (pe.ltp || pe.oi || pe.iv);
-    if (!ceAlive && !peAlive) return;
+    /* Skip dead strikes: no LTP on either leg = no current market activity */
+    const ceLive = ce?.ltp > 0;
+    const peLive = pe?.ltp > 0;
+    if (!ceLive && !peLive) return;
+    /* In "All" mode also skip strikes > 15% from spot (deep OTM, no trader interest) */
+    if (_lcNStrikes === 0 && Math.abs(K - spot) / spot > 0.15) return;
 
     const isATM = K === atmK;
     const isITMce = K < spot;   // call is ITM when strike < spot
@@ -2100,16 +2105,17 @@ function lcBuildLive(data, bsmInputs) {
     tr.className = isATM ? 'lc-atm' : (isITMce ? 'lc-itm-ce' : 'lc-itm-pe');
 
     /* CE cells */
-    const ceOIbar  = ce?.oi  ? lcOIBar(ce.oi,  _maxOI, 'ce') : '';
-    const peOIbar  = pe?.oi  ? lcOIBar(pe.oi,  _maxOI, 'pe') : '';
-    const ceOIchg  = lcOIChg(ce?.oi, ce?.prev_oi);
-    const peOIchg  = lcOIChg(pe?.oi, pe?.prev_oi);
+    /* OI intensity: scale opacity by how large OI is vs max */
+    const ceOIPct = ce?.oi ? Math.min(1, ce.oi / _maxOI) : 0;
+    const peOIPct = pe?.oi ? Math.min(1, pe.oi / _maxOI) : 0;
+    const ceOIStyle = ceOIPct > 0.5 ? 'font-weight:700;color:var(--blue)' : 'color:var(--blue)';
+    const peOIStyle = peOIPct > 0.5 ? 'font-weight:700;color:var(--red)'  : 'color:var(--red)';
 
     tr.innerHTML = `
-      <td class="lc-ce-zone">
-        <div class="oi-bar-wrap">${ceOIbar}<span>${lcFmtOI(ce?.oi)}</span></div>
+      <td class="lc-ce-zone" style="${ceOIStyle}">
+        ${lcFmtOI(ce?.oi)}
+        ${ce?.oi ? `<div class="oi-bar ce" style="width:${Math.round(ceOIPct*40)}px;margin-top:2px;margin-left:auto"></div>` : ''}
       </td>
-      <td class="lc-ce-zone">${ceOIchg || '—'}</td>
       <td class="lc-ce-zone">${lcFmtVol(ce?.volume)}</td>
       <td class="lc-ce-zone" style="color:var(--yellow)">${ce?.iv ? ce.iv.toFixed(2)+'%' : '—'}</td>
       <td class="lc-ce-zone" style="color:var(--blue)">${ce?.delta ? ce.delta.toFixed(3) : '—'}</td>
@@ -2130,9 +2136,9 @@ function lcBuildLive(data, bsmInputs) {
       <td class="lc-pe-zone" style="color:var(--blue)">${pe?.delta ? pe.delta.toFixed(3) : '—'}</td>
       <td class="lc-pe-zone" style="color:var(--yellow)">${pe?.iv ? pe.iv.toFixed(2)+'%' : '—'}</td>
       <td class="lc-pe-zone">${lcFmtVol(pe?.volume)}</td>
-      <td class="lc-pe-zone">${peOIchg || '—'}</td>
-      <td class="lc-pe-zone">
-        <div class="oi-bar-wrap" style="flex-direction:row-reverse">${peOIbar}<span>${lcFmtOI(pe?.oi)}</span></div>
+      <td class="lc-pe-zone" style="${peOIStyle}">
+        ${lcFmtOI(pe?.oi)}
+        ${pe?.oi ? `<div class="oi-bar pe" style="width:${Math.round(peOIPct*40)}px;margin-top:2px"></div>` : ''}
       </td>`;
 
     tbody.appendChild(tr);
@@ -2141,6 +2147,12 @@ function lcBuildLive(data, bsmInputs) {
   /* Show table, hide empty */
   el('lcTable').style.display = 'table';
   el('lcEmpty').style.display = 'none';
+
+  /* Auto-scroll ATM row into the centre of the viewport */
+  setTimeout(() => {
+    const atmTr = el('lcBody').querySelector('tr.lc-atm');
+    if (atmTr) atmTr.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, 60);
 
   /* Summary bar */
   const pcrCls = pcr > 1.3 ? 'bull' : pcr < 0.7 ? 'bear' : 'neu';
@@ -2154,7 +2166,8 @@ function lcBuildLive(data, bsmInputs) {
   el('csTotalPEOI').textContent = lcFmtOI(totPEOI);
   el('csOISignal').textContent  = oiSig;
   el('csOISignal').className    = 'cs-val ' + pcrCls;
-  el('csStrikes').textContent   = rows.length + ' strikes';
+  const rendered = el('lcBody').querySelectorAll('tr').length;
+  el('csStrikes').textContent   = rendered + ' active strikes';
   el('csUpdated').textContent   = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   el('lcSummary').style.display = 'flex';
 }
@@ -2172,7 +2185,6 @@ function lcBuildBSM(i) {
   el('lcModeBadge').className   = 'lc-badge bsm';
   el('lcTitle').textContent     = 'Option Chain — BSM Theoretical';
   el('lcExpiryBadge').style.display = 'none';
-  el('lcLiveBadge').style.display   = 'none';
 
   /* BSM uses simple 13-col layout */
   el('lcHead').innerHTML = `<tr>
