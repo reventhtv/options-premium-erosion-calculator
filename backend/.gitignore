@@ -1,7 +1,5 @@
-backend/.gitignore << 'EOF'
 .env
 __pycache__/
 *.pyc
 .venv/
 venv/
-EOF
