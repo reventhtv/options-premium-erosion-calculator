@@ -235,6 +235,8 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 .lc-table{width:100%;border-collapse:collapse;font-size:.66rem}
 .lc-table thead th{padding:.36rem .5rem;font-size:.55rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);border-bottom:2px solid var(--bd);white-space:nowrap;text-align:right;position:sticky;top:0;background:var(--bg2);z-index:2}
 .lc-table thead th.lc-strike-hdr{text-align:center;background:rgba(59,130,246,.06);color:var(--blue)}
+.lc-table thead th.lc-pcr-hdr{text-align:center;background:rgba(234,179,8,.07);color:var(--yellow);font-weight:600;cursor:help}
+.lc-pcr-col{text-align:center;font-size:.75rem;padding:0 6px}
 .lc-table thead th.lc-ce{color:var(--blue)}
 .lc-table thead th.lc-pe{color:var(--red)}
 .lc-table thead th.lc-sep{border-left:1px solid var(--bd2)}
@@ -2085,13 +2087,10 @@ function lcBuildLive(data, bsmInputs) {
     <th class="lc-ce" style="text-align:right">IV%</th>
     <th class="lc-ce" style="text-align:right">Δ</th>
     <th class="lc-ce" style="text-align:right">θ/day</th>
-    <th class="lc-ce" style="text-align:right">Bid</th>
     <th class="lc-ce" style="text-align:right">LTP ▲</th>
-    <th class="lc-ce" style="text-align:right">Ask</th>
     <th class="lc-strike-hdr">Strike</th>
-    <th class="lc-pe lc-sep" style="text-align:left">Bid</th>
-    <th class="lc-pe" style="text-align:left">LTP ▼</th>
-    <th class="lc-pe" style="text-align:left">Ask</th>
+    <th class="lc-pcr-hdr" title="Put-Call Ratio = PE OI ÷ CE OI per strike">PCR</th>
+    <th class="lc-pe lc-sep" style="text-align:left">LTP ▼</th>
     <th class="lc-pe" style="text-align:left">θ/day</th>
     <th class="lc-pe" style="text-align:left">Δ</th>
     <th class="lc-pe" style="text-align:left">IV%</th>
@@ -2138,18 +2137,21 @@ function lcBuildLive(data, bsmInputs) {
       <td class="lc-ce-zone" style="color:var(--yellow)">${ce?.iv ? ce.iv.toFixed(2)+'%' : '—'}</td>
       <td class="lc-ce-zone" style="color:var(--blue)">${ce?.delta ? ce.delta.toFixed(3) : '—'}</td>
       <td class="lc-ce-zone" style="color:var(--orange)">${ce?.theta ? ce.theta.toFixed(2) : '—'}</td>
-      <td class="lc-ce-zone" style="color:var(--green);font-size:.6rem">${ce?.bid ? ce.bid.toFixed(2) : '—'}</td>
       <td class="lc-ce-zone ltp-ce${isATM?' ltp-atm':''}">${ce?.ltp ? ce.ltp.toFixed(2) : '—'}</td>
-      <td class="lc-ce-zone" style="color:var(--red);font-size:.6rem">${ce?.ask ? ce.ask.toFixed(2) : '—'}</td>
 
       <td class="lc-strike-col">
         ${K.toLocaleString('en-IN')}${isATM ? '<br><span class="atm-pill">ATM</span>' : ''}
         ${K === mpK ? '<br><span class="atm-pill" style="background:rgba(234,179,8,.15);color:var(--yellow);border-color:rgba(234,179,8,.4)">MAX PAIN</span>' : ''}
       </td>
 
-      <td class="lc-pe-zone lc-sep" style="color:var(--green);font-size:.6rem">${pe?.bid ? pe.bid.toFixed(2) : '—'}</td>
-      <td class="lc-pe-zone ltp-pe${isATM?' ltp-atm':''}">${pe?.ltp ? pe.ltp.toFixed(2) : '—'}</td>
-      <td class="lc-pe-zone" style="color:var(--red);font-size:.6rem">${pe?.ask ? pe.ask.toFixed(2) : '—'}</td>
+      <td class="lc-pcr-col">${(() => {
+        const spPCR = (ce?.oi && pe?.oi) ? pe.oi / ce.oi : null;
+        if (!spPCR) return '<span style="color:var(--fg3)">—</span>';
+        const cls = spPCR > 1.2 ? 'color:var(--green);font-weight:700' : spPCR < 0.8 ? 'color:var(--red);font-weight:700' : 'color:var(--yellow)';
+        return '<span style="' + cls + '">' + spPCR.toFixed(2) + '</span>';
+      })()}</td>
+
+      <td class="lc-pe-zone lc-sep ltp-pe${isATM?' ltp-atm':''}">${pe?.ltp ? pe.ltp.toFixed(2) : '—'}</td>
       <td class="lc-pe-zone" style="color:var(--orange)">${pe?.theta ? pe.theta.toFixed(2) : '—'}</td>
       <td class="lc-pe-zone" style="color:var(--blue)">${pe?.delta ? pe.delta.toFixed(3) : '—'}</td>
       <td class="lc-pe-zone" style="color:var(--yellow)">${pe?.iv ? pe.iv.toFixed(2)+'%' : '—'}</td>
