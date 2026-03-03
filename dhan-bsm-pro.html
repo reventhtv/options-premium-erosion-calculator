@@ -235,8 +235,8 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 .lc-table{width:100%;border-collapse:collapse;font-size:.66rem}
 .lc-table thead th{padding:.36rem .5rem;font-size:.55rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);border-bottom:2px solid var(--bd);white-space:nowrap;text-align:right;position:sticky;top:0;background:var(--bg2);z-index:2}
 .lc-table thead th.lc-strike-hdr{text-align:center;background:rgba(59,130,246,.06);color:var(--blue)}
-.lc-table thead th.lc-pcr-hdr{text-align:center;background:rgba(234,179,8,.07);color:var(--yellow);font-weight:600;cursor:help}
-.lc-pcr-col{text-align:center;font-size:.75rem;padding:0 6px}
+.lc-table thead th.lc-pcr-hdr{text-align:center;background:rgba(234,179,8,.07);color:var(--yellow);font-weight:600;cursor:help;min-width:52px;border-left:1px solid var(--bd2);border-right:1px solid var(--bd2)}
+.lc-pcr-col{text-align:center;font-size:.75rem;padding:0 6px;min-width:52px;border-left:1px solid rgba(234,179,8,.15);border-right:1px solid rgba(234,179,8,.15)}
 .lc-table thead th.lc-ce{color:var(--blue)}
 .lc-table thead th.lc-pe{color:var(--red)}
 .lc-table thead th.lc-sep{border-left:1px solid var(--bd2)}
@@ -247,7 +247,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 .lc-table tbody tr.lc-atm:hover td{background:rgba(59,130,246,.09)}
 .lc-table tbody tr.lc-atm td.lc-strike-col{background:rgba(59,130,246,.12)}
 /* Strike centre column */
-.lc-strike-col{text-align:center!important;background:var(--bg3);position:sticky;border-left:1px solid var(--bd2);border-right:1px solid var(--bd2);font-family:var(--mono);font-weight:700;font-size:.72rem;color:var(--t1)}
+.lc-strike-col{text-align:center!important;background:var(--bg3);position:sticky;border-left:1px solid var(--bd2);border-right:1px solid var(--bd2);font-family:var(--mono);font-weight:700;font-size:.72rem;color:var(--t1);min-width:68px}
 /* OI bar */
 .oi-bar-wrap{display:flex;align-items:center;gap:.28rem;justify-content:flex-end}
 .oi-bar{height:4px;border-radius:2px;min-width:2px;max-width:52px}
@@ -260,8 +260,8 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 .ba-bid{color:var(--green);font-size:.6rem}
 .ba-ask{color:var(--red);font-size:.6rem}
 /* LTP highlight */
-.ltp-ce{color:var(--blue);font-weight:700}
-.ltp-pe{color:var(--red);font-weight:700}
+.ltp-ce{color:var(--blue);font-weight:700;min-width:58px}
+.ltp-pe{color:var(--red);font-weight:700;min-width:58px}
 .ltp-atm{color:var(--t1)!important;font-weight:800!important}
 /* ITM shading */
 .lc-table tbody tr.lc-itm-ce td.lc-ce-zone{background:rgba(59,130,246,.03)}
@@ -1137,7 +1137,7 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
         <div class="chain-summary" id="lcSummary" style="display:none">
           <div class="cs-item"><div class="cs-lbl">Spot</div><div class="cs-val" id="csSpot">—</div></div>
           <div class="cs-item"><div class="cs-lbl">ATM IV</div><div class="cs-val" id="csATMIV">—</div></div>
-          <div class="cs-item"><div class="cs-lbl">PCR</div><div class="cs-val" id="csPCR">—</div></div>
+          <div class="cs-item" title="Chain PCR = Total PE OI ÷ Total CE OI across all visible strikes"><div class="cs-lbl">Chain PCR</div><div class="cs-val" id="csPCR">—</div></div>
           <div class="cs-item"><div class="cs-lbl">Max Pain</div><div class="cs-val" id="csMaxPain">—</div></div>
           <div class="cs-item"><div class="cs-lbl">Total CE OI</div><div class="cs-val" id="csTotalCEOI">—</div></div>
           <div class="cs-item"><div class="cs-lbl">Total PE OI</div><div class="cs-val" id="csTotalPEOI">—</div></div>
@@ -2087,10 +2087,10 @@ function lcBuildLive(data, bsmInputs) {
     <th class="lc-ce" style="text-align:right">IV%</th>
     <th class="lc-ce" style="text-align:right">Δ</th>
     <th class="lc-ce" style="text-align:right">θ/day</th>
-    <th class="lc-ce" style="text-align:right">LTP ▲</th>
+    <th class="lc-ce" style="text-align:right;min-width:58px">LTP ▲</th>
     <th class="lc-strike-hdr">Strike</th>
     <th class="lc-pcr-hdr" title="Put-Call Ratio = PE OI ÷ CE OI per strike">PCR</th>
-    <th class="lc-pe lc-sep" style="text-align:left">LTP ▼</th>
+    <th class="lc-pe lc-sep" style="text-align:left;min-width:58px">LTP ▼</th>
     <th class="lc-pe" style="text-align:left">θ/day</th>
     <th class="lc-pe" style="text-align:left">Δ</th>
     <th class="lc-pe" style="text-align:left">IV%</th>
