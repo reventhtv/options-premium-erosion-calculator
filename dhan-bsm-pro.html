@@ -191,6 +191,8 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 
 /* Content tabs */
 .ctab-bar{display:flex;background:var(--bg2);border-bottom:1px solid var(--bd);padding:0 1.2rem;flex-shrink:0}
+.pl-sub{font-size:.62rem;font-weight:600;padding:.22rem .65rem;border-radius:var(--rsm);border:1px solid var(--bd2);background:transparent;color:var(--t3);cursor:pointer;transition:all .12s;font-family:var(--sans)}
+.pl-sub.active{background:var(--bg4);color:var(--t1);border-color:var(--bd3)}
 .ctab{font-family:var(--sans);font-size:.72rem;font-weight:500;padding:.6rem .92rem;background:none;border:none;border-bottom:2px solid transparent;color:var(--t3);cursor:pointer;transition:all .14s;margin-bottom:-1px;white-space:nowrap}
 .ctab:hover{color:var(--t2)}.ctab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
 .tab-body{display:none}.tab-body.active{display:block}
@@ -972,90 +974,96 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
 
     <!-- Content tabs -->
     <div class="ctab-bar">
-      <button class="ctab active" onclick="switchTab('erosion',this)">📉 Erosion</button>
-      <button class="ctab"        onclick="switchTab('pl',this)">📊 P&amp;L Profile</button>
+      <button class="ctab active" onclick="switchTab('pl',this)">📊 P&amp;L</button>
       <button class="ctab"        onclick="switchTab('strategy',this)">🏗 Strategy</button>
       <button class="ctab"        onclick="switchTab('chain',this)">📊 Option Chain</button>
-      <button class="ctab"        onclick="switchTab('scenarios',this)">🎯 Scenarios</button>
-      <button class="ctab"        onclick="switchTab('sensitivity',this)">🌡 Sensitivity</button>
+      <button class="ctab"        onclick="switchTab('analysis',this)">🔬 Analysis</button>
       <button class="ctab"        onclick="switchTab('compare',this)">⚖ Compare</button>
       <button class="ctab"        onclick="switchTab('position',this)">📍 Position</button>
       <button class="ctab"        onclick="switchTab('maxpain',this)">⚡ Max Pain</button>
     </div>
 
     <!-- TAB: Erosion -->
-    <div class="tab-body active" id="tab-erosion">
-      <div class="charts-grid">
-        <div class="chart-card">
-          <div class="chart-head">
-            <span class="chart-title">Premium Erosion — Days to Expiry</span>
-            <span class="badge badge-orange" id="bThRate">θ/unit: —</span>
-          </div>
-          <div class="chart-body">
-            <div style="height:216px;position:relative"><canvas id="cErosion"></canvas></div>
-            <div class="em-grid">
-              <div class="em-item">
-                <div class="em-lbl">θ Per Unit/Day</div>
-                <div class="em-val" id="emU" style="color:var(--orange)">—</div>
-                <div class="em-sub">raw Greek value</div>
-              </div>
-              <div class="em-item">
-                <div class="em-lbl">Per Lot/Day</div>
-                <div class="em-val" id="emL" style="color:var(--orange)">—</div>
-                <div class="em-sub" id="emLS">θ × lot size</div>
-              </div>
-              <div class="em-item">
-                <div class="em-lbl">Total Position/Day</div>
-                <div class="em-val" id="emT" style="color:var(--red)">—</div>
-                <div class="em-sub" id="emTS">× lots</div>
-              </div>
-              <div class="em-item">
-                <div class="em-lbl">Weekly (5d)</div>
-                <div class="em-val" id="emW" style="color:var(--orange)">—</div>
-                <div class="em-sub">total position × 5</div>
-              </div>
-              <div class="em-item">
-                <div class="em-lbl">θ Annual Yield</div>
-                <div class="em-val" id="emYield" style="color:var(--yellow)">—</div>
-                <div class="em-sub">θ÷prem×365</div>
+    <!-- TAB: P&L (merged Erosion + P&L Profile) -->
+    <div class="tab-body active" id="tab-pl">
+      <!-- Sub-toggle -->
+      <div style="display:flex;gap:.3rem;padding:.5rem 1rem .2rem;border-bottom:1px solid var(--bd)">
+        <button class="pl-sub active" id="plSubErosion" onclick="plSub('erosion',this)">📉 Erosion</button>
+        <button class="pl-sub"        id="plSubProfile" onclick="plSub('profile',this)">📈 P&amp;L Profile</button>
+      </div>
+
+      <!-- Erosion view -->
+      <div id="plViewErosion">
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-head">
+              <span class="chart-title">Premium Erosion — Days to Expiry</span>
+              <span class="badge badge-orange" id="bThRate">θ/unit: —</span>
+            </div>
+            <div class="chart-body">
+              <div style="height:216px;position:relative"><canvas id="cErosion"></canvas></div>
+              <div class="em-grid">
+                <div class="em-item">
+                  <div class="em-lbl">θ Per Unit/Day</div>
+                  <div class="em-val" id="emU" style="color:var(--orange)">—</div>
+                  <div class="em-sub">raw Greek value</div>
+                </div>
+                <div class="em-item">
+                  <div class="em-lbl">Per Lot/Day</div>
+                  <div class="em-val" id="emL" style="color:var(--orange)">—</div>
+                  <div class="em-sub" id="emLS">θ × lot size</div>
+                </div>
+                <div class="em-item">
+                  <div class="em-lbl">Total Position/Day</div>
+                  <div class="em-val" id="emT" style="color:var(--red)">—</div>
+                  <div class="em-sub" id="emTS">× lots</div>
+                </div>
+                <div class="em-item">
+                  <div class="em-lbl">Weekly (5d)</div>
+                  <div class="em-val" id="emW" style="color:var(--orange)">—</div>
+                  <div class="em-sub">total position × 5</div>
+                </div>
+                <div class="em-item">
+                  <div class="em-lbl">θ Annual Yield</div>
+                  <div class="em-val" id="emYield" style="color:var(--yellow)">—</div>
+                  <div class="em-sub">θ÷prem×365</div>
+                </div>
               </div>
             </div>
           </div>
-
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-head">
-            <span class="chart-title">Theta Acceleration vs DTE</span>
-            <span class="badge badge-muted">|θ| grows near expiry</span>
-          </div>
-          <div class="chart-body">
-            <div style="height:258px;position:relative"><canvas id="cTheta"></canvas></div>
+          <div class="chart-card">
+            <div class="chart-head">
+              <span class="chart-title">Theta Acceleration vs DTE</span>
+              <span class="badge badge-muted">|θ| grows near expiry</span>
+            </div>
+            <div class="chart-body">
+              <div style="height:258px;position:relative"><canvas id="cTheta"></canvas></div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- TAB: P&L -->
-    <div class="tab-body" id="tab-pl">
-      <div class="charts-grid">
-        <div class="chart-card" style="grid-column:1/-1">
-          <div class="chart-head">
-            <span class="chart-title">P&amp;L Profile — At Expiry (solid) &amp; Today's BSM Value (dashed)</span>
-            <div style="display:flex;gap:.38rem">
-              <span class="badge badge-green" id="bMaxP">Max Profit: —</span>
-              <span class="badge badge-red"   id="bMaxL">Max Loss: —</span>
-              <span class="badge badge-muted"  id="bRR">R:R —</span>
+      <!-- P&L Profile view -->
+      <div id="plViewProfile" style="display:none">
+        <div class="charts-grid">
+          <div class="chart-card" style="grid-column:1/-1">
+            <div class="chart-head">
+              <span class="chart-title">P&amp;L Profile — At Expiry (solid) &amp; Today's BSM (dashed)</span>
+              <div style="display:flex;gap:.38rem">
+                <span class="badge badge-green" id="bMaxP">Max Profit: —</span>
+                <span class="badge badge-red"   id="bMaxL">Max Loss: —</span>
+                <span class="badge badge-muted"  id="bRR">R:R —</span>
+              </div>
             </div>
-          </div>
-          <div class="chart-body">
-            <div style="height:285px;position:relative"><canvas id="cPL"></canvas></div>
-          </div>
-          <div class="pl-legend">
-            <span class="pll"><span class="pll-line" style="background:rgba(59,130,246,.85)"></span>Call expiry</span>
-            <span class="pll"><span class="pll-dash"></span>Call today</span>
-            <span class="pll"><span class="pll-line" style="background:rgba(239,68,68,.85)"></span>Put expiry</span>
-            <span class="pll"><span class="pll-dash"></span>Put today</span>
+            <div class="chart-body">
+              <div style="height:285px;position:relative"><canvas id="cPL"></canvas></div>
+            </div>
+            <div class="pl-legend">
+              <span class="pll"><span class="pll-line" style="background:rgba(59,130,246,.85)"></span>Call expiry</span>
+              <span class="pll"><span class="pll-dash"></span>Call today</span>
+              <span class="pll"><span class="pll-line" style="background:rgba(239,68,68,.85)"></span>Put expiry</span>
+              <span class="pll"><span class="pll-dash"></span>Put today</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1139,37 +1147,47 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
     </div>
 
     <!-- TAB: Scenarios -->
-    <div class="tab-body" id="tab-scenarios">
-      <div class="sc-sec">
-        <div class="sc-hdr">
-          <div>
-            <div style="font-size:.76rem;font-weight:600">Scenario Analysis</div>
-            <div style="font-size:.6rem;color:var(--t3);margin-top:.1rem">P&amp;L impact on total position (lots × lot size). Base = BSM price at current inputs.</div>
+    <!-- TAB: Analysis (merged Scenarios + Sensitivity) -->
+    <div class="tab-body" id="tab-analysis">
+      <!-- Sub-toggle -->
+      <div style="display:flex;gap:.3rem;padding:.5rem 1rem .2rem;border-bottom:1px solid var(--bd)">
+        <button class="pl-sub active" id="anSubScenarios"   onclick="anSub('scenarios',this)">🎯 Scenarios</button>
+        <button class="pl-sub"        id="anSubSensitivity" onclick="anSub('sensitivity',this)">🌡 Sensitivity</button>
+      </div>
+
+      <!-- Scenarios view -->
+      <div id="anViewScenarios">
+        <div class="sc-sec">
+          <div class="sc-hdr">
+            <div>
+              <div style="font-size:.76rem;font-weight:600">Scenario Analysis</div>
+              <div style="font-size:.6rem;color:var(--t3);margin-top:.1rem">P&amp;L impact on total position. Base = BSM price at current inputs.</div>
+            </div>
+            <span class="badge badge-muted" id="bScBase">Base: —</span>
           </div>
-          <span class="badge badge-muted" id="bScBase">Base: —</span>
-        </div>
-        <div class="sc-grid" id="scGrid">
-          <div class="sc-card"><div class="sc-lbl">No data</div><div class="sc-val cne">Run calculator</div></div>
+          <div class="sc-grid" id="scGrid">
+            <div class="sc-card"><div class="sc-lbl">No data</div><div class="sc-val cne">Run calculator</div></div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- TAB: Sensitivity -->
-    <div class="tab-body" id="tab-sensitivity">
-      <div class="sens-sec">
-        <div class="sens-card">
-          <div class="sens-head">
-            IV Sensitivity — CE &amp; PE at different σ
-            <span class="badge badge-muted" id="bCurrIV">—</span>
+      <!-- Sensitivity view -->
+      <div id="anViewSensitivity" style="display:none">
+        <div class="sens-sec">
+          <div class="sens-card">
+            <div class="sens-head">
+              IV Sensitivity — CE &amp; PE at different σ
+              <span class="badge badge-muted" id="bCurrIV">—</span>
+            </div>
+            <div id="ivSensBody"><div class="empty-msg">Run calculator first</div></div>
           </div>
-          <div id="ivSensBody"><div class="empty-msg">Run calculator first</div></div>
-        </div>
-        <div class="sens-card">
-          <div class="sens-head">
-            DTE Sensitivity — CE &amp; PE at different T
-            <span class="badge badge-muted" id="bCurrDTE">—</span>
+          <div class="sens-card">
+            <div class="sens-head">
+              DTE Sensitivity — CE &amp; PE at different T
+              <span class="badge badge-muted" id="bCurrDTE">—</span>
+            </div>
+            <div id="dteSensBody"><div class="empty-msg">Run calculator first</div></div>
           </div>
-          <div id="dteSensBody"><div class="empty-msg">Run calculator first</div></div>
         </div>
       </div>
     </div>
@@ -2545,6 +2563,24 @@ function switchTab(name, btn) {
   setTimeout(() => [cErosion, cTheta, cPL, cStrat].forEach(c => c && c.resize()), 50);
 }
 
+/* Sub-toggle for P&L tab (Erosion / P&L Profile) */
+function plSub(view, btn) {
+  document.querySelectorAll('#tab-pl .pl-sub').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  el('plViewErosion').style.display  = view === 'erosion'  ? '' : 'none';
+  el('plViewProfile').style.display  = view === 'profile'  ? '' : 'none';
+  /* Resize charts after show */
+  setTimeout(() => [cErosion, cTheta, cPL].forEach(c => c && c.resize()), 50);
+}
+
+/* Sub-toggle for Analysis tab (Scenarios / Sensitivity) */
+function anSub(view, btn) {
+  document.querySelectorAll('#tab-analysis .pl-sub').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  el('anViewScenarios').style.display   = view === 'scenarios'   ? '' : 'none';
+  el('anViewSensitivity').style.display = view === 'sensitivity' ? '' : 'none';
+}
+
 /* ── SECTION 15: Keyboard Shortcuts ─────────────────────────────────
    F5         = Calculate / Refresh
    F1/F2/F3   = Switch to NIFTY / BANKNIFTY / FINNIFTY
@@ -3319,6 +3355,16 @@ function setPosType(t, btn) {
   POS.type = t;
   ['ptCall','ptPut'].forEach(id => { const b = el(id); if(b) b.className='pos-type-btn'; });
   if (btn) btn.className = 'pos-type-btn ' + (t==='call'?'active-call':'active-put');
+
+  /* Update Entry Premium for the newly selected type */
+  const K      = parseFloat(el('ptStrike').value) || 0;
+  const lv     = K ? _liveMap[K] : null;
+  const livePx = lv ? (t === 'call' ? lv.ce_ltp : lv.pe_ltp) : null;
+  const bsmPx  = A.lastBSM ? (t === 'call' ? A.lastBSM.call : A.lastBSM.put) : null;
+  const px     = livePx ?? bsmPx;
+  if (px != null) {
+    _writing = true; el('ptPrem').value = px.toFixed(2); _writing = false;
+  }
 }
 
 function posAutoFill() {
