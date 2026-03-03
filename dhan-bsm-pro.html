@@ -221,7 +221,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 /* Option chain */
 .chain-sec{padding:.6rem 0}
 .chain-hdr{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1rem .5rem;flex-wrap:wrap;gap:.4rem}
-.chain-wrap{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rlg);overflow:auto;max-height:calc(100vh - 280px)}
+.chain-wrap{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rlg);overflow:auto;max-height:calc(100vh - 280px);-webkit-overflow-scrolling:touch}
 /* Live chain specific */
 .lc-meta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .lc-badge{font-size:.55rem;font-weight:700;padding:.1rem .35rem;border-radius:20px;letter-spacing:.04em;text-transform:uppercase}
@@ -232,7 +232,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 .lc-filter-btn{font-size:.6rem;padding:.15rem .4rem;border-radius:var(--rsm);border:1px solid var(--bd2);background:var(--bg4);color:var(--t2);cursor:pointer;transition:all .12s}
 .lc-filter-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 /* Chain table */
-.lc-table{width:100%;border-collapse:collapse;font-size:.66rem}
+.lc-table{width:100%;border-collapse:collapse;font-size:.66rem;table-layout:auto}
 .lc-table thead th{padding:.36rem .5rem;font-size:.55rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);border-bottom:2px solid var(--bd);white-space:nowrap;text-align:right;position:sticky;top:0;background:var(--bg2);z-index:2}
 .lc-table thead th.lc-strike-hdr{text-align:center;background:rgba(59,130,246,.06);color:var(--blue)}
 .lc-table thead th.lc-pcr-hdr{text-align:center;background:rgba(234,179,8,.07);color:var(--yellow);font-weight:600;cursor:help;min-width:52px;border-left:1px solid var(--bd2);border-right:1px solid var(--bd2)}
@@ -257,8 +257,6 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 .oi-chg.up{color:var(--green)}.oi-chg.dn{color:var(--red)}
 /* Bid/Ask spread cell */
 .ba-wrap{display:flex;flex-direction:column;line-height:1.2;align-items:flex-end}
-.ba-bid{color:var(--green);font-size:.6rem}
-.ba-ask{color:var(--red);font-size:.6rem}
 /* LTP highlight */
 .ltp-ce{color:var(--blue);font-weight:700;min-width:58px}
 .ltp-pe{color:var(--red);font-weight:700;min-width:58px}
@@ -787,7 +785,7 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
       <div id="divWidth" style="display:none" class="field"><div class="field-label">Wing Width <span class="field-hint">strikes between legs</span></div><div class="iw"><input type="number" id="iWidth" value="5" step="1" min="1" max="30" oninput="onInput()"><div class="sfx">strikes</div></div></div>
       <div id="divSingleType">
       <div class="field">
-        <div class="field-label">Analyse</div>
+        <div class="field-label">Analysis</div>
         <div class="type-tabs">
           <button class="type-tab call active" id="tCE"   onclick="setType('call')">CE — Call</button>
           <button class="type-tab put"          id="tPE"   onclick="setType('put')">PE — Put</button>
@@ -851,7 +849,7 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
     <div class="calc-wrap">
       <button class="calc-btn" onclick="calculate()">
         <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 7H6a2 2 0 00-2 2v9a2 2 0 002 2h9a2 2 0 002-2v-3M16 5l2 2 4-4M19 10V6h-4"/></svg>
-        Run BSM Calculator
+        Price Options
       </button>
       <div id="parityBadge" class="parity ok">
         <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
@@ -867,7 +865,7 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
     <!-- Price Header -->
     <div class="price-hdr">
       <div class="ph-blk">
-        <div class="ph-lbl">Call CE Premium</div>
+        <div class="ph-lbl">CE Premium</div>
         <div class="ph-val call" id="oCallPx">₹—</div>
         <div class="ph-sub">
           <span id="oCallLTPWrap" style="display:none"><span class="ph-live-ltp" id="oCallLTP">—</span><span class="ph-spread" id="oCallSpread"></span>&nbsp;·&nbsp;</span>
@@ -877,7 +875,7 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
       </div>
       <div class="ph-div"></div>
       <div class="ph-blk">
-        <div class="ph-lbl">Put PE Premium</div>
+        <div class="ph-lbl">PE Premium</div>
         <div class="ph-val put" id="oPutPx">₹—</div>
         <div class="ph-sub">
           <span id="oPutLTPWrap" style="display:none"><span class="ph-live-ltp" id="oPutLTP">—</span><span class="ph-spread" id="oPutSpread"></span>&nbsp;·&nbsp;</span>
@@ -887,13 +885,13 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
       </div>
       <div class="ph-div"></div>
       <div class="ph-blk">
-        <div class="ph-lbl">Call Breakeven at Expiry</div>
+        <div class="ph-lbl">CE Breakeven</div>
         <div class="ph-val neu" id="oCallBE">₹—</div>
         <div class="ph-sub"><span id="oCallMoney">—</span> &nbsp;·&nbsp; Strike + Paid</div>
       </div>
       <div class="ph-div"></div>
       <div class="ph-blk">
-        <div class="ph-lbl">Put Breakeven at Expiry</div>
+        <div class="ph-lbl">PE Breakeven</div>
         <div class="ph-val neu" id="oPutBE">₹—</div>
         <div class="ph-sub"><span id="oPutMoney">—</span> &nbsp;·&nbsp; Strike − Paid</div>
       </div>
@@ -1125,7 +1123,7 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
         <div class="chain-wrap" id="lcWrap">
           <div class="chain-no-data" id="lcEmpty">
             Load live data using <strong style="color:var(--green)">Load Live</strong> in the panel above,<br>
-            or click <strong style="color:var(--blue)">Run BSM Calculator</strong> for theoretical values.
+            or click <strong style="color:var(--blue)">Price Options</strong> for theoretical values.
           </div>
           <table class="lc-table" id="lcTable" style="display:none">
             <thead id="lcHead"></thead>
@@ -2082,8 +2080,8 @@ function lcBuildLive(data, bsmInputs) {
 
   /* Build thead */
   el('lcHead').innerHTML = `<tr>
-    <th class="lc-ce" style="text-align:right">OI</th>
-    <th class="lc-ce" style="text-align:right">Volume</th>
+    <th class="lc-ce" style="text-align:right;min-width:54px">OI</th>
+    <th class="lc-ce" style="text-align:right;min-width:50px">Volume</th>
     <th class="lc-ce" style="text-align:right">IV%</th>
     <th class="lc-ce" style="text-align:right">Δ</th>
     <th class="lc-ce" style="text-align:right">θ/day</th>
@@ -2094,8 +2092,8 @@ function lcBuildLive(data, bsmInputs) {
     <th class="lc-pe" style="text-align:left">θ/day</th>
     <th class="lc-pe" style="text-align:left">Δ</th>
     <th class="lc-pe" style="text-align:left">IV%</th>
-    <th class="lc-pe" style="text-align:left">Volume</th>
-    <th class="lc-pe" style="text-align:left">OI</th>
+    <th class="lc-pe" style="text-align:left;min-width:50px">Volume</th>
+    <th class="lc-pe" style="text-align:left;min-width:54px">OI</th>
   </tr>`;
 
   /* Build tbody */
