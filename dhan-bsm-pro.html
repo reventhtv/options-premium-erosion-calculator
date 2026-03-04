@@ -1687,17 +1687,6 @@ function calculate() {
     const pfvg = el('oPutFVG'); if (pfvg) pfvg.style.display = 'none';
   }
 
-  /* Trigger insight panel fallback when IV rank not yet computed */
-  if (ceLTP !== null || peLTP !== null) {
-    const ivH2 = gv('iIVHigh'), ivL2 = gv('iIVLow');
-    if (!ivH2 || !ivL2 || ivH2 <= ivL2) {
-      /* IV range not set — show FVG-only insight */
-      const ceGapFB = ceLTP !== null ? ceLTP - res.call : 0;
-      const peGapFB = peLTP !== null ? peLTP - res.put  : 0;
-      buildIVInsight(null, ceGapFB, peGapFB, ceLTP ?? 0, peLTP ?? 0);
-    }
-  }
-
   /* Breakeven = Strike ± paid (what was actually paid, now correctly synced) */
   st('oCallBE',   '₹' + (i.K + paid).toFixed(2));
   st('oPutBE',    '₹' + (i.K - paid).toFixed(2));
@@ -1777,7 +1766,14 @@ function calculate() {
   buildChain(i);
   buildScenarios(i, res);
   buildSensitivity(i);
-  buildIVRank(i);
+  const _ivrResult = buildIVRank(i);
+  /* IV Insight: all data already in scope here — rank, gaps, LTPs */
+  if (ceLTP !== null || peLTP !== null) {
+    const _ceGap = ceLTP !== null ? ceLTP - res.call : 0;
+    const _peGap = peLTP !== null ? peLTP - res.put  : 0;
+    const _rank  = _ivrResult ? _ivrResult.rank : null;
+    buildIVInsight(_rank, _ceGap, _peGap, ceLTP ?? 0, peLTP ?? 0);
+  }
   buildCompare(i);
 
   /* ── Probability & Risk metrics ── */
@@ -3249,17 +3245,6 @@ function buildIVRank(i) {
   const cib = el('cmpIVRBadge');
   if (cib) {
     cib.innerHTML = '<span class="badge" style="background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3);color:var(--yellow);font-size:.58rem;padding:.14rem .44rem;border-radius:20px">σ Rank ' + rank.toFixed(0) + '% · ' + sig + '</span>';
-  }
-  /* Trigger insight panel with current rank + FVG data */
-  const _liveLeg2 = A.lastLiveKey ? _liveMap[A.lastLiveKey] : null;
-  const _ceLTP2 = _liveLeg2?.ce_ltp ?? null;
-  const _peLTP2 = _liveLeg2?.pe_ltp ?? null;
-  const _bsmInputs2 = A.lastBSM;
-  if (_bsmInputs2 && (_ceLTP2 !== null || _peLTP2 !== null)) {
-    const bsmRes2 = bsm(_bsmInputs2.S, _bsmInputs2.K, _bsmInputs2.T, _bsmInputs2.r, _bsmInputs2.sigma, _bsmInputs2.q);
-    const ceGap2 = _ceLTP2 !== null ? _ceLTP2 - bsmRes2.call : 0;
-    const peGap2 = _peLTP2 !== null ? _peLTP2 - bsmRes2.put  : 0;
-    buildIVInsight(rank, ceGap2, peGap2, _ceLTP2 ?? 0, _peLTP2 ?? 0);
   }
   return { rank, sig };
 }
