@@ -1006,7 +1006,7 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
       <div class="mr-it"><div class="mr-lb">Max Loss</div><div class="mr-vl mr-r" id="mMaxL">—</div><div class="mr-sb">premium at risk</div></div>
       <div class="mr-it"><div class="mr-lb">R:R</div><div class="mr-vl mr-c" id="mRR">—</div><div class="mr-sb">reward:risk</div></div>
       <div class="mr-it ivr-it"><div class="mr-lb">IV Rank</div><div class="mr-vl mr-y" id="mIVR">—</div><div class="mr-sb" id="mIVRSb">52-week range</div></div>
-      <div class="mr-it ivr-it"><div class="mr-lb">IV Signal</div><div class="mr-vl" id="mIVSig">—</div><div class="mr-sb" id="mIVSigSb">premium regime</div></div>
+      <div class="mr-it ivr-it"><div class="mr-lb">IV Regime</div><div class="mr-vl" id="mIVSig">—</div><div class="mr-sb" id="mIVSigSb">52w rank zone</div></div>
     </div>
 
     <!-- IV Insight Panel -->
@@ -2765,11 +2765,18 @@ const STRAT_DEFS = {
 /* §F  BUILD LEGS */
 function buildLegs(i) {
   const K = i.K, W = (gv('iWidth') || 5) * A.step;
-  const mk = K2 => {
+  const mk = (K2, forceType) => {
     const useSkew = A.skewMode === 'skew';
     const ivP = gv('iIVPut') || i.iv, ivC = gv('iIVCall') || i.iv;
     const iv2 = getSkewIV(K2, i.S, i.iv, ivP, ivC, useSkew);
-    return { res: bsm(i.S, K2, i.T, R, iv2/100, Q), iv: iv2, K: K2 };
+    const bsmRes = bsm(i.S, K2, i.T, R, iv2/100, Q);
+    /* Inject live LTP into BSM res when available — strategy shows real market cost */
+    const lv = _liveMap[K2];
+    if (lv) {
+      if (lv.ce_ltp != null) bsmRes.call = lv.ce_ltp;
+      if (lv.pe_ltp != null) bsmRes.put  = lv.pe_ltp;
+    }
+    return { res: bsmRes, iv: iv2, K: K2 };
   };
   switch (A.strategy) {
     case 'single': {
@@ -3189,45 +3196,45 @@ function buildIVInsight(ivRank, ceGap, peGap, ceLTP, peLTP) {
   if (!hasRank) {
     if (avgPct > 4) {
       cond = 'Expensive Options'; color = 'var(--orange)';
-      text = 'Options are trading <strong>' + fvgStr + ' above BSM fair value</strong>. Market is pricing extra uncertainty — sellers have a statistical edge. Set your 52w IV range for the full regime signal.';
-      tags = [{l:'Sell Bias',c:'sell'},{l:'Set IV Range ▸',c:'neutral'}];
+      text = 'Options are trading <strong>' + fvgStr + ' above BSM fair value</strong>. Market is pricing in more uncertainty than the model estimates. Set your 52w IV range in the left panel for the full regime analysis.';
+      tags = [{l:'IV Overpriced',c:'caution'},{l:'Set IV Range ▸',c:'neutral'}];
     } else if (avgPct < -3) {
       cond = 'Cheap Options'; color = 'var(--green)';
-      text = 'Options are trading <strong>' + fvgStr + ' below BSM fair value</strong>. Buyers have a structural value edge — good for directional plays. Set your 52w IV range for the full regime signal.';
-      tags = [{l:'Buy Bias',c:'buy'},{l:'Set IV Range ▸',c:'neutral'}];
+      text = 'Options are trading <strong>' + fvgStr + ' below BSM fair value</strong>. The market is pricing less uncertainty than the model estimates. Set your 52w IV range for the full regime analysis.';
+      tags = [{l:'IV Underpriced',c:'buy'},{l:'Set IV Range ▸',c:'neutral'}];
     } else {
       cond = 'Fairly Priced'; color = 'var(--t2)';
-      text = 'Options are priced <strong>within ±2% of BSM fair value</strong>. No structural edge from IV alone — direction and timing are the key drivers.';
+      text = 'Options are priced <strong>within ±2% of BSM fair value</strong>. No structural mispricing detected. P&L outcome depends on the direction and timing of spot movement.';
       tags = [{l:'Direction Key',c:'neutral'},{l:'Set IV Range ▸',c:'neutral'}];
     }
   } else if (ivRank < 30) {
-    cond = 'Low IV · Buy Zone'; color = 'var(--green)';
+    cond = 'Low IV Regime'; color = 'var(--green)';
     if (avgPct < -2) {
-      text = 'IV near its <strong>yearly low</strong> and options are underpriced by ' + fvgStr + '. <strong>High-conviction buying setup</strong> — cheap options in a compressed IV environment maximise risk/reward for buyers. Breakouts typically follow low-IV phases.';
-      tags = [{l:'Strong Buy',c:'buy'},{l:'Long Options',c:'buy'},{l:'Breakout Watch',c:'buy'}];
+      text = 'IV near its <strong>yearly low</strong> and options are underpriced by ' + fvgStr + ' vs BSM fair value. Historically, low-IV environments precede expansion — options are at their most capital-efficient. Breakouts typically follow compressed IV phases.';
+      tags = [{l:'Low IV',c:'buy'},{l:'Options Cheap',c:'buy'},{l:'Breakout Watch',c:'neutral'}];
     } else {
-      text = 'IV near its <strong>yearly low</strong> — options are historically cheap. Favour <strong>long options</strong> (calls, puts, straddles). Selling premium here offers poor reward vs risk; expect IV expansion ahead.';
-      tags = [{l:'Buy Premium',c:'buy'},{l:'Straddle / Strangle',c:'buy'},{l:'Avoid Selling',c:'caution'}];
+      text = 'IV near its <strong>yearly low</strong> — options are historically cheap relative to the 52w range. Capital cost for options positions is at its lowest. Historically, periods of suppressed IV tend to be followed by expansion.';
+      tags = [{l:'Low IV',c:'buy'},{l:'Options Cheap',c:'buy'},{l:'IV Expansion Expected',c:'neutral'}];
     }
   } else if (ivRank > 70) {
-    cond = 'High IV · Sell Zone'; color = 'var(--red)';
+    cond = 'High IV Regime'; color = 'var(--red)';
     if (avgPct > 3) {
-      text = 'IV elevated AND options overpriced by <strong>' + fvgStr + ' vs fair value</strong>. Sellers have a double edge: IV mean-reversion + inflated extrinsic decay. <strong>Use defined-risk spreads</strong> to avoid naked short exposure.';
-      tags = [{l:'Strong Sell',c:'sell'},{l:'Credit Spreads',c:'sell'},{l:'Iron Condor',c:'sell'}];
+      text = 'IV elevated AND options overpriced by <strong>' + fvgStr + ' vs BSM fair value</strong>. Two forces work against option buyers here: IV mean-reversion risk and inflated extrinsic value decay. Risk is asymmetrically loaded onto the premium payer.';
+      tags = [{l:'High IV',c:'caution'},{l:'Options Expensive',c:'caution'},{l:'IV Mean Reversion Risk',c:'caution'}];
     } else {
-      text = 'IV near its <strong>yearly high</strong> — options are historically expensive. Favour <strong>premium selling</strong> (credit spreads, covered calls, iron condors). Avoid buying naked options — IV crush will offset any directional gain.';
-      tags = [{l:'Sell Premium',c:'sell'},{l:'Credit Spreads',c:'sell'},{l:'Avoid Buying',c:'caution'}];
+      text = 'IV near its <strong>yearly high</strong> — options are historically expensive relative to the 52w range. Elevated IV inflates extrinsic value; any mean reversion in IV will reduce option value independent of spot movement.';
+      tags = [{l:'High IV',c:'caution'},{l:'Options Expensive',c:'caution'},{l:'Premium Inflated',c:'caution'}];
     }
   } else {
     cond = 'Neutral IV Zone'; color = 'var(--yellow)';
     if (avgPct > 3) {
-      text = 'IV neutral but options overpriced by <strong>' + fvgStr + '</strong>. Mild seller edge — use spreads to capture it while keeping risk defined. Direction will be the primary P&L driver.';
-      tags = [{l:'Mild Sell Edge',c:'caution'},{l:'Use Spreads',c:'neutral'},{l:'Direction Key',c:'neutral'}];
+      text = 'IV in neutral zone. Options are overpriced by <strong>' + fvgStr + ' vs BSM fair value</strong>. The FVG adds a mild structural imbalance — direction and timing remain the primary P&L drivers.';
+      tags = [{l:'Neutral IV',c:'neutral'},{l:'FVG Overpriced',c:'caution'},{l:'Direction Key',c:'neutral'}];
     } else if (avgPct < -2) {
-      text = 'IV neutral but options underpriced by <strong>' + fvgStr + '</strong>. Mild buyer edge — directional spreads amplify the FVG advantage if the move is sharp.';
-      tags = [{l:'Mild Buy Edge',c:'buy'},{l:'Directional Spread',c:'buy'},{l:'Manage Risk',c:'neutral'}];
+      text = 'IV in neutral zone. Options are underpriced by <strong>' + fvgStr + ' vs BSM fair value</strong>. The FVG creates a mild structural imbalance in favour of the premium payer. Direction remains the primary catalyst.';
+      tags = [{l:'Neutral IV',c:'neutral'},{l:'FVG Underpriced',c:'buy'},{l:'Manage Risk',c:'neutral'}];
     } else {
-      text = '<strong>No structural edge</strong> from IV or fair value. This is a pure directional trade — focus on OI buildup in the option chain, support/resistance, and conviction in your thesis.';
+      text = '<strong>No structural edge</strong> from IV rank or fair value gap. Option pricing is neutral. P&L outcome is driven primarily by the magnitude and direction of spot movement relative to the selected strike.';
       tags = [{l:'Direction Only',c:'neutral'},{l:'Watch OI Levels',c:'neutral'}];
     }
   }
@@ -3241,7 +3248,7 @@ function buildIVInsight(ivRank, ceGap, peGap, ceLTP, peLTP) {
 
 /* §J  IV RANK / PERCENTILE ──────────────────────────────────────────
    IV Rank   = (currentIV − 52wLow) / (52wHigh − 52wLow) × 100
-   IV Signal = Buy premium (Rank<30) | Neutral (30-70) | Sell (>70)
+   IV Regime = IV Low (Rank<30) | IV Mid (30-70) | IV High (>70)
    Gauge fills left→right in green→yellow→red.
 ───────────────────────────────────────────────────────────────────── */
 function buildIVRank(i) {
@@ -3260,11 +3267,11 @@ function buildIVRank(i) {
 
   let sig, sigColor, gaugeColor;
   if (rank < 30) {
-    sig = 'Buy Prem'; sigColor = 'var(--green)'; gaugeColor = '#22C55E';
+    sig = 'IV Low'; sigColor = 'var(--green)'; gaugeColor = '#22C55E';
   } else if (rank > 70) {
-    sig = 'Sell Prem'; sigColor = 'var(--red)'; gaugeColor = '#EF4444';
+    sig = 'IV High'; sigColor = 'var(--red)'; gaugeColor = '#EF4444';
   } else {
-    sig = 'Neutral'; sigColor = 'var(--yellow)'; gaugeColor = '#EAB308';
+    sig = 'IV Mid'; sigColor = 'var(--yellow)'; gaugeColor = '#EAB308';
   }
   if (mIVSig) { mIVSig.textContent = sig; mIVSig.style.color = sigColor; }
   if (mIVSigSb) mIVSigSb.textContent = 'IV Rank ' + rank.toFixed(0) + '%';
@@ -3498,7 +3505,7 @@ function buildCompare(i) {
 
   /* Note */
   const note = el('cmpNote'); if (note) {
-    const rankTip = rank < 0 ? '' : rank < 30 ? ' · Low IV: favour buying' : rank > 70 ? ' · High IV: favour selling' : ' · Mid IV: spreads offer best R/R';
+    const rankTip = rank < 0 ? '' : rank < 30 ? ' · Low IV regime' : rank > 70 ? ' · High IV regime' : ' · Mid IV regime';
     note.textContent = 'IV ' + iv.toFixed(1) + '% (Rank ' + (rank>=0?rank.toFixed(0)+'%':'—') + ')' + rankTip + ' · K=₹' + K.toLocaleString('en-IN') + ' · DTE ' + i.dte + 'd · ★ = best fit for regime + bias';
     note.style.display = 'block';
   }
