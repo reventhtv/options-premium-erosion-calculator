@@ -472,6 +472,30 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
 .ph-spread.over{color:var(--orange)}
 .ph-spread.under{color:var(--cyan)}
 
+/* ── Fair Value Gap Badge ───────────────────────────────────────────── */
+.fvg-badge{display:inline-flex;align-items:center;gap:.2rem;font-size:.57rem;font-weight:700;padding:.1rem .36rem;border-radius:20px;margin-top:.14rem;letter-spacing:.01em;white-space:nowrap}
+.fvg-over{background:rgba(249,115,22,.12);color:var(--orange);border:1px solid rgba(249,115,22,.28)}
+.fvg-under{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.28)}
+.fvg-fair{background:rgba(100,116,139,.1);color:var(--t3);border:1px solid var(--bd2)}
+
+/* ── IV Insight Panel ───────────────────────────────────────────────── */
+.iv-insight{display:none;margin:0;background:var(--bg2);border-bottom:1px solid var(--bd);padding:.55rem 1.2rem;align-items:stretch;gap:0;flex-shrink:0}
+.ivi-inner{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;width:100%}
+.ivi-cond-blk{display:flex;flex-direction:column;gap:.14rem;min-width:120px;flex-shrink:0}
+.ivi-cond-lbl{font-size:.52rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--t3)}
+.ivi-cond-val{font-size:.8rem;font-weight:700;line-height:1.2}
+.ivi-sep{width:1px;background:var(--bd2);align-self:stretch;min-height:28px;flex-shrink:0}
+.ivi-body{flex:1;min-width:0}
+.ivi-insight-lbl{font-size:.52rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--t3);margin-bottom:.22rem;display:flex;align-items:center;gap:.3rem}
+.ivi-text{font-size:.67rem;color:var(--t2);line-height:1.55;margin-bottom:.28rem}
+.ivi-text strong{color:var(--t1);font-weight:700}
+.ivi-tags{display:flex;gap:.25rem;flex-wrap:wrap}
+.ivi-tag{font-size:.55rem;font-weight:600;padding:.1rem .34rem;border-radius:20px;border:1px solid;white-space:nowrap}
+.ivi-tag.buy{background:rgba(34,197,94,.1);color:var(--green);border-color:rgba(34,197,94,.3)}
+.ivi-tag.sell{background:rgba(239,68,68,.1);color:var(--red);border-color:rgba(239,68,68,.3)}
+.ivi-tag.caution{background:rgba(249,115,22,.1);color:var(--orange);border-color:rgba(249,115,22,.3)}
+.ivi-tag.neutral{background:rgba(100,116,139,.1);color:var(--t3);border-color:var(--bd2)}
+
 /* ── LIVE DATA PANEL ─────────────────────────────────────────────────── */
 .live-panel{background:var(--bg3);border-bottom:1px solid var(--bd);padding:.45rem 1.2rem;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;flex-shrink:0}
 .live-panel-lbl{font-size:.58rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);white-space:nowrap}
@@ -976,15 +1000,17 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
 
     <!-- IV Insight Panel -->
     <div class="iv-insight" id="ivInsightPanel">
-      <div class="ivi-signal">
-        <div class="ivi-sig-lbl">Market Condition</div>
-        <div class="ivi-sig-val" id="iviCondition">—</div>
-      </div>
-      <div class="ivi-divider"></div>
-      <div class="ivi-rule">
-        <div class="ivi-rule-title">💡 Trader Insight</div>
-        <div class="ivi-rule-text" id="iviRuleText">—</div>
-        <div class="ivi-tags" id="iviTags"></div>
+      <div class="ivi-inner">
+        <div class="ivi-cond-blk">
+          <div class="ivi-cond-lbl">Market Condition</div>
+          <div class="ivi-cond-val" id="iviCondition">—</div>
+        </div>
+        <div class="ivi-sep"></div>
+        <div class="ivi-body">
+          <div class="ivi-insight-lbl">💡 Trader Insight</div>
+          <div class="ivi-text" id="iviRuleText">—</div>
+          <div class="ivi-tags" id="iviTags"></div>
+        </div>
       </div>
     </div>
 
@@ -3130,74 +3156,75 @@ function renderFVGBadge(id, gap, ltp) {
 }
 
 /* ── IV Insight Panel ────────────────────────────────────────────────
-   Combines IV Rank + PCR signal + FVG to give a plain-English
-   actionable insight with strategy tags. Updates on every calculate().
+   Combines IV Rank + FVG % to produce a concise, non-redundant
+   actionable insight. IV rank value shown in metrics row — not repeated.
 ─────────────────────────────────────────────────────────────────────*/
 function buildIVInsight(ivRank, ceGap, peGap, ceLTP, peLTP) {
-  const panel = el('ivInsightPanel');
+  const panel  = el('ivInsightPanel');
   const condEl = el('iviCondition');
   const textEl = el('iviRuleText');
   const tagsEl = el('iviTags');
   if (!panel || !condEl || !textEl || !tagsEl) return;
 
-  const hasIVRank = (ivRank !== null && !isNaN(ivRank));
-  const cePct = ceLTP > 0 ? (ceGap / ceLTP) * 100 : 0;
-  const pePct = peLTP > 0 ? (peGap / peLTP) * 100 : 0;
-  const avgPct = (ceLTP > 0 && peLTP > 0) ? (cePct + pePct) / 2 : (ceLTP > 0 ? cePct : pePct);
+  const hasRank = ivRank !== null && !isNaN(ivRank);
+  const cePct   = ceLTP > 0 ? (ceGap / ceLTP) * 100 : 0;
+  const pePct   = peLTP > 0 ? (peGap / peLTP) * 100 : 0;
+  const avgPct  = (ceLTP > 0 && peLTP > 0) ? (cePct + pePct) / 2
+                : (ceLTP > 0 ? cePct : pePct);
+  const fvgStr  = Math.abs(avgPct).toFixed(1) + '%';
 
-  let condition, condColor, ruleText, tags = [];
+  let cond, color, text, tags = [];
 
-  if (!hasIVRank) {
-    /* No IV range set — give generic FVG insight */
+  if (!hasRank) {
     if (avgPct > 4) {
-      condition = 'Options Expensive'; condColor = 'var(--orange)';
-      ruleText = 'Both CE and PE are trading <strong>above BSM fair value by ' + avgPct.toFixed(1) + '%</strong>. Market is pricing in more uncertainty than the model. Sellers have a statistical edge. Set your 52w IV range in the left panel for a full signal.';
-      tags = [{l:'Sell Bias',c:'sell'},{l:'IV Premium High',c:'caution'},{l:'Set IV Range',c:'neutral'}];
+      cond = 'Expensive Options'; color = 'var(--orange)';
+      text = 'Options are trading <strong>' + fvgStr + ' above BSM fair value</strong>. Market is pricing extra uncertainty — sellers have a statistical edge. Set your 52w IV range for the full regime signal.';
+      tags = [{l:'Sell Bias',c:'sell'},{l:'Set IV Range ▸',c:'neutral'}];
     } else if (avgPct < -3) {
-      condition = 'Options Cheap'; condColor = 'var(--green)';
-      ruleText = 'Options are trading <strong>below BSM fair value by ' + Math.abs(avgPct).toFixed(1) + '%</strong>. Buyers have a value edge. Ideal for directional plays or hedges. Set your 52w IV range for a complete regime signal.';
-      tags = [{l:'Buy Bias',c:'buy'},{l:'Value Entry',c:'buy'},{l:'Set IV Range',c:'neutral'}];
+      cond = 'Cheap Options'; color = 'var(--green)';
+      text = 'Options are trading <strong>' + fvgStr + ' below BSM fair value</strong>. Buyers have a structural value edge — good for directional plays. Set your 52w IV range for the full regime signal.';
+      tags = [{l:'Buy Bias',c:'buy'},{l:'Set IV Range ▸',c:'neutral'}];
     } else {
-      condition = 'Fairly Priced'; condColor = 'var(--t2)';
-      ruleText = 'Options are priced <strong>close to BSM fair value (±2%)</strong>. Neither buyers nor sellers have a structural edge from IV alone. Direction and timing matter most here. Set your 52w IV range for the full regime signal.';
-      tags = [{l:'Direction Driven',c:'neutral'},{l:'No IV Edge',c:'neutral'},{l:'Set IV Range',c:'neutral'}];
+      cond = 'Fairly Priced'; color = 'var(--t2)';
+      text = 'Options are priced <strong>within ±2% of BSM fair value</strong>. No structural edge from IV alone — direction and timing are the key drivers.';
+      tags = [{l:'Direction Key',c:'neutral'},{l:'Set IV Range ▸',c:'neutral'}];
     }
   } else if (ivRank < 30) {
-    condition = 'Low IV Regime'; condColor = 'var(--green)';
+    cond = 'Low IV · Buy Zone'; color = 'var(--green)';
     if (avgPct < -2) {
-      ruleText = '<strong>IV Rank ' + ivRank.toFixed(0) + '%</strong> — IV is near its yearly low AND options are trading below fair value. This is a <strong>high-conviction buying opportunity</strong>. Cheap options in a low-IV environment historically offer the best risk/reward for buyers. Breakouts often follow low-IV compression.';
-      tags = [{l:'Strong Buy Signal',c:'buy'},{l:'Low IV + Underpriced',c:'buy'},{l:'Breakout Watch',c:'buy'}];
+      text = 'IV near its <strong>yearly low</strong> and options are underpriced by ' + fvgStr + '. <strong>High-conviction buying setup</strong> — cheap options in a compressed IV environment maximise risk/reward for buyers. Breakouts typically follow low-IV phases.';
+      tags = [{l:'Strong Buy',c:'buy'},{l:'Long Options',c:'buy'},{l:'Breakout Watch',c:'buy'}];
     } else {
-      ruleText = '<strong>IV Rank ' + ivRank.toFixed(0) + '%</strong> — IV is near its yearly low. Options are cheap in historical context. Favour <strong>buying strategies</strong> — long calls, puts, straddles, or strangles. Avoid selling premium as reward vs risk is poor for sellers. Expect IV expansion ahead.';
-      tags = [{l:'Buy Premium',c:'buy'},{l:'Long Straddle/Strangle',c:'buy'},{l:'Avoid Selling',c:'caution'}];
+      text = 'IV near its <strong>yearly low</strong> — options are historically cheap. Favour <strong>long options</strong> (calls, puts, straddles). Selling premium here offers poor reward vs risk; expect IV expansion ahead.';
+      tags = [{l:'Buy Premium',c:'buy'},{l:'Straddle / Strangle',c:'buy'},{l:'Avoid Selling',c:'caution'}];
     }
   } else if (ivRank > 70) {
-    condition = 'High IV Regime'; condColor = 'var(--red)';
+    cond = 'High IV · Sell Zone'; color = 'var(--red)';
     if (avgPct > 3) {
-      ruleText = '<strong>IV Rank ' + ivRank.toFixed(0) + '%</strong> — IV is elevated AND options are overpriced vs fair value by ' + avgPct.toFixed(1) + '%. This is a <strong>strong selling environment</strong>. Premium sellers collecting inflated IV have a double edge: mean-reversion of IV + decay of inflated extrinsic value. Use defined-risk spreads.';
-      tags = [{l:'Strong Sell Signal',c:'sell'},{l:'IV + FVG Edge',c:'sell'},{l:'Use Spreads',c:'caution'}];
+      text = 'IV elevated AND options overpriced by <strong>' + fvgStr + ' vs fair value</strong>. Sellers have a double edge: IV mean-reversion + inflated extrinsic decay. <strong>Use defined-risk spreads</strong> to avoid naked short exposure.';
+      tags = [{l:'Strong Sell',c:'sell'},{l:'Credit Spreads',c:'sell'},{l:'Iron Condor',c:'sell'}];
     } else {
-      ruleText = '<strong>IV Rank ' + ivRank.toFixed(0) + '%</strong> — IV is near its yearly high. Options are expensive in historical context. Favour <strong>selling strategies</strong> — covered calls, cash-secured puts, credit spreads, iron condors. Avoid buying naked options — you are paying peak premium that will crush on any IV mean reversion.';
-      tags = [{l:'Sell Premium',c:'sell'},{l:'Credit Spreads',c:'sell'},{l:'Iron Condor',c:'sell'},{l:'Avoid Buying',c:'caution'}];
+      text = 'IV near its <strong>yearly high</strong> — options are historically expensive. Favour <strong>premium selling</strong> (credit spreads, covered calls, iron condors). Avoid buying naked options — IV crush will offset any directional gain.';
+      tags = [{l:'Sell Premium',c:'sell'},{l:'Credit Spreads',c:'sell'},{l:'Avoid Buying',c:'caution'}];
     }
   } else {
-    condition = 'Neutral IV Regime'; condColor = 'var(--yellow)';
+    cond = 'Neutral IV Zone'; color = 'var(--yellow)';
     if (avgPct > 3) {
-      ruleText = '<strong>IV Rank ' + ivRank.toFixed(0) + '%</strong> — IV is in the neutral zone but options are trading <strong>above fair value by ' + avgPct.toFixed(1) + '%</strong>. Mild seller edge from the FVG. Direction will drive P&L more than IV. Consider spreads to define risk while capturing the slight premium edge.';
-      tags = [{l:'Mild Sell Edge',c:'caution'},{l:'Spread Preferred',c:'neutral'},{l:'Direction Key',c:'neutral'}];
+      text = 'IV neutral but options overpriced by <strong>' + fvgStr + '</strong>. Mild seller edge — use spreads to capture it while keeping risk defined. Direction will be the primary P&L driver.';
+      tags = [{l:'Mild Sell Edge',c:'caution'},{l:'Use Spreads',c:'neutral'},{l:'Direction Key',c:'neutral'}];
     } else if (avgPct < -2) {
-      ruleText = '<strong>IV Rank ' + ivRank.toFixed(0) + '%</strong> — IV is in the neutral zone but options are trading <strong>below fair value by ' + Math.abs(avgPct).toFixed(1) + '%</strong>. Mild buyer edge from the FVG. Use directional spreads to manage risk. The FVG advantage gets amplified if the move is sharp.';
+      text = 'IV neutral but options underpriced by <strong>' + fvgStr + '</strong>. Mild buyer edge — directional spreads amplify the FVG advantage if the move is sharp.';
       tags = [{l:'Mild Buy Edge',c:'buy'},{l:'Directional Spread',c:'buy'},{l:'Manage Risk',c:'neutral'}];
     } else {
-      ruleText = '<strong>IV Rank ' + ivRank.toFixed(0) + '%</strong> — IV is in the neutral zone and options are fairly priced. <strong>No structural edge</strong> from IV or FVG alone. Pure directional trading. Focus on support/resistance levels, option chain OI buildup, and your thesis conviction.';
-      tags = [{l:'Direction Only',c:'neutral'},{l:'No IV Edge',c:'neutral'},{l:'OI Analysis Key',c:'neutral'}];
+      text = '<strong>No structural edge</strong> from IV or fair value. This is a pure directional trade — focus on OI buildup in the option chain, support/resistance, and conviction in your thesis.';
+      tags = [{l:'Direction Only',c:'neutral'},{l:'Watch OI Levels',c:'neutral'}];
     }
   }
 
-  condEl.textContent = condition;
-  condEl.style.color = condColor;
-  textEl.innerHTML = ruleText;
-  tagsEl.innerHTML = tags.map(t => `<span class="ivi-tag ${t.c}">${t.l}</span>`).join('');
+  condEl.textContent  = cond;
+  condEl.style.color  = color;
+  textEl.innerHTML    = text;
+  tagsEl.innerHTML    = tags.map(t => `<span class="ivi-tag ${t.c}">${t.l}</span>`).join('');
   panel.style.display = 'flex';
 }
 
