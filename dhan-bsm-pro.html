@@ -515,6 +515,12 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
 .live-refresh-btn{font-family:var(--sans);font-size:.6rem;font-weight:600;padding:.18rem .45rem;border-radius:var(--rsm);border:1px solid var(--bd2);background:var(--bg4);color:var(--t2);cursor:pointer;transition:all .13s;display:none}
 .live-refresh-btn.visible{display:inline-flex;align-items:center;gap:.25rem}
 .live-refresh-btn:hover{border-color:var(--blue);color:var(--blue)}
+.auto-refresh-badge{display:none;align-items:center;gap:.3rem;font-size:.58rem;color:var(--t3);white-space:nowrap}
+.auto-refresh-badge.visible{display:inline-flex}
+.ar-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:ar-pulse 2s ease-in-out infinite}
+@keyframes ar-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.ar-paused .ar-dot{background:var(--yellow);animation:none}
+.ar-countdown{font-family:var(--mono);font-weight:700;color:var(--t2);min-width:14px;display:inline-block;text-align:right}
 .live-chain-badge{font-size:.55rem;color:var(--green);padding:.08rem .3rem;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:var(--rsm);display:none}
 .live-chain-badge.visible{display:inline-block}
 .live-offline-note{font-size:.57rem;color:var(--t4);display:none}
@@ -642,6 +648,11 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
     <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
     Refresh
   </button>
+  <span class="auto-refresh-badge" id="autoRefreshBadge">
+    <span class="ar-dot" id="arDot"></span>
+    <span id="arLabel">Auto · next in</span>
+    <span class="ar-countdown" id="arCountdown">15</span>s
+  </span>
   <span class="live-offline-note" id="liveOfflineNote">Backend offline — using BSM estimates</span>
 </div>
 
@@ -3988,7 +3999,13 @@ async function loadLiveChain() {
 
     _liveChain = data;
     applyLiveChain(data);
-    liveSetStatus('green', 'Live · ' + data.chain.length + ' strikes · ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}));
+    liveSetStatus('green', 'Live · ' + data.chain.length + ' strikes · ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
+
+    /* Reset auto-refresh countdown from this moment */
+    if (typeof _arActive !== 'undefined' && _arActive) {
+      _arRemaining = AR_INTERVAL;
+      const ce = el('arCountdown'); if (ce) ce.textContent = _arRemaining;
+    }
 
     /* Show badges */
     const sb = el('liveSpotBadge');
@@ -4141,6 +4158,84 @@ async function fetchWithTimeout(url, ms) {
   }
 }
 
+/* ══ AUTO-REFRESH ENGINE ═══════════════════════════════════════════════
+   • 15s interval during market hours (IST 09:15–15:30, Mon–Fri)
+   • Paused outside market hours — shows yellow dot + "Market closed"
+   • First load fires automatically after backend is ready
+   • Countdown ticker updates every second
+══════════════════════════════════════════════════════════════════════ */
+const AR_INTERVAL   = 15;   // seconds between auto-refreshes
+let   _arTimer      = null; // setInterval handle for countdown
+let   _arRemaining  = AR_INTERVAL;
+let   _arActive     = false;
+
+function isMarketOpen() {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun, 6=Sat
+  if (day === 0 || day === 6) return false;
+  // Convert to IST (UTC+5:30)
+  const ist = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+  const h = ist.getUTCHours(), m = ist.getUTCMinutes();
+  const mins = h * 60 + m;
+  return mins >= (9 * 60 + 15) && mins < (15 * 60 + 30);
+}
+
+function arShowBadge(show) {
+  const badge = el('autoRefreshBadge');
+  if (badge) badge.classList.toggle('visible', show);
+}
+
+function arSetPaused(paused, reason) {
+  const badge  = el('autoRefreshBadge');
+  const dot    = el('arDot');
+  const label  = el('arLabel');
+  const count  = el('arCountdown');
+  if (!badge) return;
+  if (paused) {
+    badge.classList.add('ar-paused');
+    if (dot)   dot.style.background = 'var(--yellow)';
+    if (label) label.textContent = reason || 'Paused';
+    if (count) count.textContent = '';
+  } else {
+    badge.classList.remove('ar-paused');
+    if (dot)   dot.style.background = 'var(--green)';
+    if (label) label.textContent = 'Auto · next in';
+  }
+}
+
+function arStartCountdown() {
+  if (_arTimer) clearInterval(_arTimer);
+  _arRemaining = AR_INTERVAL;
+  const countEl = el('arCountdown');
+  if (countEl) countEl.textContent = _arRemaining;
+
+  _arTimer = setInterval(async () => {
+    if (!isMarketOpen()) {
+      arSetPaused(true, 'Market closed');
+      return;
+    }
+    arSetPaused(false);
+    _arRemaining--;
+    if (countEl) countEl.textContent = Math.max(0, _arRemaining);
+
+    if (_arRemaining <= 0) {
+      _arRemaining = AR_INTERVAL;
+      if (countEl) countEl.textContent = _arRemaining;
+      // Silent background refresh — don't disturb UI state
+      if (!_liveLoading && el('liveExpiry')?.value) {
+        await loadLiveChain();
+      }
+    }
+  }, 1000);
+  _arActive = true;
+}
+
+function arStop() {
+  if (_arTimer) { clearInterval(_arTimer); _arTimer = null; }
+  _arActive = false;
+  arShowBadge(false);
+}
+
 (async function initLive() {
   liveSetStatus('amber', 'Connecting…');
 
@@ -4166,7 +4261,7 @@ async function fetchWithTimeout(url, ms) {
     return;
   }
 
-  /* Step 2: verify Dhan token is valid */
+  /* Step 2: verify Dhan token */
   liveSetStatus('amber', 'Checking Dhan token…');
   try {
     const tr = await fetchWithTimeout(`${BACKEND}/api/token-check`, 12000);
@@ -4187,7 +4282,6 @@ async function fetchWithTimeout(url, ms) {
       return;
     }
   } catch(e) {
-    /* token-check failed — try loading expiries anyway */
     console.warn('[Live] token-check error, proceeding:', e.message);
   }
 
@@ -4195,6 +4289,24 @@ async function fetchWithTimeout(url, ms) {
   liveSetOnline();
   liveSetStatus('green', 'Backend online');
   await loadExpiries(13);
+
+  /* Step 4: AUTO-LOAD immediately after expiries are ready */
+  const expSel = el('liveExpiry');
+  if (expSel && expSel.value) {
+    liveSetStatus('amber', 'Auto-loading chain…');
+    await loadLiveChain();
+  }
+
+  /* Step 5: start auto-refresh countdown */
+  arShowBadge(true);
+  if (!isMarketOpen()) {
+    arSetPaused(true, 'Market closed');
+    // Still start timer so it activates automatically when market opens
+    arStartCountdown();
+  } else {
+    arSetPaused(false);
+    arStartCountdown();
+  }
 })();
 
 
