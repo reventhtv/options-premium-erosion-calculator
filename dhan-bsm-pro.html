@@ -411,9 +411,19 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
 .bias-btn.active-bear{background:rgba(239,68,68,.15);border-color:var(--red);color:var(--red)}
 .bias-btn.active-neut{background:rgba(234,179,8,.15);border-color:var(--yellow);color:var(--yellow)}
 .cmp-table-wrap{overflow-x:auto;border:1px solid var(--bd);border-radius:var(--r)}
-.cmp-table{width:100%;border-collapse:collapse;font-size:.66rem}
-.cmp-table th{background:var(--bg4);padding:.38rem .6rem;text-align:left;font-size:.53rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);border-bottom:1px solid var(--bd);white-space:nowrap}
-.cmp-table td{padding:.38rem .6rem;border-bottom:1px solid var(--bd);vertical-align:middle;white-space:nowrap}
+.cmp-table{width:100%;border-collapse:collapse;font-size:.66rem;table-layout:fixed}
+.cmp-table th{background:var(--bg4);padding:.38rem .55rem;text-align:right;font-size:.52rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);border-bottom:1px solid var(--bd);white-space:nowrap}
+.cmp-table th:first-child{text-align:left;width:22%}
+.cmp-table th:nth-child(2){width:10%}
+.cmp-table th:nth-child(3){width:13%}
+.cmp-table th:nth-child(4){width:11%}
+.cmp-table th:nth-child(5){width:7%}
+.cmp-table th:nth-child(6){width:11%}
+.cmp-table th:nth-child(7){width:10%}
+.cmp-table th:last-child{width:7%;text-align:center}
+.cmp-table td{padding:.38rem .55rem;border-bottom:1px solid var(--bd);vertical-align:middle;white-space:nowrap;text-align:right}
+.cmp-table td:first-child{text-align:left}
+.cmp-table td:last-child{text-align:center}
 .cmp-table tbody tr:last-child td{border-bottom:none}
 .cmp-table tbody tr:hover{background:var(--bg3)}
 .cmp-table tbody tr.cmp-best{background:rgba(59,130,246,.06);border-left:2px solid var(--blue)}
@@ -1873,7 +1883,7 @@ function calculate() {
     if (pv > maxPQ) maxPQ = pv; if (pv < minPQ) minPQ = pv;
   }
   const lossA = Math.abs(minPQ);
-  const rrMet = lossA > 0 ? (maxPQ > 1e9 ? '∞:1' : (maxPQ / lossA).toFixed(2) + ':1') : '∞:0';
+  const rrMet = lossA > 0 ? (maxPQ > 1e9 ? 'Unlim:1' : (maxPQ / lossA).toFixed(2) + ':1') : 'Unlim:0';
   st('mRR', rrMet);
 }
 
@@ -1970,7 +1980,7 @@ function drawPL(i, res, paid) {
 
   st('bMaxP', 'Max Profit: ' + (maxP > 1e9 ? '∞' : fRs(maxP, 0)));
   st('bMaxL', 'Max Loss: '   + fRs(Math.abs(minP), 0));
-  const rrV = Math.abs(minP) > 0 ? (maxP > 1e9 ? '∞:1' : (maxP / Math.abs(minP)).toFixed(2) + ':1') : '∞:0';
+  const rrV = Math.abs(minP) > 0 ? (maxP > 1e9 ? 'Unlim:1' : (maxP / Math.abs(minP)).toFixed(2) + ':1') : 'Unlim:0';
   st('bRR', 'R:R ' + rrV);
 
   const seg = { borderColor: c => c.p0.parsed.y >= 0 ? 'rgba(34,197,94,.85)' : 'rgba(239,68,68,.78)' };
@@ -2842,6 +2852,50 @@ function computeBEs(legs, strategy, netPrem) {
   return [];
 }
 
+/* ── Analytical max profit / max loss per strategy ───────────────────
+   Replaces scan-based estimates which are inaccurate for:
+   - Long Put (scan ±20% misses spot→0 scenario)
+   - Straddle (scan resolution misses exact K)
+   - Iron Condor (scan float drift)
+────────────────────────────────────────────────────────────────────── */
+function analyticalMaxPL(stratKey, type, legs, absNet, qty) {
+  const leg = (d, t) => legs.find(l => l.dir === d && l.type === t);
+  switch(stratKey) {
+    case 'single': {
+      if (type === 'call') return { maxP: Infinity, minP: -absNet * qty };
+      if (type === 'put')  return { maxP: (legs[0].K - absNet) * qty, minP: -absNet * qty };
+      // both (synthetic straddle)
+      return { maxP: Infinity, minP: -absNet * qty };
+    }
+    case 'bull_cs': {
+      const lc = leg(1,'call'), sc = leg(-1,'call');
+      if (!lc || !sc) break;
+      return { maxP: (sc.K - lc.K - absNet) * qty, minP: -absNet * qty };
+    }
+    case 'bear_ps': {
+      const lp = leg(1,'put'), sp = leg(-1,'put');
+      if (!lp || !sp) break;
+      return { maxP: (lp.K - sp.K - absNet) * qty, minP: -absNet * qty };
+    }
+    case 'straddle':
+    case 'strangle':
+      return { maxP: Infinity, minP: -absNet * qty };
+    case 'iron_condor': {
+      const sc = leg(-1,'call'), lc = leg(1,'call');
+      const sp = leg(-1,'put'),  lp = leg(1,'put');
+      if (!sc || !lc || !sp || !lp) break;
+      const callWing = lc.K - sc.K;
+      const putWing  = sp.K - lp.K;
+      const wing     = Math.max(callWing, putWing);
+      return { maxP: absNet * qty, minP: -(wing - absNet) * qty };
+    }
+    // compare-tab strategy ids
+    case 'single_call': return { maxP: Infinity, minP: -absNet * qty };
+    case 'single_put':  return { maxP: (legs[0].K - absNet) * qty, minP: -absNet * qty };
+  }
+  return null;
+}
+
 /* Detect whether a strategy has unlimited profit or loss */
 function stratLimits(strategy, type) {
   const unlimitedProfit = strategy === 'straddle' || strategy === 'strangle' ||
@@ -2939,12 +2993,12 @@ function drawStrategy(i, legs) {
       let moneyLabel = Math.abs(moneyPct) < 0.15 ? 'ATM'
         : moneyPct < 0 ? 'ITM ' + Math.abs(moneyPct).toFixed(1) + '%'
         : 'OTM +' + moneyPct.toFixed(1) + '%';
-      /* For puts: moneyness is inverted */
+      /* For puts: ITM when K > S (spot below strike), OTM when K < S */
       if (lg.type === 'put') {
-        const pd = (i.S - lg.K) / i.S * 100;
+        const pd = (lg.K - i.S) / i.S * 100;   // positive = put ITM (K>S)
         moneyLabel = Math.abs(pd) < 0.15 ? 'ATM'
-          : pd < 0 ? 'OTM +' + Math.abs(pd).toFixed(1) + '%'
-          : 'ITM ' + pd.toFixed(1) + '%';
+          : pd > 0 ? 'ITM '  + pd.toFixed(1) + '%'
+          : 'OTM +' + Math.abs(pd).toFixed(1) + '%';
       }
       const d = document.createElement('div');
       d.className = 'leg-card ' + (lg.dir > 0 ? 'long' : 'short');
@@ -2977,15 +3031,13 @@ function drawStrategy(i, legs) {
     if (v < minP) minP = v;
   }
 
-  /* Check if profit is truly unlimited (extend scan to ±40%) */
-  const { unlimitedProfit } = stratLimits(A.strategy, A.type);
-  const farUp = stratPayoff(i.S * 1.5, legs) * qty;
-  const farDn = stratPayoff(i.S * 0.6, legs) * qty;
-  const isUnlimitedProfit = unlimitedProfit || farUp > maxP * 1.5;
+  /* Override scan-based estimates with exact analytical formulas ── */
+  const ana = analyticalMaxPL(A.strategy, A.type, legs, absNet, qty);
+  if (ana) { maxP = ana.maxP; minP = ana.minP; }
+  const isUnlimitedProfit = !isFinite(maxP);
 
   const lossAbs = Math.abs(minP);
-  const rrNum = isUnlimitedProfit ? '∞' : maxP.toFixed(0);
-  const rr    = lossAbs > 0.01 ? (isUnlimitedProfit ? '∞:1' : (maxP / lossAbs).toFixed(2) + ':1') : '∞:0';
+  const rr = lossAbs > 0.01 ? (isUnlimitedProfit ? 'Unlim:1' : (maxP / lossAbs).toFixed(2) + ':1') : 'Unlim:0';
 
   /* ── Analytical breakevens ── */
   const BEs = computeBEs(legs, A.strategy, netPrem);
@@ -3003,7 +3055,7 @@ function drawStrategy(i, legs) {
       },
       {
         lb: 'Max Profit',
-        vl: isUnlimitedProfit ? 'Unlimited' : '₹' + maxP.toFixed(0),
+        vl: isUnlimitedProfit ? 'Unlimited' : '₹' + maxP.toLocaleString('en-IN', {maximumFractionDigits:0}),
         sb: isUnlimitedProfit ? 'uncapped upside' : 'total position',
         c:  'var(--green)'
       },
@@ -3041,7 +3093,9 @@ function drawStrategy(i, legs) {
 
   /* Add spot price vertical indicator as a spike dataset */
   const spotIdx  = Math.round((i.S - (i.S - rng)) / (rng * 2) * 200);
-  const spotLine = payoffs.map((_, idx) => idx === spotIdx ? maxP + Math.abs(minP) : null);
+  /* Chart spike height: use scan range for visual (not analytical maxP which may be huge) */
+  const chartTop = Math.max(...payoffs.filter(v=>isFinite(v)), 0) + Math.abs(Math.min(...payoffs.filter(v=>isFinite(v)), 0));
+  const spotLine = payoffs.map((_, idx) => idx === spotIdx ? chartTop * 1.05 : null);
   datasets.push({
     label: 'Current Spot ₹' + i.S.toLocaleString('en-IN'),
     data: spotLine, borderWidth: 1.5, pointRadius: 0, tension: 0,
@@ -3053,7 +3107,7 @@ function drawStrategy(i, legs) {
   BEs.forEach((be, bidx) => {
     const beIdx = Math.round((be - (i.S - rng)) / (rng * 2) * 200);
     if (beIdx < 0 || beIdx > 200) return;
-    const beLine = payoffs.map((_, idx) => idx === beIdx ? maxP + Math.abs(minP) : null);
+    const beLine = payoffs.map((_, idx) => idx === beIdx ? chartTop * 1.05 : null);
     datasets.push({
       label: 'BE ₹' + be.toFixed(0),
       data: beLine, borderWidth: 1.2, pointRadius: 0, tension: 0,
@@ -3419,23 +3473,33 @@ function buildCompare(i) {
         if      (stratId === 'single_call' || stratId === 'bull_cs') pop = Phi(dbe)  * 100;
         else if (stratId === 'single_put'  || stratId === 'bear_ps') pop = Phi(-dbe) * 100;
         else if (stratId === 'iron_condor') {
+          // P(lower_BE < S_T < upper_BE) = Phi(-d_upper) - Phi(-d_lower)
+          // BEs[0]=upper BE, BEs[1]=lower BE
           const be1 = BEs[0], be2 = BEs[1];
           const d1b = (Math.log(Fval/be1)-0.5*sigma*sigma*T)/(sigma*sqT);
           const d2b = (Math.log(Fval/be2)-0.5*sigma*sigma*T)/(sigma*sqT);
-          pop = (Phi(d1b) - Phi(d2b)) * 100;  // prob between both BEs
+          pop = (Phi(-d1b) - Phi(-d2b)) * 100;  // corrected: P(S between BEs)
         } else {
-          // straddle/strangle: need S to move past at least one BE
-          pop = (1 - (Phi((Math.log(Fval/BEs[0])-0.5*sigma*sigma*T)/(sigma*sqT))
-                    - Phi((Math.log(Fval/BEs[1])-0.5*sigma*sigma*T)/(sigma*sqT)))) * 100;
+          // straddle/strangle: P(S_T > upper_BE) + P(S_T < lower_BE)
+          const du = (Math.log(Fval/BEs[0])-0.5*sigma*sigma*T)/(sigma*sqT);
+          const dd = (Math.log(Fval/BEs[1])-0.5*sigma*sigma*T)/(sigma*sqT);
+          pop = (Phi(du) + (1 - Phi(dd))) * 100;
         }
       }
     }
     pop = Math.min(100, Math.max(0, pop));
 
-    const lossAbs = Math.abs(minP);
-    const rr = lossAbs > 0.01 ? (isUnlim ? '∞:1' : (maxP/lossAbs).toFixed(2)+':1') : '∞:0';
+    /* Override scan with analytical max profit / max loss for accuracy */
+    const anaC = analyticalMaxPL(stratId, null, legs, absNet, qty);
+    if (anaC) {
+      maxP = anaC.maxP; minP = anaC.minP;
+    }
+    const isUnlimFinal = !isFinite(maxP);
 
-    return { netPrem, isCredit, absNet, nTheta, maxP, minP, lossAbs, isUnlim, pop, rr, BEs };
+    const lossAbs = Math.abs(minP);
+    const rr = lossAbs > 0.01 ? (isUnlimFinal ? 'Unlim:1' : (maxP/lossAbs).toFixed(2)+':1') : 'Unlim:0';
+
+    return { netPrem, isCredit, absNet, nTheta, maxP, minP, lossAbs, isUnlim: isUnlimFinal, pop, rr, BEs };
   }
 
   /* Build table */
@@ -3474,15 +3538,16 @@ function buildCompare(i) {
     const rowStyle = best ? ' class="cmp-best"' : '';
     const dimStyle = !inBias ? ' style="opacity:.45"' : '';
 
+    const fmt = n => Math.round(n).toLocaleString('en-IN');
     const netStr = m.isCredit
       ? '<span style="color:var(--green)">+₹' + m.absNet.toFixed(2) + '</span>'
       : '<span style="color:var(--red)">−₹' + m.absNet.toFixed(2) + '</span>';
     const maxPStr = m.isUnlim
       ? '<span style="color:var(--green)">Unlimited</span>'
-      : '<span style="color:var(--green)">₹' + Math.max(0,m.maxP).toFixed(0) + '</span>';
-    const maxLStr = '<span style="color:var(--red)">₹' + m.lossAbs.toFixed(0) + '</span>';
+      : '<span style="color:var(--green)">₹' + fmt(Math.max(0, m.maxP)) + '</span>';
+    const maxLStr = '<span style="color:var(--red)">₹' + fmt(m.lossAbs) + '</span>';
     const popStr  = '<span style="color:' + (m.pop>50?'var(--green)':m.pop>35?'var(--yellow)':'var(--red)') + '">' + m.pop.toFixed(0) + '%</span>';
-    const thStr   = '<span style="color:var(--orange)">' + m.nTheta.toFixed(0) + '/d</span>';
+    const thStr   = '<span style="color:var(--orange)">' + (m.nTheta >= 0 ? '+' : '') + Math.round(m.nTheta).toLocaleString('en-IN') + '/d</span>';
     const rrStr   = '<span style="color:var(--cyan)">' + m.rr + '</span>';
     const bestBadge = best ? '<span class="cmp-badge-best">★ Best match</span>' : '';
     const biasIcons = s.bias.map(b => b==='bull'?'📈':b==='bear'?'📉':'↔').join(' ');
