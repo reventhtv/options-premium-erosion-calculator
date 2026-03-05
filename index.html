@@ -38,13 +38,18 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 .brand-sub{font-size:.6rem;color:var(--t3);display:block;margin-top:-2px}
 .ul-tabs{display:flex;gap:.2rem;flex:1;overflow-x:auto}
 .ul-tabs::-webkit-scrollbar{display:none}
-.ul-tab{display:flex;flex-direction:column;align-items:flex-start;padding:.28rem .75rem;border-radius:var(--rsm);border:1px solid transparent;cursor:pointer;background:none;transition:all .14s;flex-shrink:0;min-width:78px}
+.ul-tab{display:flex;flex-direction:column;align-items:flex-start;padding:.28rem .75rem;border-radius:var(--rsm);border:1px solid transparent;cursor:pointer;background:none;transition:all .14s;flex-shrink:0;min-width:88px}
 .ul-tab:hover{background:var(--bg4)}
 .ul-tab.active{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.3)}
+.ul-tab-row{display:flex;align-items:center;gap:.22rem}
 .ul-tab-name{font-size:.7rem;font-weight:600;color:var(--t2)}
 .ul-tab.active .ul-tab-name{color:var(--blue)}
 .ul-tab-price{font-family:var(--mono);font-size:.63rem;color:var(--t3)}
 .ul-tab.active .ul-tab-price{color:var(--t2)}
+.ul-exch-badge{font-size:.42rem;font-weight:700;letter-spacing:.04em;padding:.06rem .22rem;border-radius:2px;line-height:1.2;vertical-align:middle}
+.ul-exch-badge.nse{background:rgba(34,197,94,.12);color:rgba(34,197,94,.8);border:1px solid rgba(34,197,94,.2)}
+.ul-exch-badge.bse{background:rgba(234,179,8,.12);color:rgba(234,179,8,.85);border:1px solid rgba(234,179,8,.2)}
+
 .topbar-right{display:flex;align-items:center;gap:.75rem;margin-left:auto;flex-shrink:0}
 .live-badge{display:flex;align-items:center;gap:.35rem;font-size:.62rem;font-weight:500;color:var(--green);padding:.2rem .55rem;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:20px;letter-spacing:.04em;text-transform:uppercase}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
@@ -191,6 +196,8 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 
 /* Content tabs */
 .ctab-bar{display:flex;background:var(--bg2);border-bottom:1px solid var(--bd);padding:0 1.2rem;flex-shrink:0}
+.pl-sub{font-size:.62rem;font-weight:600;padding:.22rem .65rem;border-radius:var(--rsm);border:1px solid var(--bd2);background:transparent;color:var(--t3);cursor:pointer;transition:all .12s;font-family:var(--sans)}
+.pl-sub.active{background:var(--bg4);color:var(--t1);border-color:var(--bd3)}
 .ctab{font-family:var(--sans);font-size:.72rem;font-weight:500;padding:.6rem .92rem;background:none;border:none;border-bottom:2px solid transparent;color:var(--t3);cursor:pointer;transition:all .14s;margin-bottom:-1px;white-space:nowrap}
 .ctab:hover{color:var(--t2)}.ctab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
 .tab-body{display:none}.tab-body.active{display:block}
@@ -217,9 +224,62 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 .em-sub{font-size:.53rem;color:var(--t3);margin-top:.07rem}
 
 /* Option chain */
-.chain-sec{padding:.95rem 1.2rem}
-.chain-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.78rem}
-.chain-wrap{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rlg);overflow:hidden}
+.chain-sec{padding:.6rem 0}
+.chain-hdr{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1rem .5rem;flex-wrap:wrap;gap:.4rem}
+.chain-wrap{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rlg);overflow:auto;max-height:calc(100vh - 280px);-webkit-overflow-scrolling:touch}
+/* Live chain specific */
+.lc-meta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.lc-badge{font-size:.55rem;font-weight:700;padding:.1rem .35rem;border-radius:20px;letter-spacing:.04em;text-transform:uppercase}
+.lc-badge.live{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.lc-badge.bsm{background:rgba(59,130,246,.1);color:var(--blue);border:1px solid rgba(59,130,246,.25)}
+.lc-badge.expiry{background:rgba(234,179,8,.1);color:var(--yellow);border:1px solid rgba(234,179,8,.2)}
+.lc-filter{display:flex;gap:.3rem;align-items:center}
+.lc-filter-btn{font-size:.6rem;padding:.15rem .4rem;border-radius:var(--rsm);border:1px solid var(--bd2);background:var(--bg4);color:var(--t2);cursor:pointer;transition:all .12s}
+.lc-filter-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+/* Chain table */
+.lc-table{width:100%;border-collapse:collapse;font-size:.66rem;table-layout:auto}
+.lc-table thead th{padding:.36rem .5rem;font-size:.55rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);border-bottom:2px solid var(--bd);white-space:nowrap;text-align:right;position:sticky;top:0;background:var(--bg2);z-index:2}
+.lc-table thead th.lc-strike-hdr{text-align:center;background:rgba(59,130,246,.06);color:var(--blue)}
+.lc-table thead th.lc-pcr-hdr{text-align:center;background:rgba(234,179,8,.07);color:var(--yellow);font-weight:600;cursor:help;min-width:52px;border-left:1px solid var(--bd2);border-right:1px solid var(--bd2)}
+.lc-pcr-col{text-align:center;font-size:.75rem;padding:0 6px;min-width:52px;border-left:1px solid rgba(234,179,8,.15);border-right:1px solid rgba(234,179,8,.15)}
+.lc-table thead th.lc-ce{color:var(--blue)}
+.lc-table thead th.lc-pe{color:var(--red)}
+.lc-table thead th.lc-sep{border-left:1px solid var(--bd2)}
+.lc-table tbody td{padding:.32rem .5rem;border-bottom:1px solid rgba(36,40,54,.4);text-align:right;font-family:var(--mono);white-space:nowrap;vertical-align:middle}
+.lc-table tbody tr:hover td{background:var(--bg3)}
+/* ATM row */
+.lc-table tbody tr.lc-atm td{background:rgba(59,130,246,.04)}
+.lc-table tbody tr.lc-atm:hover td{background:rgba(59,130,246,.09)}
+.lc-table tbody tr.lc-atm td.lc-strike-col{background:rgba(59,130,246,.12)}
+/* Strike centre column */
+.lc-strike-col{text-align:center!important;background:var(--bg3);position:sticky;border-left:1px solid var(--bd2);border-right:1px solid var(--bd2);font-family:var(--mono);font-weight:700;font-size:.72rem;color:var(--t1);min-width:68px}
+/* OI bar */
+.oi-bar-wrap{display:flex;align-items:center;gap:.28rem;justify-content:flex-end}
+.oi-bar{height:4px;border-radius:2px;min-width:2px;max-width:52px}
+.oi-bar.ce{background:rgba(59,130,246,.6)}
+.oi-bar.pe{background:rgba(239,68,68,.6)}
+.oi-chg{font-size:.52rem}
+.oi-chg.up{color:var(--green)}.oi-chg.dn{color:var(--red)}
+/* Bid/Ask spread cell */
+.ba-wrap{display:flex;flex-direction:column;line-height:1.2;align-items:flex-end}
+/* LTP highlight */
+.ltp-ce{color:var(--blue);font-weight:700;min-width:58px}
+.ltp-pe{color:var(--red);font-weight:700;min-width:58px}
+.ltp-atm{color:var(--t1)!important;font-weight:800!important}
+/* ITM shading */
+.lc-table tbody tr.lc-itm-ce td.lc-ce-zone{background:rgba(59,130,246,.03)}
+.lc-table tbody tr.lc-itm-pe td.lc-pe-zone{background:rgba(239,68,68,.03)}
+/* Chain summary bar */
+.chain-summary{display:flex;gap:1.2rem;padding:.5rem 1rem;background:var(--bg3);border-top:1px solid var(--bd);font-size:.6rem;flex-wrap:wrap}
+.cs-item{display:flex;flex-direction:column;gap:.06rem}
+.cs-lbl{color:var(--t3);font-size:.54rem;text-transform:uppercase;letter-spacing:.05em}
+.cs-val{font-family:var(--mono);font-weight:700;color:var(--t1)}
+.cs-val.bull{color:var(--green)}.cs-val.bear{color:var(--red)}.cs-val.neu{color:var(--yellow)}
+/* Empty / loading states */
+.chain-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;gap:.7rem;color:var(--t3)}
+.chain-spinner{width:24px;height:24px;border:2px solid var(--bd2);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.chain-no-data{text-align:center;padding:2.5rem 1rem;color:var(--t3);font-size:.7rem}
 table{width:100%;border-collapse:collapse;font-size:.71rem}
 thead th{font-size:.56rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);padding:.52rem .78rem;text-align:right;background:var(--bg3);border-bottom:1px solid var(--bd);white-space:nowrap}
 thead th:first-child{text-align:left}
@@ -356,9 +416,19 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
 .bias-btn.active-bear{background:rgba(239,68,68,.15);border-color:var(--red);color:var(--red)}
 .bias-btn.active-neut{background:rgba(234,179,8,.15);border-color:var(--yellow);color:var(--yellow)}
 .cmp-table-wrap{overflow-x:auto;border:1px solid var(--bd);border-radius:var(--r)}
-.cmp-table{width:100%;border-collapse:collapse;font-size:.66rem}
-.cmp-table th{background:var(--bg4);padding:.38rem .6rem;text-align:left;font-size:.53rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);border-bottom:1px solid var(--bd);white-space:nowrap}
-.cmp-table td{padding:.38rem .6rem;border-bottom:1px solid var(--bd);vertical-align:middle;white-space:nowrap}
+.cmp-table{width:100%;border-collapse:collapse;font-size:.66rem;table-layout:fixed}
+.cmp-table th{background:var(--bg4);padding:.38rem .55rem;text-align:right;font-size:.52rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);border-bottom:1px solid var(--bd);white-space:nowrap}
+.cmp-table th:first-child{text-align:left;width:22%}
+.cmp-table th:nth-child(2){width:10%}
+.cmp-table th:nth-child(3){width:13%}
+.cmp-table th:nth-child(4){width:11%}
+.cmp-table th:nth-child(5){width:7%}
+.cmp-table th:nth-child(6){width:11%}
+.cmp-table th:nth-child(7){width:10%}
+.cmp-table th:last-child{width:7%;text-align:center}
+.cmp-table td{padding:.38rem .55rem;border-bottom:1px solid var(--bd);vertical-align:middle;white-space:nowrap;text-align:right}
+.cmp-table td:first-child{text-align:left}
+.cmp-table td:last-child{text-align:center}
 .cmp-table tbody tr:last-child td{border-bottom:none}
 .cmp-table tbody tr:hover{background:var(--bg3)}
 .cmp-table tbody tr.cmp-best{background:rgba(59,130,246,.06);border-left:2px solid var(--blue)}
@@ -407,6 +477,69 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
 .pos-direction-badge{font-size:.55rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.1rem .4rem;border-radius:10px}
 .pos-long{background:rgba(34,197,94,.12);color:var(--green)}
 .pos-short{background:rgba(239,68,68,.12);color:var(--red)}
+
+/* ── LIVE LTP vs FAIR VALUE ────────────────────────────────────── */
+.ph-live-ltp{font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--green);
+  background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);
+  border-radius:var(--rsm);padding:.06rem .3rem;margin-right:.18rem}
+.ph-fair{font-family:var(--mono);font-size:.62rem;color:var(--t3)}
+.ph-spread{font-size:.57rem;color:var(--yellow);font-weight:600}
+.ph-spread.over{color:var(--orange)}
+.ph-spread.under{color:var(--cyan)}
+
+/* ── Fair Value Gap Badge ───────────────────────────────────────────── */
+.fvg-badge{display:inline-flex;align-items:center;gap:.2rem;font-size:.57rem;font-weight:700;padding:.1rem .36rem;border-radius:20px;margin-top:.14rem;letter-spacing:.01em;white-space:nowrap}
+.fvg-over{background:rgba(249,115,22,.12);color:var(--orange);border:1px solid rgba(249,115,22,.28)}
+.fvg-under{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.28)}
+.fvg-fair{background:rgba(100,116,139,.1);color:var(--t3);border:1px solid var(--bd2)}
+
+/* ── IV Insight Panel ───────────────────────────────────────────────── */
+.iv-insight{display:none;margin:0;background:var(--bg2);border-bottom:1px solid var(--bd);padding:.55rem 1.2rem;align-items:stretch;gap:0;flex-shrink:0}
+.ivi-inner{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;width:100%}
+.ivi-cond-blk{display:flex;flex-direction:column;gap:.14rem;min-width:120px;flex-shrink:0}
+.ivi-cond-lbl{font-size:.52rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--t3)}
+.ivi-cond-val{font-size:.8rem;font-weight:700;line-height:1.2}
+.ivi-sep{width:1px;background:var(--bd2);align-self:stretch;min-height:28px;flex-shrink:0}
+.ivi-body{flex:1;min-width:0}
+.ivi-insight-lbl{font-size:.52rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--t3);margin-bottom:.22rem;display:flex;align-items:center;gap:.3rem}
+.ivi-text{font-size:.67rem;color:var(--t2);line-height:1.55;margin-bottom:.28rem}
+.ivi-text strong{color:var(--t1);font-weight:700}
+.ivi-tags{display:flex;gap:.25rem;flex-wrap:wrap}
+.ivi-tag{font-size:.55rem;font-weight:600;padding:.1rem .34rem;border-radius:20px;border:1px solid;white-space:nowrap}
+.ivi-tag.buy{background:rgba(34,197,94,.1);color:var(--green);border-color:rgba(34,197,94,.3)}
+.ivi-tag.sell{background:rgba(239,68,68,.1);color:var(--red);border-color:rgba(239,68,68,.3)}
+.ivi-tag.caution{background:rgba(249,115,22,.1);color:var(--orange);border-color:rgba(249,115,22,.3)}
+.ivi-tag.neutral{background:rgba(100,116,139,.1);color:var(--t3);border-color:var(--bd2)}
+
+/* ── LIVE DATA PANEL ─────────────────────────────────────────────────── */
+.live-panel{background:var(--bg3);border-bottom:1px solid var(--bd);padding:.45rem 1.2rem;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;flex-shrink:0}
+.live-panel-lbl{font-size:.58rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);white-space:nowrap}
+.live-exp-sel{font-family:var(--mono);font-size:.68rem;color:var(--t1);background:var(--bg4);border:1px solid var(--bd2);border-radius:var(--rsm);padding:.22rem .4rem;outline:none;cursor:pointer;min-width:120px}
+.live-exp-sel:focus{border-color:var(--blue)}
+.live-load-btn{font-family:var(--sans);font-size:.65rem;font-weight:700;padding:.24rem .65rem;border-radius:var(--rsm);border:none;background:var(--blue);color:#fff;cursor:pointer;transition:all .14s;white-space:nowrap;display:flex;align-items:center;gap:.3rem}
+.live-load-btn:hover{background:#5294f7}
+.live-load-btn:disabled{background:var(--bg4);color:var(--t3);cursor:not-allowed}
+.live-status{font-size:.6rem;color:var(--t3);display:flex;align-items:center;gap:.3rem}
+.live-status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.live-status-dot.green{background:var(--green);box-shadow:0 0 5px rgba(34,197,94,.5)}
+.live-status-dot.red{background:var(--red)}
+.live-status-dot.amber{background:var(--yellow);animation:pulse 1.5s infinite}
+.live-spot-badge{font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--t1);padding:.14rem .4rem;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:var(--rsm)}
+.live-dte-badge{font-size:.6rem;color:var(--orange);padding:.1rem .32rem;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.2);border-radius:var(--rsm)}
+.live-divider{width:1px;height:20px;background:var(--bd);flex-shrink:0}
+.live-refresh-btn{font-family:var(--sans);font-size:.6rem;font-weight:600;padding:.18rem .45rem;border-radius:var(--rsm);border:1px solid var(--bd2);background:var(--bg4);color:var(--t2);cursor:pointer;transition:all .13s;display:none}
+.live-refresh-btn.visible{display:inline-flex;align-items:center;gap:.25rem}
+.live-refresh-btn:hover{border-color:var(--blue);color:var(--blue)}
+.auto-refresh-badge{display:none;align-items:center;gap:.3rem;font-size:.58rem;color:var(--t3);white-space:nowrap}
+.auto-refresh-badge.visible{display:inline-flex}
+.ar-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:ar-pulse 2s ease-in-out infinite}
+@keyframes ar-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.ar-paused .ar-dot{background:var(--yellow);animation:none}
+.ar-countdown{font-family:var(--mono);font-weight:700;color:var(--t2);min-width:14px;display:inline-block;text-align:right}
+.live-chain-badge{font-size:.55rem;color:var(--green);padding:.08rem .3rem;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:var(--rsm);display:none}
+.live-chain-badge.visible{display:inline-block}
+.live-offline-note{font-size:.57rem;color:var(--t4);display:none}
+.live-offline-note.visible{display:block}
 
 /* ── MAX PAIN ─────────────────────────────────── */
 .mp-sec{padding:.95rem 1.2rem;display:flex;flex-direction:column;gap:.85rem}
@@ -472,37 +605,65 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
 
   <!-- Underlying quick-switch tabs -->
   <div class="ul-tabs">
-    <button class="ul-tab active" data-ul="NIFTY 50"  data-spot="25000" data-lot="65"  data-step="50"  data-ivh="22" data-ivl="9"  onclick="selectUL(this)">
-      <span class="ul-tab-name">NIFTY 50</span><span class="ul-tab-price">₹25,000</span>
+    <button class="ul-tab active" data-ul="NIFTY 50" data-scrip="13" data-spot="25000" data-lot="65" data-step="50" data-ivh="22" data-ivl="9" data-iv="14" onclick="selectUL(this)">
+      <span class="ul-tab-row"><span class="ul-tab-name">NIFTY 50</span><span class="ul-exch-badge nse">NSE</span></span>
+      <span class="ul-tab-price">₹25,000</span>
     </button>
-    <button class="ul-tab" data-ul="BANKNIFTY" data-spot="60000" data-lot="15"  data-step="100" data-ivh="35" data-ivl="12" onclick="selectUL(this)">
-      <span class="ul-tab-name">BANKNIFTY</span><span class="ul-tab-price">₹60,000</span>
+    <button class="ul-tab" data-ul="BANKNIFTY" data-scrip="25" data-spot="51500" data-lot="15" data-step="100" data-ivh="35" data-ivl="12" data-iv="18" onclick="selectUL(this)">
+      <span class="ul-tab-row"><span class="ul-tab-name">BANKNIFTY</span><span class="ul-exch-badge nse">NSE</span></span>
+      <span class="ul-tab-price">₹51,500</span>
     </button>
-    <button class="ul-tab" data-ul="FINNIFTY"  data-spot="20100" data-lot="40"  data-step="50"  data-ivh="28" data-ivl="10"  onclick="selectUL(this)">
-      <span class="ul-tab-name">FINNIFTY</span><span class="ul-tab-price">₹20,100</span>
+    <button class="ul-tab" data-ul="MIDCAP NIFTY" data-scrip="442" data-spot="13000" data-lot="75" data-step="25" data-ivh="28" data-ivl="12" data-iv="18" onclick="selectUL(this)">
+      <span class="ul-tab-row"><span class="ul-tab-name">MIDCAP</span><span class="ul-exch-badge nse">NSE</span></span>
+      <span class="ul-tab-price">₹13,000</span>
     </button>
-    <button class="ul-tab" data-ul="SENSEX"    data-spot="73800" data-lot="10"  data-step="500" data-ivh="22" data-ivl="9" onclick="selectUL(this)">
-      <span class="ul-tab-name">SENSEX</span><span class="ul-tab-price">₹73,800</span>
-    </button>
-    <button class="ul-tab" data-ul="RELIANCE"  data-spot="2900"  data-lot="250" data-step="10"  data-ivh="38" data-ivl="14"  onclick="selectUL(this)">
-      <span class="ul-tab-name">RELIANCE</span><span class="ul-tab-price">₹2,900</span>
-    </button>
-    <button class="ul-tab" data-ul="HDFCBANK"  data-spot="1640"  data-lot="550" data-step="10"  data-ivh="30" data-ivl="11"  onclick="selectUL(this)">
-      <span class="ul-tab-name">HDFCBANK</span><span class="ul-tab-price">₹1,640</span>
-    </button>
-    <button class="ul-tab" data-ul="ICICIBANK" data-spot="1120"  data-lot="700" data-step="5"   data-ivh="32" data-ivl="13"   onclick="selectUL(this)">
-      <span class="ul-tab-name">ICICIBANK</span><span class="ul-tab-price">₹1,120</span>
+    <button class="ul-tab" data-ul="SENSEX" data-scrip="51" data-spot="75000" data-lot="10" data-step="100" data-ivh="22" data-ivl="9" data-iv="14" onclick="selectUL(this)">
+      <span class="ul-tab-row"><span class="ul-tab-name">SENSEX</span><span class="ul-exch-badge bse">BSE</span></span>
+      <span class="ul-tab-price">₹75,000</span>
     </button>
   </div>
 
   <div class="topbar-right">
-    <div class="live-badge"><div class="live-dot"></div>BSM Engine</div>
+    <div class="live-badge" id="topbarLiveBadge"><div class="live-dot"></div>BSM Engine</div>
     <button class="btn btn-ghost" onclick="applyPreset('atm')">Set ATM</button>
     <button class="btn btn-primary" onclick="calculate()">
       <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polygon points="5,3 19,12 5,21"/></svg>
       Calculate
     </button>
   </div>
+</div>
+
+
+<!-- ════════════════ LIVE DATA PANEL ════════════════════════════════════ -->
+<div class="live-panel" id="livePanel">
+  <span class="live-panel-lbl">Live Data</span>
+  <div class="live-status" id="liveStatus">
+    <div class="live-status-dot amber" id="liveStatusDot"></div>
+    <span id="liveStatusText">Connecting…</span>
+  </div>
+  <div class="live-divider"></div>
+  <span class="live-panel-lbl">Expiry</span>
+  <select class="live-exp-sel" id="liveExpiry" onchange="onExpiryChange()">
+    <option value="">— select underlying first —</option>
+  </select>
+  <button class="live-load-btn" id="liveLoadBtn" onclick="loadLiveChain()" disabled>
+    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+    Load Live
+  </button>
+  <div class="live-divider"></div>
+  <span class="live-spot-badge" id="liveSpotBadge" style="display:none"></span>
+  <span class="live-dte-badge"  id="liveDteBadge"  style="display:none"></span>
+  <span class="live-chain-badge" id="liveChainBadge">✓ Live chain loaded</span>
+  <button class="live-refresh-btn" id="liveRefreshBtn" onclick="loadLiveChain()">
+    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+    Refresh
+  </button>
+  <span class="auto-refresh-badge" id="autoRefreshBadge">
+    <span class="ar-dot" id="arDot"></span>
+    <span id="arLabel">Auto · next in</span>
+    <span class="ar-countdown" id="arCountdown">15</span>s
+  </span>
+  <span class="live-offline-note" id="liveOfflineNote">Backend offline — using BSM estimates</span>
 </div>
 
 <!-- ════════════════ WORKSPACE ═════════════════════════════════════════ -->
@@ -669,7 +830,7 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
       <div id="divWidth" style="display:none" class="field"><div class="field-label">Wing Width <span class="field-hint">strikes between legs</span></div><div class="iw"><input type="number" id="iWidth" value="5" step="1" min="1" max="30" oninput="onInput()"><div class="sfx">strikes</div></div></div>
       <div id="divSingleType">
       <div class="field">
-        <div class="field-label">Analyse</div>
+        <div class="field-label">Analysis</div>
         <div class="type-tabs">
           <button class="type-tab call active" id="tCE"   onclick="setType('call')">CE — Call</button>
           <button class="type-tab put"          id="tPE"   onclick="setType('put')">PE — Put</button>
@@ -724,8 +885,8 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
         <button class="preset-chip" onclick="applyPreset('itm5')">5% ITM</button>
         <button class="preset-chip" onclick="applyPreset('weekly')">Weekly 7d</button>
         <button class="preset-chip" onclick="applyPreset('monthly')">Monthly 30d</button>
-        <button class="preset-chip" onclick="applyPreset('highiv')">High IV 40%</button>
-        <button class="preset-chip" onclick="applyPreset('lowiv')">Low IV 8%</button>
+        <button class="preset-chip" onclick="applyPreset('highiv')">High IV</button>
+        <button class="preset-chip" onclick="applyPreset('lowiv')">Low IV</button>
       </div>
     </div>
 
@@ -733,7 +894,7 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
     <div class="calc-wrap">
       <button class="calc-btn" onclick="calculate()">
         <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 7H6a2 2 0 00-2 2v9a2 2 0 002 2h9a2 2 0 002-2v-3M16 5l2 2 4-4M19 10V6h-4"/></svg>
-        Run BSM Calculator
+        Price Options
       </button>
       <div id="parityBadge" class="parity ok">
         <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
@@ -749,25 +910,35 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
     <!-- Price Header -->
     <div class="price-hdr">
       <div class="ph-blk">
-        <div class="ph-lbl">Call CE Premium</div>
+        <div class="ph-lbl">CE Premium</div>
         <div class="ph-val call" id="oCallPx">₹—</div>
-        <div class="ph-sub">Intrinsic: <strong id="oCallIntr">—</strong> &nbsp;Extrinsic: <strong id="oCallExtr">—</strong></div>
+        <div class="ph-sub">
+          <span id="oCallLTPWrap" style="display:none"><span class="ph-live-ltp" id="oCallLTP">—</span><span class="ph-spread" id="oCallSpread"></span>&nbsp;·&nbsp;</span>
+          <span id="oCallFairWrap" style="display:none"><span class="ph-fair">BSM Fair: <strong id="oCallFair">—</strong></span>&nbsp;·&nbsp;</span>
+          Intr: <strong id="oCallIntr">—</strong>&nbsp;Extr: <strong id="oCallExtr">—</strong>
+        </div>
+        <span id="oCallFVG" style="display:none"></span>
       </div>
       <div class="ph-div"></div>
       <div class="ph-blk">
-        <div class="ph-lbl">Put PE Premium</div>
+        <div class="ph-lbl">PE Premium</div>
         <div class="ph-val put" id="oPutPx">₹—</div>
-        <div class="ph-sub">Intrinsic: <strong id="oPutIntr">—</strong> &nbsp;Extrinsic: <strong id="oPutExtr">—</strong></div>
+        <div class="ph-sub">
+          <span id="oPutLTPWrap" style="display:none"><span class="ph-live-ltp" id="oPutLTP">—</span><span class="ph-spread" id="oPutSpread"></span>&nbsp;·&nbsp;</span>
+          <span id="oPutFairWrap" style="display:none"><span class="ph-fair">BSM Fair: <strong id="oPutFair">—</strong></span>&nbsp;·&nbsp;</span>
+          Intr: <strong id="oPutIntr">—</strong>&nbsp;Extr: <strong id="oPutExtr">—</strong>
+        </div>
+        <span id="oPutFVG" style="display:none"></span>
       </div>
       <div class="ph-div"></div>
       <div class="ph-blk">
-        <div class="ph-lbl">Call Breakeven at Expiry</div>
+        <div class="ph-lbl">CE Breakeven</div>
         <div class="ph-val neu" id="oCallBE">₹—</div>
         <div class="ph-sub"><span id="oCallMoney">—</span> &nbsp;·&nbsp; Strike + Paid</div>
       </div>
       <div class="ph-div"></div>
       <div class="ph-blk">
-        <div class="ph-lbl">Put Breakeven at Expiry</div>
+        <div class="ph-lbl">PE Breakeven</div>
         <div class="ph-val neu" id="oPutBE">₹—</div>
         <div class="ph-sub"><span id="oPutMoney">—</span> &nbsp;·&nbsp; Strike − Paid</div>
       </div>
@@ -845,95 +1016,117 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
       <div class="mr-it"><div class="mr-lb">Max Loss</div><div class="mr-vl mr-r" id="mMaxL">—</div><div class="mr-sb">premium at risk</div></div>
       <div class="mr-it"><div class="mr-lb">R:R</div><div class="mr-vl mr-c" id="mRR">—</div><div class="mr-sb">reward:risk</div></div>
       <div class="mr-it ivr-it"><div class="mr-lb">IV Rank</div><div class="mr-vl mr-y" id="mIVR">—</div><div class="mr-sb" id="mIVRSb">52-week range</div></div>
-      <div class="mr-it ivr-it"><div class="mr-lb">IV Signal</div><div class="mr-vl" id="mIVSig">—</div><div class="mr-sb" id="mIVSigSb">premium regime</div></div>
+      <div class="mr-it ivr-it"><div class="mr-lb">IV Regime</div><div class="mr-vl" id="mIVSig">—</div><div class="mr-sb" id="mIVSigSb">52w rank zone</div></div>
+    </div>
+
+    <!-- IV Insight Panel -->
+    <div class="iv-insight" id="ivInsightPanel">
+      <div class="ivi-inner">
+        <div class="ivi-cond-blk">
+          <div class="ivi-cond-lbl">Market Condition</div>
+          <div class="ivi-cond-val" id="iviCondition">—</div>
+        </div>
+        <div class="ivi-sep"></div>
+        <div class="ivi-body">
+          <div class="ivi-insight-lbl">💡 Trader Insight</div>
+          <div class="ivi-text" id="iviRuleText">—</div>
+          <div class="ivi-tags" id="iviTags"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Content tabs -->
     <div class="ctab-bar">
-      <button class="ctab active" onclick="switchTab('erosion',this)">📉 Erosion</button>
-      <button class="ctab"        onclick="switchTab('pl',this)">📊 P&amp;L Profile</button>
+      <button class="ctab active" onclick="switchTab('pl',this)">📊 P&amp;L</button>
       <button class="ctab"        onclick="switchTab('strategy',this)">🏗 Strategy</button>
-      <button class="ctab"        onclick="switchTab('chain',this)">⛓ Option Chain</button>
-      <button class="ctab"        onclick="switchTab('scenarios',this)">🎯 Scenarios</button>
-      <button class="ctab"        onclick="switchTab('sensitivity',this)">🌡 Sensitivity</button>
+      <button class="ctab"        onclick="switchTab('chain',this)">📊 Option Chain</button>
+      <button class="ctab"        onclick="switchTab('analysis',this)">🔬 Analysis</button>
       <button class="ctab"        onclick="switchTab('compare',this)">⚖ Compare</button>
       <button class="ctab"        onclick="switchTab('position',this)">📍 Position</button>
       <button class="ctab"        onclick="switchTab('maxpain',this)">⚡ Max Pain</button>
     </div>
 
     <!-- TAB: Erosion -->
-    <div class="tab-body active" id="tab-erosion">
-      <div class="charts-grid">
-        <div class="chart-card">
-          <div class="chart-head">
-            <span class="chart-title">Premium Erosion — Days to Expiry</span>
-            <span class="badge badge-orange" id="bThRate">θ/unit: —</span>
-          </div>
-          <div class="chart-body">
-            <div style="height:216px;position:relative"><canvas id="cErosion"></canvas></div>
-            <div class="em-grid">
-              <div class="em-item">
-                <div class="em-lbl">θ Per Unit/Day</div>
-                <div class="em-val" id="emU" style="color:var(--orange)">—</div>
-                <div class="em-sub">raw Greek value</div>
-              </div>
-              <div class="em-item">
-                <div class="em-lbl">Per Lot/Day</div>
-                <div class="em-val" id="emL" style="color:var(--orange)">—</div>
-                <div class="em-sub" id="emLS">θ × lot size</div>
-              </div>
-              <div class="em-item">
-                <div class="em-lbl">Total Position/Day</div>
-                <div class="em-val" id="emT" style="color:var(--red)">—</div>
-                <div class="em-sub" id="emTS">× lots</div>
-              </div>
-              <div class="em-item">
-                <div class="em-lbl">Weekly (5d)</div>
-                <div class="em-val" id="emW" style="color:var(--orange)">—</div>
-                <div class="em-sub">total position × 5</div>
-              </div>
-              <div class="em-item">
-                <div class="em-lbl">θ Annual Yield</div>
-                <div class="em-val" id="emYield" style="color:var(--yellow)">—</div>
-                <div class="em-sub">θ÷prem×365</div>
+    <!-- TAB: P&L (merged Erosion + P&L Profile) -->
+    <div class="tab-body active" id="tab-pl">
+      <!-- Sub-toggle -->
+      <div style="display:flex;gap:.3rem;padding:.5rem 1rem .2rem;border-bottom:1px solid var(--bd)">
+        <button class="pl-sub active" id="plSubErosion" onclick="plSub('erosion',this)">📉 Erosion</button>
+        <button class="pl-sub"        id="plSubProfile" onclick="plSub('profile',this)">📈 P&amp;L Profile</button>
+      </div>
+
+      <!-- Erosion view -->
+      <div id="plViewErosion">
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-head">
+              <span class="chart-title">Premium Erosion — Days to Expiry</span>
+              <span class="badge badge-orange" id="bThRate">θ/unit: —</span>
+            </div>
+            <div class="chart-body">
+              <div style="height:216px;position:relative"><canvas id="cErosion"></canvas></div>
+              <div class="em-grid">
+                <div class="em-item">
+                  <div class="em-lbl">θ Per Unit/Day</div>
+                  <div class="em-val" id="emU" style="color:var(--orange)">—</div>
+                  <div class="em-sub">raw Greek value</div>
+                </div>
+                <div class="em-item">
+                  <div class="em-lbl">Per Lot/Day</div>
+                  <div class="em-val" id="emL" style="color:var(--orange)">—</div>
+                  <div class="em-sub" id="emLS">θ × lot size</div>
+                </div>
+                <div class="em-item">
+                  <div class="em-lbl">Total Position/Day</div>
+                  <div class="em-val" id="emT" style="color:var(--red)">—</div>
+                  <div class="em-sub" id="emTS">× lots</div>
+                </div>
+                <div class="em-item">
+                  <div class="em-lbl">Weekly (5d)</div>
+                  <div class="em-val" id="emW" style="color:var(--orange)">—</div>
+                  <div class="em-sub">total position × 5</div>
+                </div>
+                <div class="em-item">
+                  <div class="em-lbl">θ Annual Yield</div>
+                  <div class="em-val" id="emYield" style="color:var(--yellow)">—</div>
+                  <div class="em-sub">θ÷prem×365</div>
+                </div>
               </div>
             </div>
           </div>
-
-        </div>
-
-        <div class="chart-card">
-          <div class="chart-head">
-            <span class="chart-title">Theta Acceleration vs DTE</span>
-            <span class="badge badge-muted">|θ| grows near expiry</span>
-          </div>
-          <div class="chart-body">
-            <div style="height:258px;position:relative"><canvas id="cTheta"></canvas></div>
+          <div class="chart-card">
+            <div class="chart-head">
+              <span class="chart-title">Theta Acceleration vs DTE</span>
+              <span class="badge badge-muted">|θ| grows near expiry</span>
+            </div>
+            <div class="chart-body">
+              <div style="height:258px;position:relative"><canvas id="cTheta"></canvas></div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- TAB: P&L -->
-    <div class="tab-body" id="tab-pl">
-      <div class="charts-grid">
-        <div class="chart-card" style="grid-column:1/-1">
-          <div class="chart-head">
-            <span class="chart-title">P&amp;L Profile — At Expiry (solid) &amp; Today's BSM Value (dashed)</span>
-            <div style="display:flex;gap:.38rem">
-              <span class="badge badge-green" id="bMaxP">Max Profit: —</span>
-              <span class="badge badge-red"   id="bMaxL">Max Loss: —</span>
-              <span class="badge badge-muted"  id="bRR">R:R —</span>
+      <!-- P&L Profile view -->
+      <div id="plViewProfile" style="display:none">
+        <div class="charts-grid">
+          <div class="chart-card" style="grid-column:1/-1">
+            <div class="chart-head">
+              <span class="chart-title">P&amp;L Profile — At Expiry (solid) &amp; Today's BSM (dashed)</span>
+              <div style="display:flex;gap:.38rem">
+                <span class="badge badge-green" id="bMaxP">Max Profit: —</span>
+                <span class="badge badge-red"   id="bMaxL">Max Loss: —</span>
+                <span class="badge badge-muted"  id="bRR">R:R —</span>
+              </div>
             </div>
-          </div>
-          <div class="chart-body">
-            <div style="height:285px;position:relative"><canvas id="cPL"></canvas></div>
-          </div>
-          <div class="pl-legend">
-            <span class="pll"><span class="pll-line" style="background:rgba(59,130,246,.85)"></span>Call expiry</span>
-            <span class="pll"><span class="pll-dash"></span>Call today</span>
-            <span class="pll"><span class="pll-line" style="background:rgba(239,68,68,.85)"></span>Put expiry</span>
-            <span class="pll"><span class="pll-dash"></span>Put today</span>
+            <div class="chart-body">
+              <div style="height:285px;position:relative"><canvas id="cPL"></canvas></div>
+            </div>
+            <div class="pl-legend">
+              <span class="pll"><span class="pll-line" style="background:rgba(59,130,246,.85)"></span>Call expiry</span>
+              <span class="pll"><span class="pll-dash"></span>Call today</span>
+              <span class="pll"><span class="pll-line" style="background:rgba(239,68,68,.85)"></span>Put expiry</span>
+              <span class="pll"><span class="pll-dash"></span>Put today</span>
+            </div>
           </div>
         </div>
       </div>
@@ -967,72 +1160,97 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
     <!-- TAB: Chain -->
     <div class="tab-body" id="tab-chain">
       <div class="chain-sec">
+        <!-- Header -->
         <div class="chain-hdr">
-          <div>
-            <div style="font-size:.76rem;font-weight:600">BSM Option Chain — ±6 strikes around selected strike</div>
-            <div style="font-size:.6rem;color:var(--t3);margin-top:.1rem">All Greeks per unit per day. θ shown negative (decay).</div>
+          <div class="lc-meta">
+            <span style="font-size:.76rem;font-weight:600" id="lcTitle">Option Chain</span>
+            <span class="lc-badge bsm" id="lcModeBadge">BSM Mode</span>
+            <span class="lc-badge expiry" id="lcExpiryBadge" style="display:none"></span>
+<!-- lcLiveBadge removed — lcModeBadge already shows Live status -->
           </div>
-          <div style="display:flex;gap:.48rem;align-items:center">
+          <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+            <!-- Strike filter -->
+            <div class="lc-filter">
+              <span style="font-size:.56rem;color:var(--t3)">Strikes:</span>
+              <button class="lc-filter-btn" onclick="lcSetStrikes(5,this)">±5</button>
+              <button class="lc-filter-btn active" onclick="lcSetStrikes(10,this)">±10</button>
+              <button class="lc-filter-btn" onclick="lcSetStrikes(15,this)">±15</button>
+              <button class="lc-filter-btn" onclick="lcSetStrikes(0,this)">All</button>
+            </div>
             <span class="badge badge-blue" id="bATM">ATM: ₹—</span>
-            <button class="btn btn-ghost" style="font-size:.62rem;padding:.26rem .52rem" onclick="calculate()">Refresh</button>
+            <button class="btn btn-ghost" style="font-size:.62rem;padding:.26rem .52rem" id="lcRefreshBtn" onclick="lcRefresh()">↺ Refresh</button>
           </div>
         </div>
-        <div class="chain-wrap">
-          <table>
-            <thead><tr>
-              <th>Strike</th>
-              <th class="ccall">CE ₹</th>
-              <th class="cth">θ Call</th>
-              <th class="cde">Δ Call</th>
-              <th class="cga">Γ</th>
-              <th class="cve">ν Vega</th>
-              <th class="cput">PE ₹</th>
-              <th class="cth">θ Put</th>
-              <th class="cde">Δ Put</th>
-              <th class="cyiv">IV%</th>
-              <th>C−P</th>
-              <th>Parity</th>
-            </tr></thead>
-            <tbody id="chainBody">
-              <tr><td colspan="12"><div class="empty-msg">Click <strong style="color:var(--blue)">Run BSM Calculator</strong> to generate chain</div></td></tr>
-            </tbody>
+
+        <!-- Table wrapper -->
+        <div class="chain-wrap" id="lcWrap">
+          <div class="chain-no-data" id="lcEmpty">
+            Load live data using <strong style="color:var(--green)">Load Live</strong> in the panel above,<br>
+            or click <strong style="color:var(--blue)">Price Options</strong> for theoretical values.
+          </div>
+          <table class="lc-table" id="lcTable" style="display:none">
+            <thead id="lcHead"></thead>
+            <tbody id="lcBody"></tbody>
           </table>
+        </div>
+
+        <!-- Summary bar -->
+        <div class="chain-summary" id="lcSummary" style="display:none">
+          <div class="cs-item"><div class="cs-lbl">Spot</div><div class="cs-val" id="csSpot">—</div></div>
+          <div class="cs-item"><div class="cs-lbl">ATM IV</div><div class="cs-val" id="csATMIV">—</div></div>
+          <div class="cs-item" title="Chain PCR = Total PE OI ÷ Total CE OI across all visible strikes"><div class="cs-lbl">Chain PCR</div><div class="cs-val" id="csPCR">—</div></div>
+          <div class="cs-item"><div class="cs-lbl">Max Pain</div><div class="cs-val" id="csMaxPain">—</div></div>
+          <div class="cs-item"><div class="cs-lbl">Total CE OI</div><div class="cs-val" id="csTotalCEOI">—</div></div>
+          <div class="cs-item"><div class="cs-lbl">Total PE OI</div><div class="cs-val" id="csTotalPEOI">—</div></div>
+          <div class="cs-item"><div class="cs-lbl">OI Signal</div><div class="cs-val" id="csOISignal">—</div></div>
+          <div class="cs-item"><div class="cs-lbl">Strikes</div><div class="cs-val" id="csStrikes">—</div></div>
+          <div class="cs-item"><div class="cs-lbl">Updated</div><div class="cs-val" id="csUpdated">—</div></div>
         </div>
       </div>
     </div>
 
     <!-- TAB: Scenarios -->
-    <div class="tab-body" id="tab-scenarios">
-      <div class="sc-sec">
-        <div class="sc-hdr">
-          <div>
-            <div style="font-size:.76rem;font-weight:600">Scenario Analysis</div>
-            <div style="font-size:.6rem;color:var(--t3);margin-top:.1rem">P&amp;L impact on total position (lots × lot size). Base = BSM price at current inputs.</div>
+    <!-- TAB: Analysis (merged Scenarios + Sensitivity) -->
+    <div class="tab-body" id="tab-analysis">
+      <!-- Sub-toggle -->
+      <div style="display:flex;gap:.3rem;padding:.5rem 1rem .2rem;border-bottom:1px solid var(--bd)">
+        <button class="pl-sub active" id="anSubScenarios"   onclick="anSub('scenarios',this)">🎯 Scenarios</button>
+        <button class="pl-sub"        id="anSubSensitivity" onclick="anSub('sensitivity',this)">🌡 Sensitivity</button>
+      </div>
+
+      <!-- Scenarios view -->
+      <div id="anViewScenarios">
+        <div class="sc-sec">
+          <div class="sc-hdr">
+            <div>
+              <div style="font-size:.76rem;font-weight:600">Scenario Analysis</div>
+              <div style="font-size:.6rem;color:var(--t3);margin-top:.1rem">P&amp;L impact on total position. Base = BSM price at current inputs.</div>
+            </div>
+            <span class="badge badge-muted" id="bScBase">Base: —</span>
           </div>
-          <span class="badge badge-muted" id="bScBase">Base: —</span>
-        </div>
-        <div class="sc-grid" id="scGrid">
-          <div class="sc-card"><div class="sc-lbl">No data</div><div class="sc-val cne">Run calculator</div></div>
+          <div class="sc-grid" id="scGrid">
+            <div class="sc-card"><div class="sc-lbl">No data</div><div class="sc-val cne">Run calculator</div></div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- TAB: Sensitivity -->
-    <div class="tab-body" id="tab-sensitivity">
-      <div class="sens-sec">
-        <div class="sens-card">
-          <div class="sens-head">
-            IV Sensitivity — CE &amp; PE at different σ
-            <span class="badge badge-muted" id="bCurrIV">—</span>
+      <!-- Sensitivity view -->
+      <div id="anViewSensitivity" style="display:none">
+        <div class="sens-sec">
+          <div class="sens-card">
+            <div class="sens-head">
+              IV Sensitivity — CE &amp; PE at different σ
+              <span class="badge badge-muted" id="bCurrIV">—</span>
+            </div>
+            <div id="ivSensBody"><div class="empty-msg">Run calculator first</div></div>
           </div>
-          <div id="ivSensBody"><div class="empty-msg">Run calculator first</div></div>
-        </div>
-        <div class="sens-card">
-          <div class="sens-head">
-            DTE Sensitivity — CE &amp; PE at different T
-            <span class="badge badge-muted" id="bCurrDTE">—</span>
+          <div class="sens-card">
+            <div class="sens-head">
+              DTE Sensitivity — CE &amp; PE at different T
+              <span class="badge badge-muted" id="bCurrDTE">—</span>
+            </div>
+            <div id="dteSensBody"><div class="empty-msg">Run calculator first</div></div>
           </div>
-          <div id="dteSensBody"><div class="empty-msg">Run calculator first</div></div>
         </div>
       </div>
     </div>
@@ -1315,6 +1533,7 @@ const Q = 0.0;     // dividend yield (fixed)
 const A = {               // Application state
   type      : 'call',     // 'call' | 'put' | 'both'
   step      : 50,         // current underlying strike interval
+    scrip     : 13,         // Dhan scrip ID for live data
   premManual: false,      // true = trader has locked premium manually
   sdOpen    : false,      // strike dropdown open flag
   lastBSM   : null,       // last full BSM result object
@@ -1388,13 +1607,23 @@ let _writing = false;  // guard: prevents programmatic .value write from trigger
 function syncPrem(res) {
   if (A.premManual) return;  // trader has locked a custom price — respect it
 
-  const price = A.type === 'call' ? res.call
-              : A.type === 'put'  ? res.put
-              : res.call + res.put;   // Both = total straddle cost
+  /* Use live LTP if available for this strike, else BSM */
+  const K       = gv('iStrike');
+  const liveLeg = _liveMap[K];
+  let price;
+  if (liveLeg) {
+    price = A.type === 'call' ? (liveLeg.ce_ltp ?? res.call)
+          : A.type === 'put'  ? (liveLeg.pe_ltp ?? res.put)
+          : ((liveLeg.ce_ltp ?? res.call) + (liveLeg.pe_ltp ?? res.put));
+  } else {
+    price = A.type === 'call' ? res.call
+          : A.type === 'put'  ? res.put
+          : res.call + res.put;
+  }
 
-  _writing = true;                    // arm the guard
+  _writing = true;
   el('iPrem').value = price.toFixed(2);
-  _writing = false;                   // disarm
+  _writing = false;
 
   /* Visual feedback */
   el('autoBadge').classList.add('on');
@@ -1447,13 +1676,63 @@ function calculate() {
   st('fpNd2', f2(res.Nd2, 4));
   st('fpnd1', f2(res.nd1, 4));
 
-  /* ── Price header ── */
-  st('oCallPx',   '₹' + res.call.toFixed(2));
-  st('oPutPx',    '₹' + res.put.toFixed(2));
+  /* ── Price header — use live LTP if available, else BSM ── */
+  const K_now   = i.K;
+  const liveLeg = _liveMap[K_now];
+  const ceLTP   = liveLeg?.ce_ltp ?? null;
+  const peLTP   = liveLeg?.pe_ltp ?? null;
+
+  /* Main displayed premium = live LTP (if available) else BSM */
+  const dispCall = ceLTP !== null ? ceLTP : res.call;
+  const dispPut  = peLTP !== null ? peLTP : res.put;
+
+  st('oCallPx', '₹' + dispCall.toFixed(2));
+  st('oPutPx',  '₹' + dispPut.toFixed(2));
   st('oCallIntr', '₹' + callIntr.toFixed(2));
-  st('oCallExtr', '₹' + Math.max(0, res.call - callIntr).toFixed(2));
+  st('oCallExtr', '₹' + Math.max(0, dispCall - callIntr).toFixed(2));
   st('oPutIntr',  '₹' + putIntr.toFixed(2));
-  st('oPutExtr',  '₹' + Math.max(0, res.put  - putIntr).toFixed(2));
+  st('oPutExtr',  '₹' + Math.max(0, dispPut  - putIntr).toFixed(2));
+
+  /* Show live LTP badge + BSM fair value when live data is present */
+  if (ceLTP !== null) {
+    const cSpread = ceLTP - res.call;
+    const cwrap = el('oCallLTPWrap'), cfw = el('oCallFairWrap');
+    if (cwrap) cwrap.style.display = 'inline';
+    if (cfw)   cfw.style.display   = 'inline';
+    st('oCallLTP',  'LTP ₹' + ceLTP.toFixed(2));
+    st('oCallFair', '₹' + res.call.toFixed(2));
+    const csp = el('oCallSpread');
+    if (csp) {
+      csp.textContent = (cSpread >= 0 ? '+' : '') + cSpread.toFixed(2);
+      csp.className = 'ph-spread ' + (cSpread > 0.5 ? 'over' : cSpread < -0.5 ? 'under' : '');
+    }
+    /* Fair Value Gap badge */
+    renderFVGBadge('oCallFVG', cSpread, ceLTP);
+  } else {
+    const cw = el('oCallLTPWrap'); if (cw) cw.style.display = 'none';
+    const cf = el('oCallFairWrap'); if (cf) cf.style.display = 'none';
+    const cfvg = el('oCallFVG'); if (cfvg) cfvg.style.display = 'none';
+  }
+
+  if (peLTP !== null) {
+    const pSpread = peLTP - res.put;
+    const pwrap = el('oPutLTPWrap'), pfw = el('oPutFairWrap');
+    if (pwrap) pwrap.style.display = 'inline';
+    if (pfw)   pfw.style.display   = 'inline';
+    st('oPutLTP',  'LTP ₹' + peLTP.toFixed(2));
+    st('oPutFair', '₹' + res.put.toFixed(2));
+    const psp = el('oPutSpread');
+    if (psp) {
+      psp.textContent = (pSpread >= 0 ? '+' : '') + pSpread.toFixed(2);
+      psp.className = 'ph-spread ' + (pSpread > 0.5 ? 'over' : pSpread < -0.5 ? 'under' : '');
+    }
+    /* Fair Value Gap badge */
+    renderFVGBadge('oPutFVG', pSpread, peLTP);
+  } else {
+    const pw = el('oPutLTPWrap'); if (pw) pw.style.display = 'none';
+    const pf = el('oPutFairWrap'); if (pf) pf.style.display = 'none';
+    const pfvg = el('oPutFVG'); if (pfvg) pfvg.style.display = 'none';
+  }
 
   /* Breakeven = Strike ± paid (what was actually paid, now correctly synced) */
   st('oCallBE',   '₹' + (i.K + paid).toFixed(2));
@@ -1534,7 +1813,14 @@ function calculate() {
   buildChain(i);
   buildScenarios(i, res);
   buildSensitivity(i);
-  buildIVRank(i);
+  const _ivrResult = buildIVRank(i);
+  /* IV Insight: all data already in scope here — rank, gaps, LTPs */
+  if (ceLTP !== null || peLTP !== null) {
+    const _ceGap = ceLTP !== null ? ceLTP - res.call : 0;
+    const _peGap = peLTP !== null ? peLTP - res.put  : 0;
+    const _rank  = _ivrResult ? _ivrResult.rank : null;
+    buildIVInsight(_rank, _ceGap, _peGap, ceLTP ?? 0, peLTP ?? 0);
+  }
   buildCompare(i);
 
   /* ── Probability & Risk metrics ── */
@@ -1597,7 +1883,7 @@ function calculate() {
     if (pv > maxPQ) maxPQ = pv; if (pv < minPQ) minPQ = pv;
   }
   const lossA = Math.abs(minPQ);
-  const rrMet = lossA > 0 ? (maxPQ > 1e9 ? '∞:1' : (maxPQ / lossA).toFixed(2) + ':1') : '∞:0';
+  const rrMet = lossA > 0 ? (maxPQ > 1e9 ? 'Unlim:1' : (maxPQ / lossA).toFixed(2) + ':1') : 'Unlim:0';
   st('mRR', rrMet);
 }
 
@@ -1694,7 +1980,7 @@ function drawPL(i, res, paid) {
 
   st('bMaxP', 'Max Profit: ' + (maxP > 1e9 ? '∞' : fRs(maxP, 0)));
   st('bMaxL', 'Max Loss: '   + fRs(Math.abs(minP), 0));
-  const rrV = Math.abs(minP) > 0 ? (maxP > 1e9 ? '∞:1' : (maxP / Math.abs(minP)).toFixed(2) + ':1') : '∞:0';
+  const rrV = Math.abs(minP) > 0 ? (maxP > 1e9 ? 'Unlim:1' : (maxP / Math.abs(minP)).toFixed(2) + ':1') : 'Unlim:0';
   st('bRR', 'R:R ' + rrV);
 
   const seg = { borderColor: c => c.p0.parsed.y >= 0 ? 'rgba(34,197,94,.85)' : 'rgba(239,68,68,.78)' };
@@ -1748,43 +2034,304 @@ function mkOpts(reverseX) {
    exchanges and Bloomberg quote them. θ shown negative (erosion).
    Parity check: |C − P − (S·e^(−qT) − K·e^(−rT))| < 0.50 = valid.
 ─────────────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════
+   §LC  LIVE OPTION CHAIN ENGINE
+   Priority: Live Dhan data → fallback BSM if no live data
+   ═══════════════════════════════════════════════════════════════════ */
+
+let _lcChain    = null;   // current rendered chain rows
+let _lcNStrikes = 10;     // default ±10 around ATM; 0 = all active
+let _lcIsLive   = false;  // true when showing real Dhan data
+let _maxOI      = 1;      // for OI bar scaling
+
+/* called from calculate() — route to live or BSM */
 function buildChain(i) {
-  const atm  = Math.round(i.K / A.step) * A.step;
-  const body = el('chainBody');
-  body.innerHTML = '';
+  if (_liveChain && _liveChain.chain && _liveChain.chain.length) {
+    lcBuildLive(_liveChain, i);
+  } else {
+    lcBuildBSM(i);
+  }
+}
 
-  for (let n = -6; n <= 6; n++) {
-    const K  = atm + n * A.step;
-    const r2 = bsm(i.S, K, i.T, i.r, i.sigma, i.q);
-    if (!r2) continue;
+/* ── Refresh button ─────────────────────────────────────────────── */
+async function lcRefresh() {
+  if (_liveChain) {
+    /* Re-fetch from backend */
+    await loadLiveChain();
+  } else {
+    calculate();
+  }
+}
 
-    const isATM  = Math.abs(K - atm) < A.step * 0.5;
-    const useSkew = A.skewMode === 'skew';
-    const ivP = gv('iIVPut') || i.iv, ivC = gv('iIVCall') || i.iv;
-    const iv2 = getSkewIV(K, i.S, i.iv, ivP, ivC, useSkew);
-    const r2s = iv2 !== i.iv ? bsm(i.S, K, i.T, i.r, iv2/100, i.q) : r2;
-    const ts  = tScale();
-    const fwd    = i.S * Math.exp(-i.q * i.T) - K * Math.exp(-i.r * i.T);
-    const parity = Math.abs((r2s.call - r2s.put) - fwd);
+/* ── Strike filter ──────────────────────────────────────────────── */
+function lcSetStrikes(n, btn) {
+  document.querySelectorAll('.lc-filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  _lcNStrikes = n;
+  if (_liveChain && _liveChain.chain) {
+    lcBuildLive(_liveChain, A.lastBSM);
+  } else {
+    buildChain(A.lastBSM || {S: gv('iSpot'), K: gv('iStrike'), T: gv('iDTE')/365,
+      r: R, sigma: gv('iIV')/100, q: Q, iv: gv('iIV'), dte: gv('iDTE'),
+      lot: gv('iLotSz'), lots: gv('iLots')});
+  }
+}
 
-    const tr     = document.createElement('tr');
-    if (isATM) tr.className = 'atmrow';
+/* ── Format helpers ─────────────────────────────────────────────── */
+function lcFmtOI(n) {
+  if (!n) return '—';            // handles null, undefined, 0 all → '—'
+  if (n >= 1e7) return (n/1e7).toFixed(2) + 'Cr';
+  if (n >= 1e5) return (n/1e5).toFixed(2) + 'L';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+  return n.toLocaleString('en-IN');
+}
+function lcFmtVol(n) {
+  if (!n) return '—';            // handles null, undefined, 0
+  if (n >= 1e7) return (n/1e7).toFixed(1) + 'Cr';
+  if (n >= 1e5) return (n/1e5).toFixed(1) + 'L';
+  if (n >= 1e3) return (n/1e3).toFixed(0) + 'K';
+  return n.toLocaleString('en-IN');
+}
+function lcOIBar(oi, max, cls) {
+  const pct = Math.min(52, Math.round((oi / max) * 52));
+  return `<div class="oi-bar ${cls}" style="width:${pct}px"></div>`;
+}
+function lcOIChg(cur, prev) {
+  if (!cur || !prev) return '';
+  const d = cur - prev;
+  if (Math.abs(d) < 100) return '';
+  const cls = d > 0 ? 'up' : 'dn';
+  const lbl = d > 0 ? '+' + lcFmtOI(d) : lcFmtOI(d);
+  return `<span class="oi-chg ${cls}">${lbl}</span>`;
+}
+
+/* ══ LIVE CHAIN BUILDER ════════════════════════════════════════════ */
+function lcBuildLive(data, bsmInputs) {
+  _lcIsLive = true;
+  const chain  = data.chain;
+  const spot   = data.spot;
+  const expiry = data.expiry;
+  const dte    = data.dte;
+
+  /* Filter strikes if requested */
+  let rows = chain;
+  if (_lcNStrikes > 0) {
+    const atmI = chain.reduce((bi, r, i) =>
+      Math.abs(r.strike - spot) < Math.abs(chain[bi].strike - spot) ? i : bi, 0);
+    rows = chain.slice(Math.max(0, atmI - _lcNStrikes), atmI + _lcNStrikes + 1);
+  }
+
+  /* Compute max OI for bar scaling */
+  _maxOI = rows.reduce((m, r) => Math.max(m, r.ce?.oi||0, r.pe?.oi||0), 1);
+
+  /* Totals for summary */
+  const totCEOI  = rows.reduce((s, r) => s + (r.ce?.oi||0), 0);
+  const totPEOI  = rows.reduce((s, r) => s + (r.pe?.oi||0), 0);
+  const pcr      = totCEOI > 0 ? totPEOI / totCEOI : 0;
+
+  /* Max pain */
+  let mpK = rows[0]?.strike, mpMin = Infinity;
+  rows.forEach(candidate => {
+    const pain = rows.reduce((sum, r) => {
+      return sum
+        + (r.ce?.oi||0) * Math.max(0, candidate.strike - r.strike)
+        + (r.pe?.oi||0) * Math.max(0, r.strike - candidate.strike);
+    }, 0);
+    if (pain < mpMin) { mpMin = pain; mpK = candidate.strike; }
+  });
+
+  /* ATM row */
+  const atmRow = rows.reduce((best, r) =>
+    Math.abs(r.strike - spot) < Math.abs(best.strike - spot) ? r : best, rows[0]);
+  const atmK  = atmRow?.strike;
+  const atmIV = atmRow?.ce?.iv ?? atmRow?.pe?.iv ?? 0;
+
+  /* Update badges */
+  el('lcModeBadge').textContent = '● Live';
+  el('lcModeBadge').className   = 'lc-badge live';
+  el('lcTitle').textContent     = `${data.name} Option Chain`;
+  const eb = el('lcExpiryBadge');
+  eb.textContent = expiry + ' · ' + dte + 'd';
+  eb.style.display = 'inline-block';
+
+  /* Build thead */
+  el('lcHead').innerHTML = `<tr>
+    <th class="lc-ce" style="text-align:right;min-width:54px">OI</th>
+    <th class="lc-ce" style="text-align:right;min-width:50px">Volume</th>
+    <th class="lc-ce" style="text-align:right">IV%</th>
+    <th class="lc-ce" style="text-align:right">Δ</th>
+    <th class="lc-ce" style="text-align:right">θ/day</th>
+    <th class="lc-ce" style="text-align:right;min-width:58px">LTP ▲</th>
+    <th class="lc-strike-hdr">Strike</th>
+    <th class="lc-pcr-hdr" title="Put-Call Ratio = PE OI ÷ CE OI per strike">PCR</th>
+    <th class="lc-pe lc-sep" style="text-align:left;min-width:58px">LTP ▼</th>
+    <th class="lc-pe" style="text-align:left">θ/day</th>
+    <th class="lc-pe" style="text-align:left">Δ</th>
+    <th class="lc-pe" style="text-align:left">IV%</th>
+    <th class="lc-pe" style="text-align:left;min-width:50px">Volume</th>
+    <th class="lc-pe" style="text-align:left;min-width:54px">OI</th>
+  </tr>`;
+
+  /* Build tbody */
+  const tbody = el('lcBody');
+  tbody.innerHTML = '';
+
+  rows.forEach(row => {
+    const K    = row.strike;
+    const ce   = row.ce;
+    const pe   = row.pe;
+
+    /* Skip dead strikes: no LTP on either leg = no current market activity */
+    const ceLive = ce?.ltp > 0;
+    const peLive = pe?.ltp > 0;
+    if (!ceLive && !peLive) return;
+    /* In "All" mode also skip strikes > 15% from spot (deep OTM, no trader interest) */
+    if (_lcNStrikes === 0 && Math.abs(K - spot) / spot > 0.15) return;
+
+    const isATM = K === atmK;
+    const isITMce = K < spot;   // call is ITM when strike < spot
+    const isITMpe = K > spot;   // put is ITM when strike > spot
+
+    const tr = document.createElement('tr');
+    tr.className = isATM ? 'lc-atm' : (isITMce ? 'lc-itm-ce' : 'lc-itm-pe');
+
+    /* CE cells */
+    /* OI intensity: scale opacity by how large OI is vs max */
+    const ceOIPct = ce?.oi ? Math.min(1, ce.oi / _maxOI) : 0;
+    const peOIPct = pe?.oi ? Math.min(1, pe.oi / _maxOI) : 0;
+    const ceOIStyle = ceOIPct > 0.5 ? 'font-weight:700;color:var(--blue)' : 'color:var(--blue)';
+    const peOIStyle = peOIPct > 0.5 ? 'font-weight:700;color:var(--red)'  : 'color:var(--red)';
 
     tr.innerHTML = `
-      <td><span class="sklbl">${K.toLocaleString('en-IN')}</span>${isATM ? '<span class="atm-pill">ATM</span>' : ''}</td>
-      <td class="ccall">${r2s.call.toFixed(2)}</td>
-      <td class="cth">${(r2s.theta_c * ts).toFixed(2)}</td>
-      <td class="cde">${r2s.delta_c.toFixed(2)}</td>
-      <td class="cga">${r2s.gamma.toFixed(3)}</td>
-      <td class="cve">${r2s.vega.toFixed(2)}</td>
-      <td class="cput">${r2s.put.toFixed(2)}</td>
-      <td class="cth">${(r2s.theta_p * ts).toFixed(2)}</td>
-      <td class="cde">${r2s.delta_p.toFixed(2)}</td>
-      <td class="cyiv">${iv2.toFixed(1)}%</td>
-      <td>${(r2s.call - r2s.put).toFixed(2)}</td>
-      <td class="${parity < 0.5 ? 'cok' : 'cerr'}">${parity < 0.5 ? '✓' : '±' + parity.toFixed(2)}</td>`;
-    body.appendChild(tr);
+      <td class="lc-ce-zone" style="${ceOIStyle}">
+        ${lcFmtOI(ce?.oi)}
+        ${ce?.oi ? `<div class="oi-bar ce" style="width:${Math.round(ceOIPct*40)}px;margin-top:2px;margin-left:auto"></div>` : ''}
+      </td>
+      <td class="lc-ce-zone">${lcFmtVol(ce?.volume)}</td>
+      <td class="lc-ce-zone" style="color:var(--yellow)">${ce?.iv ? ce.iv.toFixed(2)+'%' : '—'}</td>
+      <td class="lc-ce-zone" style="color:var(--blue)">${ce?.delta ? ce.delta.toFixed(3) : '—'}</td>
+      <td class="lc-ce-zone" style="color:var(--orange)">${ce?.theta ? ce.theta.toFixed(2) : '—'}</td>
+      <td class="lc-ce-zone ltp-ce${isATM?' ltp-atm':''}">${ce?.ltp ? ce.ltp.toFixed(2) : '—'}</td>
+
+      <td class="lc-strike-col">
+        ${K.toLocaleString('en-IN')}${isATM ? '<br><span class="atm-pill">ATM</span>' : ''}
+        ${K === mpK ? '<br><span class="atm-pill" style="background:rgba(234,179,8,.15);color:var(--yellow);border-color:rgba(234,179,8,.4)">MAX PAIN</span>' : ''}
+      </td>
+
+      <td class="lc-pcr-col">${(() => {
+        const spPCR = (ce?.oi && pe?.oi) ? pe.oi / ce.oi : null;
+        if (!spPCR) return '<span style="color:var(--fg3)">—</span>';
+        const cls = spPCR > 1.2 ? 'color:var(--green);font-weight:700' : spPCR < 0.8 ? 'color:var(--red);font-weight:700' : 'color:var(--yellow)';
+        return '<span style="' + cls + '">' + spPCR.toFixed(2) + '</span>';
+      })()}</td>
+
+      <td class="lc-pe-zone lc-sep ltp-pe${isATM?' ltp-atm':''}">${pe?.ltp ? pe.ltp.toFixed(2) : '—'}</td>
+      <td class="lc-pe-zone" style="color:var(--orange)">${pe?.theta ? pe.theta.toFixed(2) : '—'}</td>
+      <td class="lc-pe-zone" style="color:var(--blue)">${pe?.delta ? pe.delta.toFixed(3) : '—'}</td>
+      <td class="lc-pe-zone" style="color:var(--yellow)">${pe?.iv ? pe.iv.toFixed(2)+'%' : '—'}</td>
+      <td class="lc-pe-zone">${lcFmtVol(pe?.volume)}</td>
+      <td class="lc-pe-zone" style="${peOIStyle}">
+        ${lcFmtOI(pe?.oi)}
+        ${pe?.oi ? `<div class="oi-bar pe" style="width:${Math.round(peOIPct*40)}px;margin-top:2px"></div>` : ''}
+      </td>`;
+
+    tbody.appendChild(tr);
+  });
+
+  /* Show table, hide empty */
+  el('lcTable').style.display = 'table';
+  el('lcEmpty').style.display = 'none';
+
+  /* Auto-scroll ATM row into the centre of the viewport */
+  setTimeout(() => {
+    const atmTr = el('lcBody').querySelector('tr.lc-atm');
+    if (atmTr) atmTr.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, 60);
+
+  /* Summary bar */
+  const pcrCls = pcr > 1.3 ? 'bull' : pcr < 0.7 ? 'bear' : 'neu';
+  const oiSig  = pcr > 1.3 ? '🟢 Bullish' : pcr < 0.7 ? '🔴 Bearish' : '🟡 Neutral';
+  el('csSpot').textContent    = '₹' + spot.toLocaleString('en-IN', {maximumFractionDigits:2});
+  el('csATMIV').textContent   = atmIV.toFixed(2) + '%';
+  el('csPCR').textContent     = pcr.toFixed(2);
+  el('csPCR').className       = 'cs-val ' + pcrCls;
+  el('csMaxPain').textContent = '₹' + mpK.toLocaleString('en-IN');
+  el('csTotalCEOI').textContent = lcFmtOI(totCEOI);
+  el('csTotalPEOI').textContent = lcFmtOI(totPEOI);
+  el('csOISignal').textContent  = oiSig;
+  el('csOISignal').className    = 'cs-val ' + pcrCls;
+  const rendered = el('lcBody').querySelectorAll('tr').length;
+  el('csStrikes').textContent   = rendered + ' active strikes';
+  el('csUpdated').textContent   = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  el('lcSummary').style.display = 'flex';
+}
+
+/* ══ BSM FALLBACK CHAIN (when no live data) ════════════════════════ */
+function lcBuildBSM(i) {
+  _lcIsLive = false;
+  const atm  = Math.round((i.S || gv('iSpot')) / A.step) * A.step;
+  const S    = i.S || gv('iSpot');
+  const T    = i.T || gv('iDTE')/365;
+  const sig  = i.sigma || gv('iIV')/100;
+  const ts   = tScale();
+
+  el('lcModeBadge').textContent = 'BSM';
+  el('lcModeBadge').className   = 'lc-badge bsm';
+  el('lcTitle').textContent     = 'Option Chain — BSM Theoretical';
+  el('lcExpiryBadge').style.display = 'none';
+
+  /* BSM uses simple 13-col layout */
+  el('lcHead').innerHTML = `<tr>
+    <th>Strike</th>
+    <th class="lc-ce">CE ₹</th>
+    <th class="lc-ce">θ Call</th>
+    <th class="lc-ce">Δ Call</th>
+    <th class="lc-ce">Γ</th>
+    <th class="lc-ce">Vega</th>
+    <th class="lc-pe">PE ₹</th>
+    <th class="lc-pe">θ Put</th>
+    <th class="lc-pe">Δ Put</th>
+    <th style="color:var(--yellow)">IV%</th>
+    <th>C−P</th>
+    <th>Parity</th>
+  </tr>`;
+
+  const tbody = el('lcBody');
+  tbody.innerHTML = '';
+
+  const nRange = _lcNStrikes > 0 ? _lcNStrikes : 8;
+  for (let n = -nRange; n <= nRange; n++) {
+    const K   = atm + n * A.step;
+    const r2  = bsm(S, K, T, R, sig, Q);
+    if (!r2) continue;
+    const isATM = K === atm;
+    const useSkew = A.skewMode === 'skew';
+    const ivP = gv('iIVPut') || i.iv, ivC = gv('iIVCall') || i.iv;
+    const iv2 = getSkewIV(K, S, i.iv || gv('iIV'), ivP, ivC, useSkew);
+    const r2s = iv2 !== (i.iv||gv('iIV')) ? bsm(S, K, T, R, iv2/100, Q) : r2;
+    const fwd    = S * Math.exp(-Q * T) - K * Math.exp(-R * T);
+    const parity = Math.abs((r2s.call - r2s.put) - fwd);
+    const tr = document.createElement('tr');
+    if (isATM) tr.className = 'lc-atm';
+    tr.innerHTML = `
+      <td class="lc-strike-col">${K.toLocaleString('en-IN')}${isATM?'<br><span class="atm-pill">ATM</span>':''}</td>
+      <td class="lc-ce" style="font-weight:600">${r2s.call.toFixed(2)}</td>
+      <td style="color:var(--orange)">${(r2s.theta_c*ts).toFixed(2)}</td>
+      <td style="color:var(--blue)">${r2s.delta_c.toFixed(3)}</td>
+      <td style="color:var(--purple)">${r2s.gamma.toFixed(4)}</td>
+      <td style="color:var(--cyan)">${r2s.vega.toFixed(2)}</td>
+      <td class="lc-pe" style="font-weight:600">${r2s.put.toFixed(2)}</td>
+      <td style="color:var(--orange)">${(r2s.theta_p*ts).toFixed(2)}</td>
+      <td style="color:var(--blue)">${r2s.delta_p.toFixed(3)}</td>
+      <td style="color:var(--yellow)">${iv2.toFixed(1)}%</td>
+      <td>${(r2s.call-r2s.put).toFixed(2)}</td>
+      <td class="${parity<0.5?'cok':'cerr'}">${parity<0.5?'✓':'±'+parity.toFixed(2)}</td>`;
+    tbody.appendChild(tr);
   }
+
+  el('lcTable').style.display = 'table';
+  el('lcEmpty').style.display = 'none';
+  el('lcSummary').style.display = 'none';
 }
 
 /* ── SECTION 11: Scenario Analysis ──────────────────────────────────
@@ -1854,9 +2401,13 @@ function buildSensitivity(i) {
     const isCurr = off === 0;
     const row    = document.createElement('div');
     row.className = 'sens-row' + (isCurr ? ' curr' : '');
+    /* For current row, show live LTP if available */
+    const lv = isCurr ? _liveMap[i.K] : null;
+    const ceVal = (lv?.ce_ltp) ? lv.ce_ltp.toFixed(2) + '<span style="font-size:.52rem;color:var(--green);margin-left:.15rem">⬤</span>' : r2.call.toFixed(2);
+    const peVal = (lv?.pe_ltp) ? lv.pe_ltp.toFixed(2) + '<span style="font-size:.52rem;color:var(--green);margin-left:.15rem">⬤</span>' : r2.put.toFixed(2);
     row.innerHTML = `<span class="skey" style="${isCurr?'color:var(--blue);font-weight:600;':''}">σ = ${iv2.toFixed(1)}% ${off !== 0 ? '('+( off > 0 ? '+':'')+off+'%)' : '← current'}</span>
-      <span class="sce">CE ₹${r2.call.toFixed(2)}</span>
-      <span class="spe">PE ₹${r2.put.toFixed(2)}</span>`;
+      <span class="sce">CE ₹${ceVal}</span>
+      <span class="spe">PE ₹${peVal}</span>`;
     ivBody.appendChild(row);
   });
 
@@ -1872,9 +2423,12 @@ function buildSensitivity(i) {
     const isCurr = off === 0;
     const row    = document.createElement('div');
     row.className = 'sens-row' + (isCurr ? ' curr' : '');
+    const lv2 = isCurr ? _liveMap[i.K] : null;
+    const ceV2 = (lv2?.ce_ltp) ? lv2.ce_ltp.toFixed(2) + '<span style="font-size:.52rem;color:var(--green);margin-left:.15rem">⬤</span>' : r2.call.toFixed(2);
+    const peV2 = (lv2?.pe_ltp) ? lv2.pe_ltp.toFixed(2) + '<span style="font-size:.52rem;color:var(--green);margin-left:.15rem">⬤</span>' : r2.put.toFixed(2);
     row.innerHTML = `<span class="skey" style="${isCurr?'color:var(--blue);font-weight:600;':''}">T = ${d2}d ${off !== 0 ? '('+(off > 0 ? '+':'')+off+'d)' : '← current'}</span>
-      <span class="sce">CE ₹${r2.call.toFixed(2)}</span>
-      <span class="spe">PE ₹${r2.put.toFixed(2)}</span>`;
+      <span class="sce">CE ₹${ceV2}</span>
+      <span class="spe">PE ₹${peV2}</span>`;
     dteBody.appendChild(row);
   });
 }
@@ -1916,13 +2470,20 @@ function buildSDRows() {
     row.className = 'sd-row' + (isATM ? ' atmr' : '') + (K === cur ? ' sel' : '');
     row.dataset.k = K;
     row.style.gridTemplateColumns = '1.6fr 1fr .82fr .82fr 1fr .82fr .64fr';
+    const liveK  = _liveMap[K];
+    const ceDisp = liveK?.ce_ltp != null
+      ? '<span style="color:var(--green);font-weight:700">' + liveK.ce_ltp.toFixed(2) + '</span><span style="color:var(--t4);font-size:.5rem"> f' + r2sd.call.toFixed(1) + '</span>'
+      : r2sd.call.toFixed(2);
+    const peDisp = liveK?.pe_ltp != null
+      ? '<span style="color:var(--green);font-weight:700">' + liveK.pe_ltp.toFixed(2) + '</span><span style="color:var(--t4);font-size:.5rem"> f' + r2sd.put.toFixed(1) + '</span>'
+      : r2sd.put.toFixed(2);
     row.innerHTML = `
       <div class="sdc"><span class="sdn">${K.toLocaleString('en-IN')}</span>${isATM ? '<span class="sdatm">ATM</span>' : ''}
         <span class="sd-badge ${mC}" style="margin-left:.22rem;font-size:.44rem">${mL}</span></div>
-      <div class="sdc sdce">${r2sd.call.toFixed(2)}</div>
+      <div class="sdc sdce">${ceDisp}</div>
       <div class="sdc sddc">${r2sd.delta_c.toFixed(2)}</div>
       <div class="sdc sdth">${(r2sd.theta_c * tsSD).toFixed(2)}</div>
-      <div class="sdc sdpe">${r2sd.put.toFixed(2)}</div>
+      <div class="sdc sdpe">${peDisp}</div>
       <div class="sdc sddp">${r2sd.delta_p.toFixed(2)}</div>
       <div class="sdc" style="color:var(--green);font-weight:600">${popSD}</div>`;
     row.addEventListener('click', () => pickStrike(K));
@@ -1952,7 +2513,13 @@ function syncSDTrigger(K, sp, res) {
   else                      { mL = 'OTM ' + pd.toFixed(1) + '%'; mC = 'otm'; }
   const b = el('sdBadge');
   b.textContent = mL; b.className = 'sd-badge ' + mC;
-  if (res) el('sdPreview').textContent = 'CE ₹' + res.call.toFixed(2) + '  ·  PE ₹' + res.put.toFixed(2) + '  ·  Δ ' + res.delta_c.toFixed(2);
+  if (res) {
+    const K_sd   = gv('iStrike');
+    const lv     = _liveMap[K_sd];
+    const ceShow = lv?.ce_ltp != null ? lv.ce_ltp.toFixed(2) + ' ⬤' : res.call.toFixed(2);
+    const peShow = lv?.pe_ltp != null ? lv.pe_ltp.toFixed(2) + ' ⬤' : res.put.toFixed(2);
+    el('sdPreview').textContent = 'CE ₹' + ceShow + '  ·  PE ₹' + peShow + '  ·  Δ ' + res.delta_c.toFixed(2);
+  }
 }
 
 function toggleSD(e) { e.stopPropagation(); A.sdOpen ? closeSD() : openSD(); }
@@ -1988,13 +2555,34 @@ function setType(t) {
   calculate();
 }
 
+
+/* ── Update strike dropdown to reflect live LTPs from chain ─────────── */
+function updateStrikeDropdownLTP(chain, spot, atmK) {
+  /* Store step from chain spacing */
+  if (chain.length >= 2) {
+    const inferredStep = chain[1].strike - chain[0].strike;
+    if (inferredStep > 0) A.step = inferredStep;
+  }
+  /* Update the displayed CE/PE prices next to selected strike */
+  const liveK = _liveMap[atmK];
+  if (!liveK) return;
+  const ceTxt = liveK.ce_ltp != null ? '₹' + liveK.ce_ltp.toFixed(2) : '—';
+  const peTxt = liveK.pe_ltp != null ? '₹' + liveK.pe_ltp.toFixed(2) : '—';
+  /* Update the small CE/PE labels under the strike selector */
+  const sdCE = document.querySelector('.sd-sub-ce');
+  const sdPE = document.querySelector('.sd-sub-pe');
+  if (sdCE) sdCE.textContent = 'CE ' + ceTxt;
+  if (sdPE) sdPE.textContent = 'PE ' + peTxt;
+}
 function selectUL(btn) {
   document.querySelectorAll('.ul-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  const spot = parseFloat(btn.dataset.spot);
-  const lot  = parseFloat(btn.dataset.lot);
-  const step = parseFloat(btn.dataset.step) || 50;
+  const spot  = parseFloat(btn.dataset.spot);
+  const lot   = parseFloat(btn.dataset.lot);
+  const step  = parseFloat(btn.dataset.step) || 50;
+  const scrip = parseInt(btn.dataset.scrip)  || 0;
   A.step       = step;
+  A.scrip      = scrip;
   A.premManual = false;
   if (spot > 0) {
     const newK = Math.round(spot / step) * step;
@@ -2004,35 +2592,40 @@ function selectUL(btn) {
     el('sdVal').textContent   = newK.toLocaleString('en-IN');
     el('sdBadge').textContent = 'ATM';
     el('sdBadge').className   = 'sd-badge atm';
-    /* Auto-compute futures for new underlying */
     const T = Math.max(1, gv('iDTE')) / 365;
     _writing = true;
     const futEl = document.getElementById('iFut');
     if (futEl) futEl.value = (spot * Math.exp(R * T)).toFixed(2);
     _writing = false;
     updateBasis();
-    /* Set per-underlying IV range defaults */
     if (btn.dataset.ivh) { _writing=true; el('iIVHigh').value = btn.dataset.ivh; _writing=false; }
     if (btn.dataset.ivl) { _writing=true; el('iIVLow').value  = btn.dataset.ivl; _writing=false; }
+    if (btn.dataset.iv)  { _writing=true; el('iIV').value     = btn.dataset.iv;  _writing=false; }
   }
+  /* Load expiries and auto-load chain for new underlying */
+  if (scrip > 0) switchAndLoad(scrip);
   onInput();
 }
 
 function applyPreset(name) {
   const sp   = gv('iSpot') || 25000;
   const atm  = Math.round(sp / A.step) * A.step;
+  /* Use the underlying's configured IV range for high/low presets */
+  const ivHigh = gv('iIVHigh') || 22;
+  const ivLow  = gv('iIVLow')  ||  9;
+  const ivMid  = parseFloat(((ivHigh + ivLow) / 2).toFixed(1));
   const map  = {
-    atm    : { K: atm,              iv: 14, dte: 21 },
-    otm5   : { K: atm + 5 * A.step, iv: 12, dte: 21 },
-    itm5   : { K: atm - 5 * A.step, iv: 17, dte: 21 },
-    weekly : { K: atm,              iv: 14, dte:  7 },
-    monthly: { K: atm,              iv: 14, dte: 30 },
-    highiv : { K: atm,              iv: 40, dte: 21 },
-    lowiv  : { K: atm,              iv:  8, dte: 21 },
+    atm    : { K: atm,               iv: ivMid,    dte: 21 },
+    otm5   : { K: atm + 5 * A.step,  iv: ivMid - 2, dte: 21 },
+    itm5   : { K: atm - 5 * A.step,  iv: ivMid + 3, dte: 21 },
+    weekly : { K: atm,               iv: ivMid,    dte:  7 },
+    monthly: { K: atm,               iv: ivMid,    dte: 30 },
+    highiv : { K: atm,               iv: Math.round(ivHigh * 0.9), dte: 21 },
+    lowiv  : { K: atm,               iv: Math.round(ivLow  * 1.2), dte: 21 },
   };
   const p = map[name]; if (!p) return;
   el('iStrike').value = p.K;
-  el('iIV').value     = p.iv;
+  el('iIV').value     = Math.max(1, p.iv);
   el('iDTE').value    = p.dte;
   A.premManual = false;
   onInput();
@@ -2047,9 +2640,27 @@ function switchTab(name, btn) {
   setTimeout(() => [cErosion, cTheta, cPL, cStrat].forEach(c => c && c.resize()), 50);
 }
 
+/* Sub-toggle for P&L tab (Erosion / P&L Profile) */
+function plSub(view, btn) {
+  document.querySelectorAll('#tab-pl .pl-sub').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  el('plViewErosion').style.display  = view === 'erosion'  ? '' : 'none';
+  el('plViewProfile').style.display  = view === 'profile'  ? '' : 'none';
+  /* Resize charts after show */
+  setTimeout(() => [cErosion, cTheta, cPL].forEach(c => c && c.resize()), 50);
+}
+
+/* Sub-toggle for Analysis tab (Scenarios / Sensitivity) */
+function anSub(view, btn) {
+  document.querySelectorAll('#tab-analysis .pl-sub').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  el('anViewScenarios').style.display   = view === 'scenarios'   ? '' : 'none';
+  el('anViewSensitivity').style.display = view === 'sensitivity' ? '' : 'none';
+}
+
 /* ── SECTION 15: Keyboard Shortcuts ─────────────────────────────────
    F5         = Calculate / Refresh
-   F1/F2/F3   = Switch to NIFTY / BANKNIFTY / FINNIFTY
+   F1–F4      = Switch NIFTY / BANKNIFTY / MIDCAP / SENSEX
    Alt+↑/↓    = Nudge spot price ±1 strike step
    Alt+→/←    = Nudge DTE +1/−1 day
    Escape     = Close strike dropdown
@@ -2058,7 +2669,8 @@ document.addEventListener('keydown', e => {
   if (e.key === 'F5')             { e.preventDefault(); calculate(); }
   if (e.key === 'F1')             { e.preventDefault(); document.querySelector('[data-ul="NIFTY 50"]').click(); }
   if (e.key === 'F2')             { e.preventDefault(); document.querySelector('[data-ul="BANKNIFTY"]').click(); }
-  if (e.key === 'F3')             { e.preventDefault(); document.querySelector('[data-ul="FINNIFTY"]').click(); }
+  if (e.key === 'F3')             { e.preventDefault(); document.querySelector('[data-ul="MIDCAP NIFTY"]').click(); }
+  if (e.key === 'F4')             { e.preventDefault(); document.querySelector('[data-ul="SENSEX"]').click(); }
   if (e.altKey && e.key === 'ArrowUp')    { e.preventDefault(); nudge('iSpot',  A.step); }
   if (e.altKey && e.key === 'ArrowDown')  { e.preventDefault(); nudge('iSpot', -A.step); }
   if (e.altKey && e.key === 'ArrowRight') { e.preventDefault(); nudge('iDTE',  1); }
@@ -2165,11 +2777,18 @@ const STRAT_DEFS = {
 /* §F  BUILD LEGS */
 function buildLegs(i) {
   const K = i.K, W = (gv('iWidth') || 5) * A.step;
-  const mk = K2 => {
+  const mk = (K2, forceType) => {
     const useSkew = A.skewMode === 'skew';
     const ivP = gv('iIVPut') || i.iv, ivC = gv('iIVCall') || i.iv;
     const iv2 = getSkewIV(K2, i.S, i.iv, ivP, ivC, useSkew);
-    return { res: bsm(i.S, K2, i.T, R, iv2/100, Q), iv: iv2, K: K2 };
+    const bsmRes = bsm(i.S, K2, i.T, R, iv2/100, Q);
+    /* Inject live LTP into BSM res when available — strategy shows real market cost */
+    const lv = _liveMap[K2];
+    if (lv) {
+      if (lv.ce_ltp != null) bsmRes.call = lv.ce_ltp;
+      if (lv.pe_ltp != null) bsmRes.put  = lv.pe_ltp;
+    }
+    return { res: bsmRes, iv: iv2, K: K2 };
   };
   switch (A.strategy) {
     case 'single': {
@@ -2233,6 +2852,50 @@ function computeBEs(legs, strategy, netPrem) {
     }
   }
   return [];
+}
+
+/* ── Analytical max profit / max loss per strategy ───────────────────
+   Replaces scan-based estimates which are inaccurate for:
+   - Long Put (scan ±20% misses spot→0 scenario)
+   - Straddle (scan resolution misses exact K)
+   - Iron Condor (scan float drift)
+────────────────────────────────────────────────────────────────────── */
+function analyticalMaxPL(stratKey, type, legs, absNet, qty) {
+  const leg = (d, t) => legs.find(l => l.dir === d && l.type === t);
+  switch(stratKey) {
+    case 'single': {
+      if (type === 'call') return { maxP: Infinity, minP: -absNet * qty };
+      if (type === 'put')  return { maxP: (legs[0].K - absNet) * qty, minP: -absNet * qty };
+      // both (synthetic straddle)
+      return { maxP: Infinity, minP: -absNet * qty };
+    }
+    case 'bull_cs': {
+      const lc = leg(1,'call'), sc = leg(-1,'call');
+      if (!lc || !sc) break;
+      return { maxP: (sc.K - lc.K - absNet) * qty, minP: -absNet * qty };
+    }
+    case 'bear_ps': {
+      const lp = leg(1,'put'), sp = leg(-1,'put');
+      if (!lp || !sp) break;
+      return { maxP: (lp.K - sp.K - absNet) * qty, minP: -absNet * qty };
+    }
+    case 'straddle':
+    case 'strangle':
+      return { maxP: Infinity, minP: -absNet * qty };
+    case 'iron_condor': {
+      const sc = leg(-1,'call'), lc = leg(1,'call');
+      const sp = leg(-1,'put'),  lp = leg(1,'put');
+      if (!sc || !lc || !sp || !lp) break;
+      const callWing = lc.K - sc.K;
+      const putWing  = sp.K - lp.K;
+      const wing     = Math.max(callWing, putWing);
+      return { maxP: absNet * qty, minP: -(wing - absNet) * qty };
+    }
+    // compare-tab strategy ids
+    case 'single_call': return { maxP: Infinity, minP: -absNet * qty };
+    case 'single_put':  return { maxP: (legs[0].K - absNet) * qty, minP: -absNet * qty };
+  }
+  return null;
 }
 
 /* Detect whether a strategy has unlimited profit or loss */
@@ -2332,12 +2995,12 @@ function drawStrategy(i, legs) {
       let moneyLabel = Math.abs(moneyPct) < 0.15 ? 'ATM'
         : moneyPct < 0 ? 'ITM ' + Math.abs(moneyPct).toFixed(1) + '%'
         : 'OTM +' + moneyPct.toFixed(1) + '%';
-      /* For puts: moneyness is inverted */
+      /* For puts: ITM when K > S (spot below strike), OTM when K < S */
       if (lg.type === 'put') {
-        const pd = (i.S - lg.K) / i.S * 100;
+        const pd = (lg.K - i.S) / i.S * 100;   // positive = put ITM (K>S)
         moneyLabel = Math.abs(pd) < 0.15 ? 'ATM'
-          : pd < 0 ? 'OTM +' + Math.abs(pd).toFixed(1) + '%'
-          : 'ITM ' + pd.toFixed(1) + '%';
+          : pd > 0 ? 'ITM '  + pd.toFixed(1) + '%'
+          : 'OTM +' + Math.abs(pd).toFixed(1) + '%';
       }
       const d = document.createElement('div');
       d.className = 'leg-card ' + (lg.dir > 0 ? 'long' : 'short');
@@ -2370,15 +3033,13 @@ function drawStrategy(i, legs) {
     if (v < minP) minP = v;
   }
 
-  /* Check if profit is truly unlimited (extend scan to ±40%) */
-  const { unlimitedProfit } = stratLimits(A.strategy, A.type);
-  const farUp = stratPayoff(i.S * 1.5, legs) * qty;
-  const farDn = stratPayoff(i.S * 0.6, legs) * qty;
-  const isUnlimitedProfit = unlimitedProfit || farUp > maxP * 1.5;
+  /* Override scan-based estimates with exact analytical formulas ── */
+  const ana = analyticalMaxPL(A.strategy, A.type, legs, absNet, qty);
+  if (ana) { maxP = ana.maxP; minP = ana.minP; }
+  const isUnlimitedProfit = !isFinite(maxP);
 
   const lossAbs = Math.abs(minP);
-  const rrNum = isUnlimitedProfit ? '∞' : maxP.toFixed(0);
-  const rr    = lossAbs > 0.01 ? (isUnlimitedProfit ? '∞:1' : (maxP / lossAbs).toFixed(2) + ':1') : '∞:0';
+  const rr = lossAbs > 0.01 ? (isUnlimitedProfit ? 'Unlim:1' : (maxP / lossAbs).toFixed(2) + ':1') : 'Unlim:0';
 
   /* ── Analytical breakevens ── */
   const BEs = computeBEs(legs, A.strategy, netPrem);
@@ -2396,7 +3057,7 @@ function drawStrategy(i, legs) {
       },
       {
         lb: 'Max Profit',
-        vl: isUnlimitedProfit ? 'Unlimited' : '₹' + maxP.toFixed(0),
+        vl: isUnlimitedProfit ? 'Unlimited' : '₹' + maxP.toLocaleString('en-IN', {maximumFractionDigits:0}),
         sb: isUnlimitedProfit ? 'uncapped upside' : 'total position',
         c:  'var(--green)'
       },
@@ -2434,7 +3095,9 @@ function drawStrategy(i, legs) {
 
   /* Add spot price vertical indicator as a spike dataset */
   const spotIdx  = Math.round((i.S - (i.S - rng)) / (rng * 2) * 200);
-  const spotLine = payoffs.map((_, idx) => idx === spotIdx ? maxP + Math.abs(minP) : null);
+  /* Chart spike height: use scan range for visual (not analytical maxP which may be huge) */
+  const chartTop = Math.max(...payoffs.filter(v=>isFinite(v)), 0) + Math.abs(Math.min(...payoffs.filter(v=>isFinite(v)), 0));
+  const spotLine = payoffs.map((_, idx) => idx === spotIdx ? chartTop * 1.05 : null);
   datasets.push({
     label: 'Current Spot ₹' + i.S.toLocaleString('en-IN'),
     data: spotLine, borderWidth: 1.5, pointRadius: 0, tension: 0,
@@ -2446,7 +3109,7 @@ function drawStrategy(i, legs) {
   BEs.forEach((be, bidx) => {
     const beIdx = Math.round((be - (i.S - rng)) / (rng * 2) * 200);
     if (beIdx < 0 || beIdx > 200) return;
-    const beLine = payoffs.map((_, idx) => idx === beIdx ? maxP + Math.abs(minP) : null);
+    const beLine = payoffs.map((_, idx) => idx === beIdx ? chartTop * 1.05 : null);
     datasets.push({
       label: 'BE ₹' + be.toFixed(0),
       data: beLine, borderWidth: 1.2, pointRadius: 0, tension: 0,
@@ -2537,9 +3200,111 @@ function setStrat(btn) {
    All standalone functions, zero interference with existing code.
 ══════════════════════════════════════════════════════════════════════ */
 
+/* ── Fair Value Gap Badge ────────────────────────────────────────────
+   gap = LTP − BSM Fair.
+   >2% of LTP  → Overpriced  (orange) — IV premium above fair
+   <-2% of LTP → Underpriced (green)  — potential buying opportunity
+   ±2%         → Fair Value  (grey)   — priced at model value
+─────────────────────────────────────────────────────────────────────*/
+function renderFVGBadge(id, gap, ltp) {
+  const el_ = el(id);
+  if (!el_) return;
+  const pct = ltp > 0 ? (gap / ltp) * 100 : 0;
+  let cls, icon, label;
+  if (pct > 2) {
+    cls = 'fvg-badge fvg-over';
+    icon = '▲';
+    label = 'Overpriced +₹' + Math.abs(gap).toFixed(2) + ' (' + pct.toFixed(1) + '%)';
+  } else if (pct < -2) {
+    cls = 'fvg-badge fvg-under';
+    icon = '▼';
+    label = 'Underpriced −₹' + Math.abs(gap).toFixed(2) + ' (' + Math.abs(pct).toFixed(1) + '%)';
+  } else {
+    cls = 'fvg-badge fvg-fair';
+    icon = '≈';
+    label = 'Fair Value (±' + Math.abs(pct).toFixed(1) + '%)';
+  }
+  el_.className = cls;
+  el_.innerHTML = icon + ' ' + label;
+  el_.style.display = 'inline-flex';
+}
+
+/* ── IV Insight Panel ────────────────────────────────────────────────
+   Combines IV Rank + FVG % to produce a concise, non-redundant
+   actionable insight. IV rank value shown in metrics row — not repeated.
+─────────────────────────────────────────────────────────────────────*/
+function buildIVInsight(ivRank, ceGap, peGap, ceLTP, peLTP) {
+  const panel  = el('ivInsightPanel');
+  const condEl = el('iviCondition');
+  const textEl = el('iviRuleText');
+  const tagsEl = el('iviTags');
+  if (!panel || !condEl || !textEl || !tagsEl) return;
+
+  const hasRank = ivRank !== null && !isNaN(ivRank);
+  const cePct   = ceLTP > 0 ? (ceGap / ceLTP) * 100 : 0;
+  const pePct   = peLTP > 0 ? (peGap / peLTP) * 100 : 0;
+  const avgPct  = (ceLTP > 0 && peLTP > 0) ? (cePct + pePct) / 2
+                : (ceLTP > 0 ? cePct : pePct);
+  const fvgStr  = Math.abs(avgPct).toFixed(1) + '%';
+
+  let cond, color, text, tags = [];
+
+  if (!hasRank) {
+    if (avgPct > 4) {
+      cond = 'Expensive Options'; color = 'var(--orange)';
+      text = 'Options are trading <strong>' + fvgStr + ' above BSM fair value</strong>. Market is pricing in more uncertainty than the model estimates. Set your 52w IV range in the left panel for the full regime analysis.';
+      tags = [{l:'IV Overpriced',c:'caution'},{l:'Set IV Range ▸',c:'neutral'}];
+    } else if (avgPct < -3) {
+      cond = 'Cheap Options'; color = 'var(--green)';
+      text = 'Options are trading <strong>' + fvgStr + ' below BSM fair value</strong>. The market is pricing less uncertainty than the model estimates. Set your 52w IV range for the full regime analysis.';
+      tags = [{l:'IV Underpriced',c:'buy'},{l:'Set IV Range ▸',c:'neutral'}];
+    } else {
+      cond = 'Fairly Priced'; color = 'var(--t2)';
+      text = 'Options are priced <strong>within ±2% of BSM fair value</strong>. No structural mispricing detected. P&L outcome depends on the direction and timing of spot movement.';
+      tags = [{l:'Direction Key',c:'neutral'},{l:'Set IV Range ▸',c:'neutral'}];
+    }
+  } else if (ivRank < 30) {
+    cond = 'Low IV Regime'; color = 'var(--green)';
+    if (avgPct < -2) {
+      text = 'IV near its <strong>yearly low</strong> and options are underpriced by ' + fvgStr + ' vs BSM fair value. Historically, low-IV environments precede expansion — options are at their most capital-efficient. Breakouts typically follow compressed IV phases.';
+      tags = [{l:'Low IV',c:'buy'},{l:'Options Cheap',c:'buy'},{l:'Breakout Watch',c:'neutral'}];
+    } else {
+      text = 'IV near its <strong>yearly low</strong> — options are historically cheap relative to the 52w range. Capital cost for options positions is at its lowest. Historically, periods of suppressed IV tend to be followed by expansion.';
+      tags = [{l:'Low IV',c:'buy'},{l:'Options Cheap',c:'buy'},{l:'IV Expansion Expected',c:'neutral'}];
+    }
+  } else if (ivRank > 70) {
+    cond = 'High IV Regime'; color = 'var(--red)';
+    if (avgPct > 3) {
+      text = 'IV elevated AND options overpriced by <strong>' + fvgStr + ' vs BSM fair value</strong>. Two forces work against option buyers here: IV mean-reversion risk and inflated extrinsic value decay. Risk is asymmetrically loaded onto the premium payer.';
+      tags = [{l:'High IV',c:'caution'},{l:'Options Expensive',c:'caution'},{l:'IV Mean Reversion Risk',c:'caution'}];
+    } else {
+      text = 'IV near its <strong>yearly high</strong> — options are historically expensive relative to the 52w range. Elevated IV inflates extrinsic value; any mean reversion in IV will reduce option value independent of spot movement.';
+      tags = [{l:'High IV',c:'caution'},{l:'Options Expensive',c:'caution'},{l:'Premium Inflated',c:'caution'}];
+    }
+  } else {
+    cond = 'Neutral IV Zone'; color = 'var(--yellow)';
+    if (avgPct > 3) {
+      text = 'IV in neutral zone. Options are overpriced by <strong>' + fvgStr + ' vs BSM fair value</strong>. The FVG adds a mild structural imbalance — direction and timing remain the primary P&L drivers.';
+      tags = [{l:'Neutral IV',c:'neutral'},{l:'FVG Overpriced',c:'caution'},{l:'Direction Key',c:'neutral'}];
+    } else if (avgPct < -2) {
+      text = 'IV in neutral zone. Options are underpriced by <strong>' + fvgStr + ' vs BSM fair value</strong>. The FVG creates a mild structural imbalance in favour of the premium payer. Direction remains the primary catalyst.';
+      tags = [{l:'Neutral IV',c:'neutral'},{l:'FVG Underpriced',c:'buy'},{l:'Manage Risk',c:'neutral'}];
+    } else {
+      text = '<strong>No structural edge</strong> from IV rank or fair value gap. Option pricing is neutral. P&L outcome is driven primarily by the magnitude and direction of spot movement relative to the selected strike.';
+      tags = [{l:'Direction Only',c:'neutral'},{l:'Watch OI Levels',c:'neutral'}];
+    }
+  }
+
+  condEl.textContent  = cond;
+  condEl.style.color  = color;
+  textEl.innerHTML    = text;
+  tagsEl.innerHTML    = tags.map(t => `<span class="ivi-tag ${t.c}">${t.l}</span>`).join('');
+  panel.style.display = 'flex';
+}
+
 /* §J  IV RANK / PERCENTILE ──────────────────────────────────────────
    IV Rank   = (currentIV − 52wLow) / (52wHigh − 52wLow) × 100
-   IV Signal = Buy premium (Rank<30) | Neutral (30-70) | Sell (>70)
+   IV Regime = IV Low (Rank<30) | IV Mid (30-70) | IV High (>70)
    Gauge fills left→right in green→yellow→red.
 ───────────────────────────────────────────────────────────────────── */
 function buildIVRank(i) {
@@ -2558,11 +3323,11 @@ function buildIVRank(i) {
 
   let sig, sigColor, gaugeColor;
   if (rank < 30) {
-    sig = 'Buy Prem'; sigColor = 'var(--green)'; gaugeColor = '#22C55E';
+    sig = 'IV Low'; sigColor = 'var(--green)'; gaugeColor = '#22C55E';
   } else if (rank > 70) {
-    sig = 'Sell Prem'; sigColor = 'var(--red)'; gaugeColor = '#EF4444';
+    sig = 'IV High'; sigColor = 'var(--red)'; gaugeColor = '#EF4444';
   } else {
-    sig = 'Neutral'; sigColor = 'var(--yellow)'; gaugeColor = '#EAB308';
+    sig = 'IV Mid'; sigColor = 'var(--yellow)'; gaugeColor = '#EAB308';
   }
   if (mIVSig) { mIVSig.textContent = sig; mIVSig.style.color = sigColor; }
   if (mIVSigSb) mIVSigSb.textContent = 'IV Rank ' + rank.toFixed(0) + '%';
@@ -2629,12 +3394,20 @@ function buildCompare(i) {
   const W = (gv('iWidth') || 5) * A.step;
   const lot = Math.max(1, gv('iLotSz')), lots = Math.max(1, gv('iLots')), qty = lots * lot;
 
-  /* BSM at key strikes */
+  /* BSM at key strikes — inject live LTP as premium override for display */
   const ivP = A.skewMode === 'skew' ? (gv('iIVPut') || iv) : iv;
   const ivC = A.skewMode === 'skew' ? (gv('iIVCall') || iv) : iv;
   function bsmAt(K2) {
     const iv2 = getSkewIV(K2, S, iv, ivP, ivC, A.skewMode === 'skew');
-    return bsm(S, K2, T, R, iv2/100, Q);
+    const res  = bsm(S, K2, T, R, iv2/100, Q);
+    if (!res) return res;
+    /* Override call/put with live LTP when available for this strike */
+    const lv = _liveMap[K2];
+    if (lv) {
+      if (lv.ce_ltp) res.call = lv.ce_ltp;
+      if (lv.pe_ltp) res.put  = lv.pe_ltp;
+    }
+    return res;
   }
 
   /* IV rank for signal */
@@ -2702,23 +3475,33 @@ function buildCompare(i) {
         if      (stratId === 'single_call' || stratId === 'bull_cs') pop = Phi(dbe)  * 100;
         else if (stratId === 'single_put'  || stratId === 'bear_ps') pop = Phi(-dbe) * 100;
         else if (stratId === 'iron_condor') {
+          // P(lower_BE < S_T < upper_BE) = Phi(-d_upper) - Phi(-d_lower)
+          // BEs[0]=upper BE, BEs[1]=lower BE
           const be1 = BEs[0], be2 = BEs[1];
           const d1b = (Math.log(Fval/be1)-0.5*sigma*sigma*T)/(sigma*sqT);
           const d2b = (Math.log(Fval/be2)-0.5*sigma*sigma*T)/(sigma*sqT);
-          pop = (Phi(d1b) - Phi(d2b)) * 100;  // prob between both BEs
+          pop = (Phi(-d1b) - Phi(-d2b)) * 100;  // corrected: P(S between BEs)
         } else {
-          // straddle/strangle: need S to move past at least one BE
-          pop = (1 - (Phi((Math.log(Fval/BEs[0])-0.5*sigma*sigma*T)/(sigma*sqT))
-                    - Phi((Math.log(Fval/BEs[1])-0.5*sigma*sigma*T)/(sigma*sqT)))) * 100;
+          // straddle/strangle: P(S_T > upper_BE) + P(S_T < lower_BE)
+          const du = (Math.log(Fval/BEs[0])-0.5*sigma*sigma*T)/(sigma*sqT);
+          const dd = (Math.log(Fval/BEs[1])-0.5*sigma*sigma*T)/(sigma*sqT);
+          pop = (Phi(du) + (1 - Phi(dd))) * 100;
         }
       }
     }
     pop = Math.min(100, Math.max(0, pop));
 
-    const lossAbs = Math.abs(minP);
-    const rr = lossAbs > 0.01 ? (isUnlim ? '∞:1' : (maxP/lossAbs).toFixed(2)+':1') : '∞:0';
+    /* Override scan with analytical max profit / max loss for accuracy */
+    const anaC = analyticalMaxPL(stratId, null, legs, absNet, qty);
+    if (anaC) {
+      maxP = anaC.maxP; minP = anaC.minP;
+    }
+    const isUnlimFinal = !isFinite(maxP);
 
-    return { netPrem, isCredit, absNet, nTheta, maxP, minP, lossAbs, isUnlim, pop, rr, BEs };
+    const lossAbs = Math.abs(minP);
+    const rr = lossAbs > 0.01 ? (isUnlimFinal ? 'Unlim:1' : (maxP/lossAbs).toFixed(2)+':1') : 'Unlim:0';
+
+    return { netPrem, isCredit, absNet, nTheta, maxP, minP, lossAbs, isUnlim: isUnlimFinal, pop, rr, BEs };
   }
 
   /* Build table */
@@ -2757,15 +3540,16 @@ function buildCompare(i) {
     const rowStyle = best ? ' class="cmp-best"' : '';
     const dimStyle = !inBias ? ' style="opacity:.45"' : '';
 
+    const fmt = n => Math.round(n).toLocaleString('en-IN');
     const netStr = m.isCredit
       ? '<span style="color:var(--green)">+₹' + m.absNet.toFixed(2) + '</span>'
       : '<span style="color:var(--red)">−₹' + m.absNet.toFixed(2) + '</span>';
     const maxPStr = m.isUnlim
       ? '<span style="color:var(--green)">Unlimited</span>'
-      : '<span style="color:var(--green)">₹' + Math.max(0,m.maxP).toFixed(0) + '</span>';
-    const maxLStr = '<span style="color:var(--red)">₹' + m.lossAbs.toFixed(0) + '</span>';
+      : '<span style="color:var(--green)">₹' + fmt(Math.max(0, m.maxP)) + '</span>';
+    const maxLStr = '<span style="color:var(--red)">₹' + fmt(m.lossAbs) + '</span>';
     const popStr  = '<span style="color:' + (m.pop>50?'var(--green)':m.pop>35?'var(--yellow)':'var(--red)') + '">' + m.pop.toFixed(0) + '%</span>';
-    const thStr   = '<span style="color:var(--orange)">' + m.nTheta.toFixed(0) + '/d</span>';
+    const thStr   = '<span style="color:var(--orange)">' + (m.nTheta >= 0 ? '+' : '') + Math.round(m.nTheta).toLocaleString('en-IN') + '/d</span>';
     const rrStr   = '<span style="color:var(--cyan)">' + m.rr + '</span>';
     const bestBadge = best ? '<span class="cmp-badge-best">★ Best match</span>' : '';
     const biasIcons = s.bias.map(b => b==='bull'?'📈':b==='bear'?'📉':'↔').join(' ');
@@ -2788,10 +3572,8 @@ function buildCompare(i) {
 
   /* Note */
   const note = el('cmpNote'); if (note) {
-    let noteText = 'All values computed at current IV ' + iv.toFixed(1) + '%, DTE ' + i.dte + 'd, K=₹' + K.toLocaleString('en-IN') + ', qty=' + qty + '.';
-    if (rank >= 0) noteText += ' IV Rank ' + rank.toFixed(0) + '% → ' + (rank<30?'low IV: favour buying premium. IV expansion gives extra tailwind.':rank>70?'high IV: favour selling premium. IV contraction amplifies credit gain.':'mid IV: spreads offer good risk/reward. Avoid expensive outright buys.');
-    noteText += ' Grey rows fall outside selected bias. ★ = recommended for current IV regime + bias.';
-    note.textContent = noteText;
+    const rankTip = rank < 0 ? '' : rank < 30 ? ' · Low IV regime' : rank > 70 ? ' · High IV regime' : ' · Mid IV regime';
+    note.textContent = 'IV ' + iv.toFixed(1) + '% (Rank ' + (rank>=0?rank.toFixed(0)+'%':'—') + ')' + rankTip + ' · K=₹' + K.toLocaleString('en-IN') + ' · DTE ' + i.dte + 'd · ★ = best fit for regime + bias';
     note.style.display = 'block';
   }
 }
@@ -2815,27 +3597,45 @@ function setPosType(t, btn) {
   POS.type = t;
   ['ptCall','ptPut'].forEach(id => { const b = el(id); if(b) b.className='pos-type-btn'; });
   if (btn) btn.className = 'pos-type-btn ' + (t==='call'?'active-call':'active-put');
+
+  /* Update Entry Premium for the newly selected type */
+  const K      = parseFloat(el('ptStrike').value) || 0;
+  const lv     = K ? _liveMap[K] : null;
+  const livePx = lv ? (t === 'call' ? lv.ce_ltp : lv.pe_ltp) : null;
+  const bsmPx  = A.lastBSM ? (t === 'call' ? A.lastBSM.call : A.lastBSM.put) : null;
+  const px     = livePx ?? bsmPx;
+  if (px != null) {
+    _writing = true; el('ptPrem').value = px.toFixed(2); _writing = false;
+  }
 }
 
 function posAutoFill() {
-  /* Pull current calculator inputs into position form */
   const i = getInputs();
+  const K = i.K;
+
+  /* Use live spot if available — more accurate than possibly-stale input field */
+  const liveSpot = _liveChain?.spot ?? i.S;
+
   _writing = true;
-  el('ptStrike').value    = i.K;
-  el('ptEntrySpot').value = i.S;
+  el('ptStrike').value    = K;
+  el('ptEntrySpot').value = liveSpot.toFixed ? liveSpot.toFixed(2) : liveSpot;
   el('ptEntryDTE').value  = i.dte;
   el('ptEntryIV').value   = i.iv;
   el('ptLots').value      = i.lots;
   _writing = false;
-  /* Also set the type from current selection */
+
+  /* Set position type from current selection */
   const t = A.type === 'put' ? 'put' : 'call';
   POS.type = t;
   ['ptCall','ptPut'].forEach(id => { const b = el(id); if(b) b.className='pos-type-btn'; });
   const tb = el(t==='call'?'ptCall':'ptPut'); if (tb) tb.className = 'pos-type-btn active-' + t;
 
-  /* Auto-fill premium from last BSM result */
-  if (A.lastBSM) {
-    const entryPx = t === 'call' ? A.lastBSM.call : A.lastBSM.put;
+  /* Use live LTP if available for this strike, else BSM */
+  const liveLeg = _liveMap[K];
+  const livePx  = t === 'call' ? liveLeg?.ce_ltp : liveLeg?.pe_ltp;
+  const bsmPx   = A.lastBSM ? (t === 'call' ? A.lastBSM.call : A.lastBSM.put) : null;
+  const entryPx = livePx ?? bsmPx;
+  if (entryPx != null) {
     _writing = true; el('ptPrem').value = entryPx.toFixed(2); _writing = false;
   }
 }
@@ -2958,49 +3758,29 @@ function calcPosition() {
         <div class="pos-card-sub">${be_pct>=0?'+':''}${be_pct.toFixed(2)}% from spot</div>
       </div>
       <div class="pos-card">
-        <div class="pos-card-lbl">DTE Consumed</div>
-        <div class="pos-card-val" style="color:var(--orange)">${dte_elapsed}d</div>
-        <div class="pos-card-sub">of ${dte_ent}d entry · ${dte_now}d left</div>
+        <div class="pos-card-lbl">θ / day (position)</div>
+        <div class="pos-card-val" style="color:var(--orange)">${th_daily>=0?'+':''}₹${(th_daily*qty).toFixed(0)}</div>
+        <div class="pos-card-sub">${fRs(th_daily,2)}/unit · ${dte_now}d left</div>
       </div>
       <div class="pos-card">
-        <div class="pos-card-lbl">θ Decayed (est.)</div>
-        <div class="pos-card-val" style="color:var(--red)">₹${theta_decayed_total.toFixed(0)}</div>
-        <div class="pos-card-sub">₹${theta_decayed_unit.toFixed(2)}/unit since entry</div>
+        <div class="pos-card-lbl">Net Delta</div>
+        <div class="pos-card-val" style="color:var(--blue)">${de_pos>=0?'+':''}${de_pos.toFixed(1)}</div>
+        <div class="pos-card-sub">₹${(de_pos*1).toFixed(0)} per ₹1 spot</div>
       </div>
       <div class="pos-card">
-        <div class="pos-card-lbl">θ Now / day</div>
-        <div class="pos-card-val" style="color:var(--orange)">${th_daily>=0?'+':''}₹${(th_daily*qty).toFixed(2)}</div>
-        <div class="pos-card-sub">pos · ${fRs(th_daily,2)}/unit</div>
-      </div>
-      <div class="pos-card">
-        <div class="pos-card-lbl">Net Δ (pos)</div>
-        <div class="pos-card-val" style="color:var(--blue)">${de_pos>=0?'+':''}${de_pos.toFixed(0)}</div>
-        <div class="pos-card-sub">₹/₹1 spot move</div>
-      </div>
-      <div class="pos-card">
-        <div class="pos-card-lbl">Net Vega (pos)</div>
+        <div class="pos-card-lbl">Net Vega</div>
         <div class="pos-card-val" style="color:var(--cyan)">${ve_pos>=0?'+':''}₹${Math.abs(ve_pos).toFixed(0)}</div>
-        <div class="pos-card-sub">per 1% IV move</div>
+        <div class="pos-card-sub">per 1% IV move · ${qty} units</div>
       </div>
       <div class="pos-card">
-        <div class="pos-card-lbl">TV Remaining</div>
+        <div class="pos-card-lbl">Time Value Left</div>
         <div class="pos-card-val" style="color:var(--purple)">₹${tv_now.toFixed(2)}</div>
-        <div class="pos-card-sub">intrinsic ₹${intrinsic_now.toFixed(2)}</div>
+        <div class="pos-card-sub">intrinsic ₹${intrinsic_now.toFixed(2)} · ${dte_elapsed>0?dte_elapsed+'d elapsed':'just entered'}</div>
       </div>
       <div class="pos-card">
-        <div class="pos-card-lbl">IV at Entry</div>
-        <div class="pos-card-val" style="color:var(--yellow)">${iv_ent.toFixed(1)}%</div>
-        <div class="pos-card-sub">now ${iv_now.toFixed(1)}% · Δ ${(iv_now-iv_ent>=0?'+':'')+(iv_now-iv_ent).toFixed(1)}%</div>
-      </div>
-    </div>
-
-    <div class="pos-decay-bar-wrap">
-      <div class="pos-decay-title">Time Value Decayed Since Entry</div>
-      <div class="pos-decay-track"><div class="pos-decay-fill" style="width:${tv_decayed_pct.toFixed(0)}%"></div></div>
-      <div class="pos-decay-labels">
-        <span>Entry (${dte_ent}d)</span>
-        <span>${tv_decayed_pct.toFixed(0)}% TV decayed</span>
-        <span>Expiry</span>
+        <div class="pos-card-lbl">IV Change</div>
+        <div class="pos-card-val" style="color:${iv_now>iv_ent?'var(--red)':'var(--green)'}">${(iv_now-iv_ent>=0?'+':'')+(iv_now-iv_ent).toFixed(1)}%</div>
+        <div class="pos-card-sub">entry ${iv_ent.toFixed(1)}% → now ${iv_now.toFixed(1)}%</div>
       </div>
     </div>
   `;
@@ -3185,6 +3965,486 @@ function onMpTabOpen() {
     mpGenStrikes();
   }
 }
+
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   §N  LIVE DATA ENGINE  — Dhan backend integration
+   ═══════════════════════════════════════════════════════════════════════
+   Architecture:
+     loadExpiries(scrip)  → populates expiry <select>
+     loadLiveChain()      → fetches chain, injects into calculator
+     applyLiveChain(data) → wires spot, IV, DTE, OI into all panels
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const BACKEND = 'https://options-premium-erosion-calculator.onrender.com';
+let _liveChain   = null;   // last fetched chain response
+let _liveLoading = false;
+let _liveMap     = {};    // strike → {ce_ltp, pe_ltp} for instant lookup
+
+/* ── Status helpers ─────────────────────────────────────────────────── */
+function liveSetStatus(state, text) {
+  const dot  = el('liveStatusDot');
+  const txt  = el('liveStatusText');
+  if (!dot || !txt) return;
+  dot.className = 'live-status-dot ' + state;   // green | amber | red
+  txt.textContent = text;
+}
+
+function liveSetOffline(msg) {
+  liveSetStatus('red', msg || 'Backend offline');
+  const note = el('liveOfflineNote');
+  if (note) note.classList.add('visible');
+  const tb = el('topbarLiveBadge');
+  if (tb) tb.style.color = 'var(--t3)';
+}
+
+function liveSetOnline() {
+  const note = el('liveOfflineNote');
+  if (note) note.classList.remove('visible');
+  const tb = el('topbarLiveBadge');
+  if (tb) { tb.innerHTML = '<div class="live-dot"></div>Live Data'; tb.style.color = 'var(--green)'; }
+}
+
+/* ── Clear all live state when switching underlying ─────────────────── */
+function clearLiveState() {
+  _liveChain  = null;
+  _liveMap    = {};
+  _lcIsLive   = false;
+  _liveLoading = false;
+
+  /* Hide stale badges */
+  const ids = ['liveSpotBadge','liveDteBadge'];
+  ids.forEach(id => { const e = el(id); if (e) e.style.display = 'none'; });
+
+  const cb = el('liveChainBadge');
+  if (cb) cb.classList.remove('visible');
+
+  const rb = el('liveRefreshBtn');
+  if (rb) rb.classList.remove('visible');
+
+  /* Reset auto-refresh badge */
+  arShowBadge(false);
+
+  /* Reset chain table to BSM-only placeholder */
+  const lcBadge = el('lcModeBadge');
+  if (lcBadge) { lcBadge.textContent = '○ BSM'; lcBadge.className = 'lc-badge bsm'; }
+
+  /* Clear expiry select */
+  const sel = el('liveExpiry');
+  if (sel) sel.innerHTML = '<option value="">Switching underlying…</option>';
+}
+
+/* ── Full switch flow: clear → expiries → chain → restart timer ─────── */
+async function switchAndLoad(scrip) {
+  /* 1. Stop any running auto-refresh for the old underlying */
+  arStop();
+
+  /* 2. Wipe all stale live data and UI */
+  clearLiveState();
+
+  /* Identify underlying name for status messages */
+  const ulBtn = document.querySelector('.ul-tab.active');
+  const ulName = ulBtn?.dataset?.ul || 'Underlying';
+
+  liveSetStatus('amber', 'Switching to ' + ulName + '…');
+
+  /* 3. Load expiries for new underlying */
+  await loadExpiries(scrip);
+
+  /* 4. Auto-load chain immediately if an expiry was selected */
+  const expSel = el('liveExpiry');
+  if (expSel && expSel.value) {
+    await loadLiveChain();
+  }
+
+  /* 5. Restart auto-refresh for new underlying */
+  arShowBadge(true);
+  if (!isMarketOpen()) {
+    arSetPaused(true, 'Market closed');
+  } else {
+    arSetPaused(false);
+  }
+  arStartCountdown();
+}
+
+/* ── Fetch expiry list and populate <select> ────────────────────────── */
+async function loadExpiries(scrip) {
+  const sel = el('liveExpiry');
+  const btn = el('liveLoadBtn');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Loading…</option>';
+  if (btn) btn.disabled = true;
+  liveSetStatus('amber', 'Fetching expiries…');
+  try {
+    const resp = await fetch(`${BACKEND}/api/expiries?scrip=${scrip}`);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const expiries = data.expiries || [];
+    if (!expiries.length) throw new Error('No expiries returned');
+
+    /* Build options — label upcoming weekly/monthly */
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    sel.innerHTML = expiries.map(exp => {
+      const d    = new Date(exp);
+      const dte  = Math.round((d - today) / 86400000);
+      const lbl  = exp + '  (' + dte + 'd)';
+      return `<option value="${exp}">${lbl}</option>`;
+    }).join('');
+
+    /* Default: nearest expiry with DTE >= 1 */
+    const nearest = expiries.find(e => {
+      const dte = Math.round((new Date(e) - today) / 86400000);
+      return dte >= 0;
+    });
+    if (nearest) sel.value = nearest;
+
+    if (btn) btn.disabled = false;
+    liveSetStatus('green', expiries.length + ' expiries loaded');
+    liveSetOnline();
+  } catch(err) {
+    sel.innerHTML = '<option value="">Error loading expiries</option>';
+    liveSetOffline('Cannot reach backend');
+    console.error('[Live] loadExpiries:', err);
+  }
+}
+
+function onExpiryChange() {
+  const btn = el('liveLoadBtn');
+  if (btn) btn.disabled = !el('liveExpiry').value;
+}
+
+/* ── Fetch option chain and apply to calculator ─────────────────────── */
+async function loadLiveChain() {
+  if (_liveLoading) return;
+  const expiry = el('liveExpiry')?.value;
+  if (!expiry) return;
+  const scrip  = A.scrip || 13;
+  const btn    = el('liveLoadBtn');
+
+  _liveLoading = true;
+  if (btn) { btn.disabled = true; btn.textContent = 'Loading…'; }
+  liveSetStatus('amber', 'Fetching chain…');
+
+  try {
+    const resp = await fetch(`${BACKEND}/api/option-chain?scrip=${scrip}&expiry=${expiry}`);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    if (!data.chain || !data.spot) throw new Error('Invalid chain response');
+
+    _liveChain = data;
+    applyLiveChain(data);
+    liveSetStatus('green', 'Live · ' + data.chain.length + ' strikes · ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
+
+    /* Reset auto-refresh countdown from this moment */
+    if (typeof _arActive !== 'undefined' && _arActive) {
+      _arRemaining = AR_INTERVAL;
+      const ce = el('arCountdown'); if (ce) ce.textContent = _arRemaining;
+    }
+
+    /* Show badges */
+    const sb = el('liveSpotBadge');
+    if (sb) { sb.textContent = '₹' + data.spot.toLocaleString('en-IN',{maximumFractionDigits:2}); sb.style.display='inline-block'; }
+    const db = el('liveDteBadge');
+    if (db) { db.textContent = data.dte + 'd to expiry'; db.style.display='inline-block'; }
+    const cb = el('liveChainBadge');
+    if (cb) cb.classList.add('visible');
+    const rb = el('liveRefreshBtn');
+    if (rb) rb.classList.add('visible');
+
+  } catch(err) {
+    liveSetOffline('Chain load failed');
+    console.error('[Live] loadLiveChain:', err);
+  } finally {
+    _liveLoading = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Load Live';
+    }
+  }
+}
+
+/* ── Apply live chain data to every panel in the calculator ─────────── */
+function applyLiveChain(data) {
+  const spot    = data.spot;
+  const dte     = data.dte  || 1;
+  const lot     = data.lot  || gv('iLotSz');
+  const step    = data.step || A.step;
+  const chain   = data.chain;
+
+  /* 1 ── Update spot, DTE, lot size ─────────────────────────────────── */
+  _writing = true;
+  el('iSpot').value  = spot.toFixed(2);
+  el('iDTE').value   = dte;
+  /* Only apply backend lot if user hasn't customised it.
+     The frontend ul-tab data-lot is the source of truth for lot size.
+     Backend may lag behind regulatory lot size changes. */
+  const currentLot = gv('iLotSz');
+  if (!currentLot || currentLot <= 0) {
+    el('iLotSz').value = lot;
+  }
+  _writing = false;
+  A.step = step;
+
+  /* ATM strike = nearest strike in chain to spot */
+  const atmRow = chain.reduce((best, row) =>
+    Math.abs(row.strike - spot) < Math.abs(best.strike - spot) ? row : best
+  , chain[0]);
+  const atmK = atmRow.strike;
+
+  /* 1b ── Build global live LTP lookup map ────────────────────────────── */
+  _liveMap = {};
+  chain.forEach(row => {
+    _liveMap[row.strike] = {
+      ce_ltp: row.ce?.ltp ?? null,
+      pe_ltp: row.pe?.ltp ?? null,
+      ce_iv:  row.ce?.iv  ?? null,
+      pe_iv:  row.pe?.iv  ?? null,
+      ce_oi:  row.ce?.oi  ?? null,
+      pe_oi:  row.pe?.oi  ?? null,
+    };
+  });
+
+  /* 2 ── Set IV from ATM chain row (use CE IV as primary) ───────────── */
+  const atmIV = atmRow.ce?.iv || atmRow.pe?.iv || gv('iIV');
+  _writing = true;
+  el('iIV').value     = atmIV.toFixed(2);
+  el('iStrike').value = atmK;
+  el('sdVal').textContent   = atmK.toLocaleString('en-IN');
+  el('sdBadge').textContent = 'ATM';
+  el('sdBadge').className   = 'sd-badge atm';
+  _writing = false;
+  A.premManual = false;
+
+  /* 2b ── Update strike dropdown to show live LTPs ─────────────────── */
+  updateStrikeDropdownLTP(chain, spot, atmK);
+
+  /* 3 ── Update IV skew inputs if OTM data available ────────────────── */
+  const otmPutRow  = chain.find(r => r.strike < atmK - step && r.pe?.iv);
+  const otmCallRow = chain.find(r => r.strike > atmK + step && r.ce?.iv);
+  if (otmPutRow?.pe?.iv) { _writing=true; el('iIVPut').value  = otmPutRow.pe.iv.toFixed(2); _writing=false; }
+  if (otmCallRow?.ce?.iv){ _writing=true; el('iIVCall').value = otmCallRow.ce.iv.toFixed(2); _writing=false; }
+
+  /* 4 ── Recalculate BSM with live inputs ───────────────────────────── */
+  calculate();
+
+  /* 5 ── Build full live option chain table ───────────────────────────── */
+  /* _liveChain is already set above — buildChain() will route to lcBuildLive */
+  buildChain(A.lastBSM || {S:spot, K:atmK, T:dte/365, r:R, sigma:atmIV/100, q:Q,
+    iv:atmIV, dte:dte, lot:lot, lots:gv('iLots')});
+
+  /* 6 ── Auto-populate Max Pain with live OI ─────────────────────────── */
+  injectLiveMaxPain(chain, spot, step);
+
+  /* 7 ── Update topbar underlying price display ───────────────────────── */
+  const activeTab = document.querySelector('.ul-tab.active');
+  if (activeTab) {
+    const priceEl = activeTab.querySelector('.ul-tab-price');
+    if (priceEl) priceEl.textContent = '₹' + spot.toLocaleString('en-IN',{maximumFractionDigits:0});
+  }
+}
+
+/* ── Inject into Option Chain tab — calls live builder directly ──────── */
+function injectLiveChain(chain, spot, atmK) {
+  /* lcBuildLive is called via buildChain() → applyLiveChain sets _liveChain first */
+  /* This is now a no-op — buildChain() routes automatically based on _liveChain */
+}
+
+/* ── Auto-populate Max Pain from live OI ───────────────────────────── */
+function injectLiveMaxPain(chain, spot, step) {
+  mpStrikesCache = chain.map(row => ({
+    K:  row.strike,
+    ce: row.ce?.oi || 0,
+    pe: row.pe?.oi || 0,
+  }));
+  /* Update centre + step in the UI controls */
+  const atmK = Math.round(spot / step) * step;
+  _writing = true;
+  el('mpCentre').value = atmK;
+  el('mpStep').value   = step;
+  _writing = false;
+  /* Re-render the table */
+  renderMpTable(spot, atmK);
+  /* Auto-calculate if we have OI data */
+  const hasOI = mpStrikesCache.some(r => r.ce > 0 || r.pe > 0);
+  if (hasOI) mpCalculate();
+}
+
+/* ── Format OI number (compact) ─────────────────────────────────────── */
+function fmtOI(n) {
+  if (!n && n !== 0) return '—';
+  if (n >= 1e7) return (n/1e7).toFixed(1)+'Cr';
+  if (n >= 1e5) return (n/1e5).toFixed(1)+'L';
+  if (n >= 1e3) return (n/1e3).toFixed(1)+'K';
+  return n.toString();
+}
+
+/* ── Init on page load ─────────────────────────────────────────────── */
+async function fetchWithTimeout(url, ms) {
+  const ctrl = new AbortController();
+  const tid  = setTimeout(() => ctrl.abort(), ms);
+  try {
+    const r = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(tid);
+    return r;
+  } catch(e) {
+    clearTimeout(tid);
+    throw e;
+  }
+}
+
+/* ══ AUTO-REFRESH ENGINE ═══════════════════════════════════════════════
+   • 15s interval during market hours (IST 09:15–15:30, Mon–Fri)
+   • Paused outside market hours — shows yellow dot + "Market closed"
+   • First load fires automatically after backend is ready
+   • Countdown ticker updates every second
+══════════════════════════════════════════════════════════════════════ */
+const AR_INTERVAL   = 15;   // seconds between auto-refreshes
+let   _arTimer      = null; // setInterval handle for countdown
+let   _arRemaining  = AR_INTERVAL;
+let   _arActive     = false;
+
+function isMarketOpen() {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun, 6=Sat
+  if (day === 0 || day === 6) return false;
+  // Convert to IST (UTC+5:30)
+  const ist = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+  const h = ist.getUTCHours(), m = ist.getUTCMinutes();
+  const mins = h * 60 + m;
+  return mins >= (9 * 60 + 15) && mins < (15 * 60 + 30);
+}
+
+function arShowBadge(show) {
+  const badge = el('autoRefreshBadge');
+  if (badge) badge.classList.toggle('visible', show);
+}
+
+function arSetPaused(paused, reason) {
+  const badge  = el('autoRefreshBadge');
+  const dot    = el('arDot');
+  const label  = el('arLabel');
+  const count  = el('arCountdown');
+  if (!badge) return;
+  if (paused) {
+    badge.classList.add('ar-paused');
+    if (dot)   dot.style.background = 'var(--yellow)';
+    if (label) label.textContent = reason || 'Paused';
+    if (count) count.textContent = '';
+  } else {
+    badge.classList.remove('ar-paused');
+    if (dot)   dot.style.background = 'var(--green)';
+    if (label) label.textContent = 'Auto · next in';
+  }
+}
+
+function arStartCountdown() {
+  if (_arTimer) clearInterval(_arTimer);
+  _arRemaining = AR_INTERVAL;
+  const countEl = el('arCountdown');
+  if (countEl) countEl.textContent = _arRemaining;
+
+  _arTimer = setInterval(async () => {
+    if (!isMarketOpen()) {
+      arSetPaused(true, 'Market closed');
+      return;
+    }
+    arSetPaused(false);
+    _arRemaining--;
+    if (countEl) countEl.textContent = Math.max(0, _arRemaining);
+
+    if (_arRemaining <= 0) {
+      _arRemaining = AR_INTERVAL;
+      if (countEl) countEl.textContent = _arRemaining;
+      // Silent background refresh — don't disturb UI state
+      if (!_liveLoading && el('liveExpiry')?.value) {
+        await loadLiveChain();
+      }
+    }
+  }, 1000);
+  _arActive = true;
+}
+
+function arStop() {
+  if (_arTimer) { clearInterval(_arTimer); _arTimer = null; }
+  _arActive = false;
+  arShowBadge(false);
+}
+
+(async function initLive() {
+  liveSetStatus('amber', 'Connecting…');
+
+  /* Step 1: ping health with retry for Render cold start */
+  let backendAlive = false;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const r = await fetchWithTimeout(`${BACKEND}/health`, 15000);
+      if (r.ok) { backendAlive = true; break; }
+      liveSetStatus('amber', `Attempt ${attempt}: HTTP ${r.status}`);
+    } catch(e) {
+      const msg = e.name === 'AbortError'
+        ? `Attempt ${attempt}: Render waking up… (${attempt * 15}s)`
+        : `Attempt ${attempt}: ${e.message}`;
+      liveSetStatus('amber', msg);
+      if (attempt < 3) await new Promise(res => setTimeout(res, 8000));
+    }
+  }
+
+  if (!backendAlive) {
+    liveSetOffline('Cannot reach backend — BSM-only mode');
+    console.warn('[Live] Backend unreachable at', BACKEND);
+    return;
+  }
+
+  /* Step 2: verify Dhan token */
+  liveSetStatus('amber', 'Checking Dhan token…');
+  try {
+    const tr = await fetchWithTimeout(`${BACKEND}/api/token-check`, 12000);
+    const td = await tr.json();
+    if (!td.valid) {
+      if (td.reason === 'TOKEN_EXPIRED') {
+        liveSetStatus('red', '⚠ Token expired — regenerate on DhanHQ');
+        const note = el('liveOfflineNote');
+        if (note) {
+          note.textContent = '⚠ Dhan token expired. Go to DhanHQ → Generate new token → update DHAN_ACCESS_TOKEN in Render dashboard.';
+          note.classList.add('visible');
+          note.style.color = 'var(--yellow)';
+        }
+      } else {
+        liveSetStatus('red', 'Token invalid: ' + (td.reason || 'unknown'));
+      }
+      console.error('[Live] Token check failed:', td);
+      return;
+    }
+  } catch(e) {
+    console.warn('[Live] token-check error, proceeding:', e.message);
+  }
+
+  /* Step 3: load expiries for the active underlying */
+  liveSetOnline();
+  liveSetStatus('green', 'Backend online');
+  const activeUL = A.scrip || 13;
+  await loadExpiries(activeUL);
+
+  /* Step 4: AUTO-LOAD immediately after expiries are ready */
+  const expSel = el('liveExpiry');
+  if (expSel && expSel.value) {
+    liveSetStatus('amber', 'Auto-loading chain…');
+    await loadLiveChain();
+  }
+
+  /* Step 5: start auto-refresh countdown */
+  arShowBadge(true);
+  if (!isMarketOpen()) {
+    arSetPaused(true, 'Market closed');
+    // Still start timer so it activates automatically when market opens
+    arStartCountdown();
+  } else {
+    arSetPaused(false);
+    arStartCountdown();
+  }
+})();
 
 
 </script>
