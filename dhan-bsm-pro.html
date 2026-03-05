@@ -49,9 +49,7 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 .ul-exch-badge{font-size:.42rem;font-weight:700;letter-spacing:.04em;padding:.06rem .22rem;border-radius:2px;line-height:1.2;vertical-align:middle}
 .ul-exch-badge.nse{background:rgba(34,197,94,.12);color:rgba(34,197,94,.8);border:1px solid rgba(34,197,94,.2)}
 .ul-exch-badge.bse{background:rgba(234,179,8,.12);color:rgba(234,179,8,.85);border:1px solid rgba(234,179,8,.2)}
-.ul-exch-badge{font-size:.42rem;font-weight:700;letter-spacing:.04em;padding:.06rem .22rem;border-radius:2px;line-height:1.2}
-.ul-exch-badge.nse{background:rgba(34,197,94,.12);color:rgba(34,197,94,.8);border:1px solid rgba(34,197,94,.2)}
-.ul-exch-badge.bse{background:rgba(234,179,8,.12);color:rgba(234,179,8,.85);border:1px solid rgba(234,179,8,.2)}
+
 .topbar-right{display:flex;align-items:center;gap:.75rem;margin-left:auto;flex-shrink:0}
 .live-badge{display:flex;align-items:center;gap:.35rem;font-size:.62rem;font-weight:500;color:var(--green);padding:.2rem .55rem;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:20px;letter-spacing:.04em;text-transform:uppercase}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
@@ -615,11 +613,11 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
       <span class="ul-tab-row"><span class="ul-tab-name">BANKNIFTY</span><span class="ul-exch-badge nse">NSE</span></span>
       <span class="ul-tab-price">₹51,500</span>
     </button>
-    <button class="ul-tab" data-ul="FINNIFTY" data-scrip="27" data-spot="23000" data-lot="40" data-step="50" data-ivh="28" data-ivl="10" data-iv="16" onclick="selectUL(this)">
-      <span class="ul-tab-row"><span class="ul-tab-name">FINNIFTY</span><span class="ul-exch-badge nse">NSE</span></span>
-      <span class="ul-tab-price">₹23,000</span>
+    <button class="ul-tab" data-ul="MIDCAP NIFTY" data-scrip="442" data-spot="13000" data-lot="75" data-step="25" data-ivh="28" data-ivl="12" data-iv="18" onclick="selectUL(this)">
+      <span class="ul-tab-row"><span class="ul-tab-name">MIDCAP</span><span class="ul-exch-badge nse">NSE</span></span>
+      <span class="ul-tab-price">₹13,000</span>
     </button>
-    <button class="ul-tab" data-ul="SENSEX" data-scrip="442" data-spot="75000" data-lot="10" data-step="100" data-ivh="22" data-ivl="9" data-iv="14" onclick="selectUL(this)">
+    <button class="ul-tab" data-ul="SENSEX" data-scrip="51" data-spot="75000" data-lot="10" data-step="100" data-ivh="22" data-ivl="9" data-iv="14" onclick="selectUL(this)">
       <span class="ul-tab-row"><span class="ul-tab-name">SENSEX</span><span class="ul-exch-badge bse">BSE</span></span>
       <span class="ul-tab-price">₹75,000</span>
     </button>
@@ -2662,7 +2660,7 @@ function anSub(view, btn) {
 
 /* ── SECTION 15: Keyboard Shortcuts ─────────────────────────────────
    F5         = Calculate / Refresh
-   F1–F4      = Switch NIFTY / BANKNIFTY / FINNIFTY / SENSEX
+   F1–F4      = Switch NIFTY / BANKNIFTY / MIDCAP / SENSEX
    Alt+↑/↓    = Nudge spot price ±1 strike step
    Alt+→/←    = Nudge DTE +1/−1 day
    Escape     = Close strike dropdown
@@ -2671,7 +2669,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'F5')             { e.preventDefault(); calculate(); }
   if (e.key === 'F1')             { e.preventDefault(); document.querySelector('[data-ul="NIFTY 50"]').click(); }
   if (e.key === 'F2')             { e.preventDefault(); document.querySelector('[data-ul="BANKNIFTY"]').click(); }
-  if (e.key === 'F3')             { e.preventDefault(); document.querySelector('[data-ul="FINNIFTY"]').click(); }
+  if (e.key === 'F3')             { e.preventDefault(); document.querySelector('[data-ul="MIDCAP NIFTY"]').click(); }
   if (e.key === 'F4')             { e.preventDefault(); document.querySelector('[data-ul="SENSEX"]').click(); }
   if (e.altKey && e.key === 'ArrowUp')    { e.preventDefault(); nudge('iSpot',  A.step); }
   if (e.altKey && e.key === 'ArrowDown')  { e.preventDefault(); nudge('iSpot', -A.step); }
