@@ -615,7 +615,7 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
       <span class="ul-tab-row"><span class="ul-tab-name">BANKNIFTY</span><span class="ul-exch-badge nse">NSE</span></span>
       <span class="ul-tab-price">₹51,500</span>
     </button>
-    <button class="ul-tab" data-ul="FINNIFTY" data-scrip="14366" data-spot="23000" data-lot="40" data-step="50" data-ivh="28" data-ivl="10" data-iv="16" onclick="selectUL(this)">
+    <button class="ul-tab" data-ul="FINNIFTY" data-scrip="27" data-spot="23000" data-lot="40" data-step="50" data-ivh="28" data-ivl="10" data-iv="16" onclick="selectUL(this)">
       <span class="ul-tab-row"><span class="ul-tab-name">FINNIFTY</span><span class="ul-exch-badge nse">NSE</span></span>
       <span class="ul-tab-price">₹23,000</span>
     </button>
@@ -2604,8 +2604,8 @@ function selectUL(btn) {
     if (btn.dataset.ivl) { _writing=true; el('iIVLow').value  = btn.dataset.ivl; _writing=false; }
     if (btn.dataset.iv)  { _writing=true; el('iIV').value     = btn.dataset.iv;  _writing=false; }
   }
-  /* Load expiries for this underlying from backend */
-  if (scrip > 0) loadExpiries(scrip);
+  /* Load expiries and auto-load chain for new underlying */
+  if (scrip > 0) switchAndLoad(scrip);
   onInput();
 }
 
@@ -4008,6 +4008,68 @@ function liveSetOnline() {
   if (tb) { tb.innerHTML = '<div class="live-dot"></div>Live Data'; tb.style.color = 'var(--green)'; }
 }
 
+/* ── Clear all live state when switching underlying ─────────────────── */
+function clearLiveState() {
+  _liveChain  = null;
+  _liveMap    = {};
+  _lcIsLive   = false;
+  _liveLoading = false;
+
+  /* Hide stale badges */
+  const ids = ['liveSpotBadge','liveDteBadge'];
+  ids.forEach(id => { const e = el(id); if (e) e.style.display = 'none'; });
+
+  const cb = el('liveChainBadge');
+  if (cb) cb.classList.remove('visible');
+
+  const rb = el('liveRefreshBtn');
+  if (rb) rb.classList.remove('visible');
+
+  /* Reset auto-refresh badge */
+  arShowBadge(false);
+
+  /* Reset chain table to BSM-only placeholder */
+  const lcBadge = el('lcModeBadge');
+  if (lcBadge) { lcBadge.textContent = '○ BSM'; lcBadge.className = 'lc-badge bsm'; }
+
+  /* Clear expiry select */
+  const sel = el('liveExpiry');
+  if (sel) sel.innerHTML = '<option value="">Switching underlying…</option>';
+}
+
+/* ── Full switch flow: clear → expiries → chain → restart timer ─────── */
+async function switchAndLoad(scrip) {
+  /* 1. Stop any running auto-refresh for the old underlying */
+  arStop();
+
+  /* 2. Wipe all stale live data and UI */
+  clearLiveState();
+
+  /* Identify underlying name for status messages */
+  const ulBtn = document.querySelector('.ul-tab.active');
+  const ulName = ulBtn?.dataset?.ul || 'Underlying';
+
+  liveSetStatus('amber', 'Switching to ' + ulName + '…');
+
+  /* 3. Load expiries for new underlying */
+  await loadExpiries(scrip);
+
+  /* 4. Auto-load chain immediately if an expiry was selected */
+  const expSel = el('liveExpiry');
+  if (expSel && expSel.value) {
+    await loadLiveChain();
+  }
+
+  /* 5. Restart auto-refresh for new underlying */
+  arShowBadge(true);
+  if (!isMarketOpen()) {
+    arSetPaused(true, 'Market closed');
+  } else {
+    arSetPaused(false);
+  }
+  arStartCountdown();
+}
+
 /* ── Fetch expiry list and populate <select> ────────────────────────── */
 async function loadExpiries(scrip) {
   const sel = el('liveExpiry');
@@ -4041,7 +4103,7 @@ async function loadExpiries(scrip) {
     if (nearest) sel.value = nearest;
 
     if (btn) btn.disabled = false;
-    liveSetStatus('green', 'Ready — ' + expiries.length + ' expiries');
+    liveSetStatus('green', expiries.length + ' expiries loaded');
     liveSetOnline();
   } catch(err) {
     sel.innerHTML = '<option value="">Error loading expiries</option>';
