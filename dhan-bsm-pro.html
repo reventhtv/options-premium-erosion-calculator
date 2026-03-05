@@ -38,13 +38,20 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 .brand-sub{font-size:.6rem;color:var(--t3);display:block;margin-top:-2px}
 .ul-tabs{display:flex;gap:.2rem;flex:1;overflow-x:auto}
 .ul-tabs::-webkit-scrollbar{display:none}
-.ul-tab{display:flex;flex-direction:column;align-items:flex-start;padding:.28rem .75rem;border-radius:var(--rsm);border:1px solid transparent;cursor:pointer;background:none;transition:all .14s;flex-shrink:0;min-width:78px}
+.ul-tab{display:flex;flex-direction:column;align-items:flex-start;padding:.28rem .75rem;border-radius:var(--rsm);border:1px solid transparent;cursor:pointer;background:none;transition:all .14s;flex-shrink:0;min-width:88px}
 .ul-tab:hover{background:var(--bg4)}
 .ul-tab.active{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.3)}
+.ul-tab-row{display:flex;align-items:center;gap:.22rem}
 .ul-tab-name{font-size:.7rem;font-weight:600;color:var(--t2)}
 .ul-tab.active .ul-tab-name{color:var(--blue)}
 .ul-tab-price{font-family:var(--mono);font-size:.63rem;color:var(--t3)}
 .ul-tab.active .ul-tab-price{color:var(--t2)}
+.ul-exch-badge{font-size:.42rem;font-weight:700;letter-spacing:.04em;padding:.06rem .22rem;border-radius:2px;line-height:1.2;vertical-align:middle}
+.ul-exch-badge.nse{background:rgba(34,197,94,.12);color:rgba(34,197,94,.8);border:1px solid rgba(34,197,94,.2)}
+.ul-exch-badge.bse{background:rgba(234,179,8,.12);color:rgba(234,179,8,.85);border:1px solid rgba(234,179,8,.2)}
+.ul-exch-badge{font-size:.42rem;font-weight:700;letter-spacing:.04em;padding:.06rem .22rem;border-radius:2px;line-height:1.2}
+.ul-exch-badge.nse{background:rgba(34,197,94,.12);color:rgba(34,197,94,.8);border:1px solid rgba(34,197,94,.2)}
+.ul-exch-badge.bse{background:rgba(234,179,8,.12);color:rgba(234,179,8,.85);border:1px solid rgba(234,179,8,.2)}
 .topbar-right{display:flex;align-items:center;gap:.75rem;margin-left:auto;flex-shrink:0}
 .live-badge{display:flex;align-items:center;gap:.35rem;font-size:.62rem;font-weight:500;color:var(--green);padding:.2rem .55rem;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:20px;letter-spacing:.04em;text-transform:uppercase}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
@@ -600,26 +607,21 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
 
   <!-- Underlying quick-switch tabs -->
   <div class="ul-tabs">
-    <button class="ul-tab active" data-ul="NIFTY 50"  data-scrip="13"  data-spot="25000" data-lot="65"  data-step="50"  data-ivh="22" data-ivl="9"  onclick="selectUL(this)">
-      <span class="ul-tab-name">NIFTY 50</span><span class="ul-tab-price">₹25,000</span>
+    <button class="ul-tab active" data-ul="NIFTY 50" data-scrip="13" data-spot="25000" data-lot="65" data-step="50" data-ivh="22" data-ivl="9" data-iv="14" onclick="selectUL(this)">
+      <span class="ul-tab-row"><span class="ul-tab-name">NIFTY 50</span><span class="ul-exch-badge nse">NSE</span></span>
+      <span class="ul-tab-price">₹25,000</span>
     </button>
-    <button class="ul-tab" data-ul="BANKNIFTY" data-scrip="25" data-spot="60000" data-lot="15"  data-step="100" data-ivh="35" data-ivl="12" onclick="selectUL(this)">
-      <span class="ul-tab-name">BANKNIFTY</span><span class="ul-tab-price">₹60,000</span>
+    <button class="ul-tab" data-ul="BANKNIFTY" data-scrip="25" data-spot="51500" data-lot="15" data-step="100" data-ivh="35" data-ivl="12" data-iv="18" onclick="selectUL(this)">
+      <span class="ul-tab-row"><span class="ul-tab-name">BANKNIFTY</span><span class="ul-exch-badge nse">NSE</span></span>
+      <span class="ul-tab-price">₹51,500</span>
     </button>
-    <button class="ul-tab" data-ul="FINNIFTY"  data-scrip="14366"  data-spot="20100" data-lot="40"  data-step="50"  data-ivh="28" data-ivl="10"  onclick="selectUL(this)">
-      <span class="ul-tab-name">FINNIFTY</span><span class="ul-tab-price">₹20,100</span>
+    <button class="ul-tab" data-ul="FINNIFTY" data-scrip="14366" data-spot="23000" data-lot="40" data-step="50" data-ivh="28" data-ivl="10" data-iv="16" onclick="selectUL(this)">
+      <span class="ul-tab-row"><span class="ul-tab-name">FINNIFTY</span><span class="ul-exch-badge nse">NSE</span></span>
+      <span class="ul-tab-price">₹23,000</span>
     </button>
-    <button class="ul-tab" data-ul="SENSEX"    data-scrip="442"    data-spot="73800" data-lot="10"  data-step="500" data-ivh="22" data-ivl="9" onclick="selectUL(this)">
-      <span class="ul-tab-name">SENSEX</span><span class="ul-tab-price">₹73,800</span>
-    </button>
-    <button class="ul-tab" data-ul="RELIANCE"  data-scrip="0"  data-spot="2900"  data-lot="250" data-step="10"  data-ivh="38" data-ivl="14"  onclick="selectUL(this)">
-      <span class="ul-tab-name">RELIANCE</span><span class="ul-tab-price">₹2,900</span>
-    </button>
-    <button class="ul-tab" data-ul="HDFCBANK"  data-scrip="0"  data-spot="1640"  data-lot="550" data-step="10"  data-ivh="30" data-ivl="11"  onclick="selectUL(this)">
-      <span class="ul-tab-name">HDFCBANK</span><span class="ul-tab-price">₹1,640</span>
-    </button>
-    <button class="ul-tab" data-ul="ICICIBANK" data-scrip="0" data-spot="1120"  data-lot="700" data-step="5"   data-ivh="32" data-ivl="13"   onclick="selectUL(this)">
-      <span class="ul-tab-name">ICICIBANK</span><span class="ul-tab-price">₹1,120</span>
+    <button class="ul-tab" data-ul="SENSEX" data-scrip="442" data-spot="75000" data-lot="10" data-step="100" data-ivh="22" data-ivl="9" data-iv="14" onclick="selectUL(this)">
+      <span class="ul-tab-row"><span class="ul-tab-name">SENSEX</span><span class="ul-exch-badge bse">BSE</span></span>
+      <span class="ul-tab-price">₹75,000</span>
     </button>
   </div>
 
@@ -885,8 +887,8 @@ tbody tr.atmrow:hover td{background:rgba(59,130,246,.09)}
         <button class="preset-chip" onclick="applyPreset('itm5')">5% ITM</button>
         <button class="preset-chip" onclick="applyPreset('weekly')">Weekly 7d</button>
         <button class="preset-chip" onclick="applyPreset('monthly')">Monthly 30d</button>
-        <button class="preset-chip" onclick="applyPreset('highiv')">High IV 40%</button>
-        <button class="preset-chip" onclick="applyPreset('lowiv')">Low IV 8%</button>
+        <button class="preset-chip" onclick="applyPreset('highiv')">High IV</button>
+        <button class="preset-chip" onclick="applyPreset('lowiv')">Low IV</button>
       </div>
     </div>
 
@@ -2600,31 +2602,32 @@ function selectUL(btn) {
     updateBasis();
     if (btn.dataset.ivh) { _writing=true; el('iIVHigh').value = btn.dataset.ivh; _writing=false; }
     if (btn.dataset.ivl) { _writing=true; el('iIVLow').value  = btn.dataset.ivl; _writing=false; }
+    if (btn.dataset.iv)  { _writing=true; el('iIV').value     = btn.dataset.iv;  _writing=false; }
   }
   /* Load expiries for this underlying from backend */
   if (scrip > 0) loadExpiries(scrip);
-  else {
-    el('liveExpiry').innerHTML = '<option value="">Not supported via API</option>';
-    el('liveLoadBtn').disabled = true;
-  }
   onInput();
 }
 
 function applyPreset(name) {
   const sp   = gv('iSpot') || 25000;
   const atm  = Math.round(sp / A.step) * A.step;
+  /* Use the underlying's configured IV range for high/low presets */
+  const ivHigh = gv('iIVHigh') || 22;
+  const ivLow  = gv('iIVLow')  ||  9;
+  const ivMid  = parseFloat(((ivHigh + ivLow) / 2).toFixed(1));
   const map  = {
-    atm    : { K: atm,              iv: 14, dte: 21 },
-    otm5   : { K: atm + 5 * A.step, iv: 12, dte: 21 },
-    itm5   : { K: atm - 5 * A.step, iv: 17, dte: 21 },
-    weekly : { K: atm,              iv: 14, dte:  7 },
-    monthly: { K: atm,              iv: 14, dte: 30 },
-    highiv : { K: atm,              iv: 40, dte: 21 },
-    lowiv  : { K: atm,              iv:  8, dte: 21 },
+    atm    : { K: atm,               iv: ivMid,    dte: 21 },
+    otm5   : { K: atm + 5 * A.step,  iv: ivMid - 2, dte: 21 },
+    itm5   : { K: atm - 5 * A.step,  iv: ivMid + 3, dte: 21 },
+    weekly : { K: atm,               iv: ivMid,    dte:  7 },
+    monthly: { K: atm,               iv: ivMid,    dte: 30 },
+    highiv : { K: atm,               iv: Math.round(ivHigh * 0.9), dte: 21 },
+    lowiv  : { K: atm,               iv: Math.round(ivLow  * 1.2), dte: 21 },
   };
   const p = map[name]; if (!p) return;
   el('iStrike').value = p.K;
-  el('iIV').value     = p.iv;
+  el('iIV').value     = Math.max(1, p.iv);
   el('iDTE').value    = p.dte;
   A.premManual = false;
   onInput();
@@ -2659,7 +2662,7 @@ function anSub(view, btn) {
 
 /* ── SECTION 15: Keyboard Shortcuts ─────────────────────────────────
    F5         = Calculate / Refresh
-   F1/F2/F3   = Switch to NIFTY / BANKNIFTY / FINNIFTY
+   F1–F4      = Switch NIFTY / BANKNIFTY / FINNIFTY / SENSEX
    Alt+↑/↓    = Nudge spot price ±1 strike step
    Alt+→/←    = Nudge DTE +1/−1 day
    Escape     = Close strike dropdown
@@ -2669,6 +2672,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'F1')             { e.preventDefault(); document.querySelector('[data-ul="NIFTY 50"]').click(); }
   if (e.key === 'F2')             { e.preventDefault(); document.querySelector('[data-ul="BANKNIFTY"]').click(); }
   if (e.key === 'F3')             { e.preventDefault(); document.querySelector('[data-ul="FINNIFTY"]').click(); }
+  if (e.key === 'F4')             { e.preventDefault(); document.querySelector('[data-ul="SENSEX"]').click(); }
   if (e.altKey && e.key === 'ArrowUp')    { e.preventDefault(); nudge('iSpot',  A.step); }
   if (e.altKey && e.key === 'ArrowDown')  { e.preventDefault(); nudge('iSpot', -A.step); }
   if (e.altKey && e.key === 'ArrowRight') { e.preventDefault(); nudge('iDTE',  1); }
@@ -4357,10 +4361,11 @@ function arStop() {
     console.warn('[Live] token-check error, proceeding:', e.message);
   }
 
-  /* Step 3: load expiries */
+  /* Step 3: load expiries for the active underlying */
   liveSetOnline();
   liveSetStatus('green', 'Backend online');
-  await loadExpiries(13);
+  const activeUL = A.scrip || 13;
+  await loadExpiries(activeUL);
 
   /* Step 4: AUTO-LOAD immediately after expiries are ready */
   const expSel = el('liveExpiry');
