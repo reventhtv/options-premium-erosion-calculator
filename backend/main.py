@@ -53,7 +53,7 @@ ALLOWED_ORIGINS = [
 #   51  = SENSEX         BSE   IDX_I
 #
 # Lot sizes as per NSE/BSE circulars (Feb 2025):
-#   NIFTY 50    = 75 (revised from 50, effective Nov 2024)
+#   NIFTY 50    = 65
 #   BANKNIFTY   = 15
 #   MIDCAP NIFTY= 75
 #   SENSEX      = 10
@@ -62,10 +62,10 @@ ALLOWED_ORIGINS = [
 # No active expiries exist — removed from supported list.
 
 UNDERLYINGS = {
-    13:  {"name": "NIFTY 50",      "segment": "IDX_I", "lot": 75,  "step": 50},
-    25:  {"name": "BANKNIFTY",     "segment": "IDX_I", "lot": 15,  "step": 100},
-    442: {"name": "MIDCAP NIFTY",  "segment": "IDX_I", "lot": 75,  "step": 25},
-    51:  {"name": "SENSEX",        "segment": "IDX_I", "lot": 10,  "step": 100},
+    13:  {"name": "NIFTY 50",      "segment": "IDX_I", "lot": 65,  "step": 50},
+    25:  {"name": "BANKNIFTY",     "segment": "IDX_I", "lot": 30,  "step": 100},
+    442: {"name": "MIDCAP NIFTY",  "segment": "IDX_I", "lot": 120,  "step": 25},
+    51:  {"name": "SENSEX",        "segment": "IDX_I", "lot": 20,  "step": 100},
 }
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
