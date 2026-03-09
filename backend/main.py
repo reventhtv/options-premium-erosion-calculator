@@ -33,7 +33,9 @@ DHAN_BASE_URL     = "https://api.dhan.co/v2"
 
 # Allowed frontend origins
 ALLOWED_ORIGINS = [
-    "https://reventhtv.github.io",
+    "https://voliq.in",                  # ← primary production domain
+    "https://www.voliq.in",
+    "https://reventhtv.github.io",       # ← legacy GitHub Pages URL
     "http://localhost:3000",
     "http://127.0.0.1:5500",
     "http://localhost:8080",
@@ -43,12 +45,27 @@ ALLOWED_ORIGINS = [
 
 # ── Supported Underlyings ────────────────────────────────────────────────
 # SecurityID → (name, segment, lot_size, step)
+#
+# Verified Dhan HQ scrip IDs (source: api.dhan.co/v2/instrument/IDX_I):
+#   13  = NIFTY 50       NSE   IDX_I
+#   25  = BANKNIFTY      NSE   IDX_I
+#   442 = MIDCAP NIFTY   NSE   IDX_I   (NOT SENSEX — common mislabel)
+#   51  = SENSEX         BSE   IDX_I
+#
+# Lot sizes as per NSE/BSE circulars (Feb 2025):
+#   NIFTY 50    = 75 (revised from 50, effective Nov 2024)
+#   BANKNIFTY   = 15
+#   MIDCAP NIFTY= 75
+#   SENSEX      = 10
+#
+# FINNIFTY (scrip=27): NSE discontinued weekly + monthly contracts Nov 2024.
+# No active expiries exist — removed from supported list.
+
 UNDERLYINGS = {
-    13:    {"name": "NIFTY",     "segment": "IDX_I", "lot": 65,  "step": 50},
-    25:    {"name": "BANKNIFTY", "segment": "IDX_I", "lot": 30,  "step": 100},
-    14366: {"name": "FINNIFTY",  "segment": "IDX_I", "lot": 40,  "step": 50},
-    442:   {"name": "SENSEX",    "segment": "IDX_I", "lot": 20,  "step": 100},
-    51909: {"name": "MIDCPNIFTY","segment": "IDX_I", "lot": 75,  "step": 25},
+    13:  {"name": "NIFTY 50",      "segment": "IDX_I", "lot": 75,  "step": 50},
+    25:  {"name": "BANKNIFTY",     "segment": "IDX_I", "lot": 15,  "step": 100},
+    442: {"name": "MIDCAP NIFTY",  "segment": "IDX_I", "lot": 75,  "step": 25},
+    51:  {"name": "SENSEX",        "segment": "IDX_I", "lot": 10,  "step": 100},
 }
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -96,13 +113,13 @@ async def dhan_post(path: str, body: dict) -> dict:
 # ── App ───────────────────────────────────────────────────────────────────
 app = FastAPI(
     title="Dhan Options Backend",
-    description="Proxy API for Dhan HQ option chain data — powers the BSM Options Calculator",
-    version="1.0.0",
+    description="Proxy API for Dhan HQ option chain data — powers Voliq (voliq.in)",
+    version="1.1.0",
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # open for now — tighten after confirming live
+    allow_origins=["*"],          # open — tighten to ALLOWED_ORIGINS after confirming live
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
@@ -113,7 +130,7 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {
-        "service": "Dhan Options Backend",
+        "service": "Dhan Options Backend — Voliq",
         "status":  "online",
         "endpoints": ["/health", "/api/instruments", "/api/expiries", "/api/option-chain", "/api/spot", "/docs"]
     }
@@ -176,7 +193,7 @@ def instruments():
 
 @app.get("/api/expiries")
 async def get_expiries(
-    scrip: int = Query(13, description="UnderlyingScrip ID, default=13 (NIFTY)"),
+    scrip: int = Query(13, description="UnderlyingScrip ID, default=13 (NIFTY 50)"),
 ):
     """Fetch active expiry dates for the given underlying."""
     cache_key = f"expiries:{scrip}"
@@ -187,15 +204,18 @@ async def get_expiries(
 
     meta = UNDERLYINGS.get(scrip)
     if not meta:
-        raise HTTPException(status_code=400, detail=f"Unsupported scrip {scrip}. See /api/instruments")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported scrip {scrip}. Supported: {list(UNDERLYINGS.keys())}. See /api/instruments"
+        )
 
     body = {"UnderlyingScrip": scrip, "UnderlyingSeg": meta["segment"]}
     raw = await dhan_post("/optionchain/expirylist", body)
 
     result = {
-        "status": "success",
-        "scrip":  scrip,
-        "name":   meta["name"],
+        "status":   "success",
+        "scrip":    scrip,
+        "name":     meta["name"],
         "expiries": raw.get("data", []),
     }
     cache_set(cache_key, result)
@@ -204,9 +224,9 @@ async def get_expiries(
 
 @app.get("/api/option-chain")
 async def get_option_chain(
-    scrip:  int = Query(13,  description="UnderlyingScrip ID"),
-    expiry: str = Query(...,  description="Expiry date YYYY-MM-DD"),
-    strikes: Optional[int] = Query(None, description="Limit to N strikes around ATM (e.g. 10). None = all."),
+    scrip:   int = Query(13,  description="UnderlyingScrip ID"),
+    expiry:  str = Query(...,  description="Expiry date YYYY-MM-DD"),
+    strikes: Optional[int] = Query(None, description="Limit to N strikes around ATM. None = all."),
 ):
     """
     Full option chain for scrip + expiry.
@@ -221,7 +241,10 @@ async def get_option_chain(
 
     meta = UNDERLYINGS.get(scrip)
     if not meta:
-        raise HTTPException(status_code=400, detail=f"Unsupported scrip {scrip}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported scrip {scrip}. Supported: {list(UNDERLYINGS.keys())}"
+        )
 
     body = {
         "UnderlyingScrip": scrip,
@@ -253,16 +276,16 @@ async def get_option_chain(
         dte = None
 
     result = {
-        "status":  "success",
-        "scrip":   scrip,
-        "name":    meta["name"],
-        "segment": meta["segment"],
-        "expiry":  expiry,
-        "dte":     dte,
-        "lot":     meta["lot"],
-        "step":    meta["step"],
-        "spot":    spot,
-        "chain":   chain,
+        "status":    "success",
+        "scrip":     scrip,
+        "name":      meta["name"],
+        "segment":   meta["segment"],
+        "expiry":    expiry,
+        "dte":       dte,
+        "lot":       meta["lot"],
+        "step":      meta["step"],
+        "spot":      spot,
+        "chain":     chain,
         "timestamp": time.time(),
     }
     cache_set(cache_key, result)
@@ -282,7 +305,6 @@ async def get_spot(scrip: int = Query(13)):
     if not meta:
         raise HTTPException(status_code=400, detail=f"Unsupported scrip {scrip}")
 
-    # Fetch expiry list first, then grab first expiry
     exp_result = await get_expiries(scrip=scrip)
     expiries = exp_result.get("expiries", [])
     if not expiries:
@@ -300,22 +322,22 @@ def _clean_leg(leg: Optional[dict]) -> Optional[dict]:
         return None
     g = leg.get("greeks", {})
     return {
-        "ltp":            leg.get("last_price"),
-        "oi":             leg.get("oi"),
-        "prev_oi":        leg.get("previous_oi"),
-        "volume":         leg.get("volume"),
-        "iv":             leg.get("implied_volatility"),
-        "avg_price":      leg.get("average_price"),
-        "bid":            leg.get("top_bid_price"),
-        "bid_qty":        leg.get("top_bid_quantity"),
-        "ask":            leg.get("top_ask_price"),
-        "ask_qty":        leg.get("top_ask_quantity"),
-        "prev_close":     leg.get("previous_close_price"),
-        "security_id":    leg.get("security_id"),
-        "delta":          g.get("delta"),
-        "theta":          g.get("theta"),
-        "gamma":          g.get("gamma"),
-        "vega":           g.get("vega"),
+        "ltp":         leg.get("last_price"),
+        "oi":          leg.get("oi"),
+        "prev_oi":     leg.get("previous_oi"),
+        "volume":      leg.get("volume"),
+        "iv":          leg.get("implied_volatility"),
+        "avg_price":   leg.get("average_price"),
+        "bid":         leg.get("top_bid_price"),
+        "bid_qty":     leg.get("top_bid_quantity"),
+        "ask":         leg.get("top_ask_price"),
+        "ask_qty":     leg.get("top_ask_quantity"),
+        "prev_close":  leg.get("previous_close_price"),
+        "security_id": leg.get("security_id"),
+        "delta":       g.get("delta"),
+        "theta":       g.get("theta"),
+        "gamma":       g.get("gamma"),
+        "vega":        g.get("vega"),
     }
 
 
@@ -323,11 +345,10 @@ def _maybe_trim(result: dict, n_strikes: Optional[int]) -> dict:
     """If n_strikes requested, return only N strikes around ATM."""
     if not n_strikes or "chain" not in result:
         return result
-    chain  = result["chain"]
-    spot   = result.get("spot", 0)
+    chain = result["chain"]
+    spot  = result.get("spot", 0)
     if not chain or not spot:
         return result
-    # Find ATM index
     atm_i = min(range(len(chain)), key=lambda i: abs(chain[i]["strike"] - spot))
     lo = max(0, atm_i - n_strikes)
     hi = min(len(chain), atm_i + n_strikes + 1)
